@@ -17,8 +17,8 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.utilities;
 
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Address;
-import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.StringType;
 
 import edu.gatech.chai.omopv5.dba.service.LocationService;
 import edu.gatech.chai.omopv5.model.entity.Location;
