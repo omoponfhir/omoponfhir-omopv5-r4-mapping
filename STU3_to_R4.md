@@ -18,3 +18,8 @@
 `import org.hl7.fhir.dstu3.model.codesystems.ObservationCategory; becomes import org.hl7.fhir.r4.model.codesystems.ObservationCategory;`
 `import org.hl7.fhir.dstu3.model.codesystems.ConditionCategory; becomes import org.hl7.fhir.r4.model.codesystems.ConditionCategory;`
 `import org.hl7.fhir.dstu3.model.Condition; becomes import org.hl7.fhir.r4.model.Condition;`
+
+## OmopCondition
+SP asserted-date is removed. Potentially changed to recorded date?
+SP abatement_boolean is removed
+SP Context is removed. Potentially change to encounter
