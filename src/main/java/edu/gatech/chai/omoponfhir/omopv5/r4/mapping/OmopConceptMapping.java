@@ -15,11 +15,11 @@
  *******************************************************************************/
 package edu.gatech.chai.omoponfhir.omopv5.r4.mapping;
 
-import org.hl7.fhir.dstu3.model.codesystems.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.codesystems.OrganizationType;
-import org.hl7.fhir.dstu3.model.codesystems.V3ActCode;
-import org.hl7.fhir.dstu3.model.codesystems.ObservationCategory;
-import org.hl7.fhir.dstu3.model.codesystems.ConditionCategory;
+import org.hl7.fhir.r4.model.codesystems.AdministrativeGender;
+import org.hl7.fhir.r4.model.codesystems.OrganizationType;
+import org.hl7.fhir.r4.model.codesystems.V3ActCode;
+import org.hl7.fhir.r4.model.codesystems.ObservationCategory;
+import org.hl7.fhir.r4.model.codesystems.ConditionCategory;
 import org.hl7.fhir.exceptions.FHIRException;
 
 public enum OmopConceptMapping {

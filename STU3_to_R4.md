@@ -12,3 +12,8 @@
 `import org.hl7.fhir.dstu3.model.ConceptMap; becomes import org.hl7.fhir.r4.model.ConceptMap;`
 `import org.hl7.fhir.dstu3.model.Parameters; becomes import org.hl7.fhir.r4.model.Parameters;`
 `import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent; becomes import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;`
+`import org.hl7.fhir.dstu3.model.codesystems.AdministrativeGender; becomes import org.hl7.fhir.dstu3.model.codesystems.AdministrativeGender;`
+`import org.hl7.fhir.dstu3.model.codesystems.OrganizationType; becomes import org.hl7.fhir.r4.model.codesystems.OrganizationType;`
+`import org.hl7.fhir.dstu3.model.codesystems.V3ActCode; becomes import org.hl7.fhir.r4.model.codesystems.V3ActCode;`
+`import org.hl7.fhir.dstu3.model.codesystems.ObservationCategory; becomes import org.hl7.fhir.r4.model.codesystems.ObservationCategory;`
+`import org.hl7.fhir.dstu3.model.codesystems.ConditionCategory; becomes import org.hl7.fhir.r4.model.codesystems.ConditionCategory;`
