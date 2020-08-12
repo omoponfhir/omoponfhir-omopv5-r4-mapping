@@ -19,7 +19,7 @@ import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.r4.model.HumanName;
 
 public class NameUtility {
 	private static final String stdNameTextFormat = "(\\w+), (\\w+)";

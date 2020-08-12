@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
 //import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointUse;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;

@@ -18,9 +18,9 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.BackboneElement;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.r4.model.BackboneElement;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Patient;
 
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;

@@ -3,7 +3,7 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.utilities;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.r4.model.Resource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;

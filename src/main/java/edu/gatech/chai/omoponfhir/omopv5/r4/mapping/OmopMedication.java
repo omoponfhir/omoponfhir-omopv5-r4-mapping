@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Medication;
-import org.hl7.fhir.dstu3.model.Medication.MedicationIngredientComponent;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Medication.MedicationIngredientComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.web.context.ContextLoaderListener;

@@ -27,8 +27,8 @@ import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvide
 import edu.gatech.chai.omopv5.dba.service.*;
 import edu.gatech.chai.omopv5.model.entity.*;
 
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.codesystems.ConditionCategory;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.codesystems.ConditionCategory;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,9 +145,9 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		case Condition.SP_ABATEMENT_AGE:
 			// not supporting
 			break;
-		case Condition.SP_ABATEMENT_BOOLEAN:
-			// not supporting
-			break;
+//		case Condition.SP_ABATEMENT_BOOLEAN:
+//			// not supporting
+//			break;
 		case Condition.SP_ABATEMENT_DATE:
 			// Condition.abatementDate -> Omop ConditionOccurrence.conditionEndDate
 			putDateInParamWrapper(paramWrapper, value, "conditionEndDate");

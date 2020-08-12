@@ -15,7 +15,7 @@
  *******************************************************************************/
 package edu.gatech.chai.omoponfhir.omopv5.r4.provider;
 
-import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.r4.model.Resource;
 
 import edu.gatech.chai.omoponfhir.omopv5.r4.mapping.BaseOmopResource;
 import edu.gatech.chai.omopv5.dba.service.IService;

@@ -370,7 +370,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		System.out.println("personTS: at "+Long.toString(personTS)+" duration: "+Long.toString(personTS-directFieldTS));
 
 		if (fObservationView.getVisitOccurrence() != null)
-			observation.getContext().setReferenceElement(
+			observation.getEncounter().setReferenceElement(
 					new IdType(EncounterResourceProvider.getType(), fObservationView.getVisitOccurrence().getId()));
 
 		long visitTS = System.currentTimeMillis()-start;
@@ -819,7 +819,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		}
 
 		/* Set visit occurrence */
-		Reference contextReference = fhirResource.getContext();
+		Reference contextReference = fhirResource.getEncounter();
 		VisitOccurrence visitOccurrence = null;
 		if (contextReference != null && !contextReference.isEmpty()) {
 			if (contextReference.getReferenceElement().getResourceType().equals(EncounterResourceProvider.getType())) {

@@ -15,7 +15,7 @@
  *******************************************************************************/
 package edu.gatech.chai.omoponfhir.omopv5.r4.model;
 
-import org.hl7.fhir.dstu3.model.Device;
+import org.hl7.fhir.r4.model.Device;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 

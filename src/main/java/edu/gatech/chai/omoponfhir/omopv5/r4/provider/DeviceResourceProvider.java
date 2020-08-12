@@ -18,9 +18,9 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.provider;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Device;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.web.context.ContextLoaderListener;

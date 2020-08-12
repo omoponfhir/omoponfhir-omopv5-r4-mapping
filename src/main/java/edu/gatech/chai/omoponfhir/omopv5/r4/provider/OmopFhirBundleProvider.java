@@ -18,7 +18,7 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.provider;
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.InstantType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
