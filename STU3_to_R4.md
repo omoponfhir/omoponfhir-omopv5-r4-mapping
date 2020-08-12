@@ -17,3 +17,4 @@
 `import org.hl7.fhir.dstu3.model.codesystems.V3ActCode; becomes import org.hl7.fhir.r4.model.codesystems.V3ActCode;`
 `import org.hl7.fhir.dstu3.model.codesystems.ObservationCategory; becomes import org.hl7.fhir.r4.model.codesystems.ObservationCategory;`
 `import org.hl7.fhir.dstu3.model.codesystems.ConditionCategory; becomes import org.hl7.fhir.r4.model.codesystems.ConditionCategory;`
+`import org.hl7.fhir.dstu3.model.Condition; becomes import org.hl7.fhir.r4.model.Condition;`
