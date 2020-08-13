@@ -467,7 +467,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				comments = comments.concat(noteService.findById(note.getId()).getNoteText());
 			}
 			if (!comments.isEmpty()) {
-				observation.setComment(comments);
+				observation.setNote(comments);
 			}
 		}
 
@@ -1247,7 +1247,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			}
 		}
 		/* Set visit occurrence */
-		Reference contextReference = fhirResource.getContext();
+		Reference contextReference = fhirResource.getEncounter();
 		VisitOccurrence visitOccurrence = fhirContext2OmopVisitOccurrence(visitOccurrenceService, contextReference);
 		if (visitOccurrence != null) {
 			measurement.setVisitOccurrence(visitOccurrence);
@@ -1521,7 +1521,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			}
 		}
 		/* Set visit occurrence */
-		Reference contextReference = fhirResource.getContext();
+		Reference contextReference = fhirResource.getEncounter();
 		VisitOccurrence visitOccurrence = null;
 		if (contextReference != null && !contextReference.isEmpty()) {
 			if (contextReference.getReferenceElement().getResourceType().equals(EncounterResourceProvider.getType())) {
@@ -1922,7 +1922,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 		// Check comments. If exists, put them in note table. And create relationship
 		// entry.
-		String comment = fhirResource.getComment();
+		String comment = fhirResource.getNote();
 		if (comment != null && !comment.isEmpty()) {
 			createFactRelationship(date, fPerson, comment, domainConceptId, 26L, 44818721L, retId, null);
 //			Note methodNote = new Note();

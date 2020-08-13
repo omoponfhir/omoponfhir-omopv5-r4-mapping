@@ -156,7 +156,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		case Condition.SP_ABATEMENT_STRING:
 			// not supporting
 			break;
-		case Condition.SP_ASSERTED_DATE:
+		case Condition.SP_RECORDED_DATE:
 			// Condition.assertedDate -> Omop ConditionOccurrence.conditionStartDate
 			putDateInParamWrapper(paramWrapper, value, "conditionStartDate");
 			mapList.add(paramWrapper);
@@ -221,7 +221,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 //                mapList.add(paramWrapper);
 
 			break;
-		case Condition.SP_CONTEXT:
+		case Condition.SP_ENCOUNTER:
 			// Condition.context -> Omop VisitOccurrence
 			ReferenceParam visitReference = (ReferenceParam) value;
 			String visitId = String.valueOf(visitReference.getIdPartAsLong());
@@ -231,9 +231,6 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 			paramWrapper.setValues(Arrays.asList(visitId));
 			paramWrapper.setRelationship("or");
 			mapList.add(paramWrapper);
-			break;
-		case Condition.SP_ENCOUNTER:
-			// not supporting
 			break;
 		case Condition.SP_EVIDENCE:
 			// not supporting
@@ -425,7 +422,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		if (visitOccurrence != null) {
 			Reference visitRef = new Reference(
 					new IdType(EncounterResourceProvider.getType(), visitOccurrence.getId()));
-			condition.setContext(visitRef);
+			condition.setEncounter(visitRef);
 		}
 	}
 
@@ -552,7 +549,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 		// set the context
 		/* Set visit occurrence */
-		Reference contextReference = fhirResource.getContext();
+		Reference contextReference = fhirResource.getEncounter();
 		VisitOccurrence visitOccurrence = fhirContext2OmopVisitOccurrence(visitOccurrenceService, contextReference);
 		if (visitOccurrence != null) {
 			conditionOccurrence.setVisitOccurrence(visitOccurrence);
