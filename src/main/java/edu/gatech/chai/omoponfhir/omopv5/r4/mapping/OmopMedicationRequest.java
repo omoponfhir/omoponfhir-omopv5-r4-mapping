@@ -323,7 +323,7 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 		if (visitOccurrence != null) {
 			Reference contextReference = 
 					new Reference(new IdType(EncounterResourceProvider.getType(), visitOccurrence.getId()));
-			medicationRequest.setContext(contextReference);
+			medicationRequest.setEncounter(contextReference);
 		}
 		
 		return medicationRequest;
@@ -384,7 +384,7 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 			}
 			mapList.add(paramWrapper);
 			break;
-		case MedicationRequest.SP_CONTEXT:
+		case MedicationRequest.SP_ENCOUNTER:
 			Long fhirEncounterId = ((ReferenceParam) value).getIdPartAsLong();
 			Long omopVisitOccurrenceId = IdMapping.getOMOPfromFHIR(fhirEncounterId, EncounterResourceProvider.getType());
 //			String resourceName = ((ReferenceParam) value).getResourceType();
@@ -656,7 +656,7 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 		drugExposure.setDrugExposureStartDate(authoredDate);
 
 		// Set VisitOccurrence 
-		Reference encounterReference = fhirResource.getContext();
+		Reference encounterReference = fhirResource.getEncounter();
 		if (encounterReference != null && !encounterReference.isEmpty()) {
 			if (EncounterResourceProvider.getType()
 					.equals(encounterReference.getReferenceElement().getResourceType())) {

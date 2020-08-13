@@ -140,10 +140,10 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 			}
 
 			if (includes.contains("Procedure:context")) {
-				if (procedure.hasContext()) {
-					Long encounterFhirId = procedure.getContext().getReferenceElement().getIdPartAsLong();
+				if (procedure.hasEncounter()) {
+					Long encounterFhirId = procedure.getEncounter().getReferenceElement().getIdPartAsLong();
 					Encounter encounter = OmopEncounter.getInstance().constructFHIR(encounterFhirId, entity.getVisitOccurrence());
-					procedure.getContext().setResource(encounter);
+					procedure.getEncounter().setResource(encounter);
 				}
 			}
 
@@ -195,7 +195,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 		VisitOccurrence visitOccurrence = entity.getVisitOccurrence();
 		if (visitOccurrence != null) {
 			Reference contextReference = new Reference(new IdType(EncounterResourceProvider.getType(), visitOccurrence.getId())); 
-			procedure.setContext(contextReference);
+			procedure.setEncounter(contextReference);
 		}
 		
 		// Performer mapping
@@ -219,7 +219,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 				}
 	
 				if (performerRoleCodeableConcept != null) {
-					performer.setRole(performerRoleCodeableConcept);
+					performer.setFunction(performerRoleCodeableConcept);
 				}
 			}
 			procedure.addPerformer(performer);
@@ -285,7 +285,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 			paramWrapper.setRelationship("and");
 			mapList.add(paramWrapper);
 			break;
-		case Procedure.SP_CONTEXT:
+		//case Procedure.SP_CONTEXT: <---Review
 		case Procedure.SP_ENCOUNTER:
 			Long fhirEncounterId = ((ReferenceParam) value).getIdPartAsLong();
 			Long omopVisitOccurrenceId = IdMapping.getOMOPfromFHIR(fhirEncounterId, EncounterResourceProvider.getType());
@@ -441,7 +441,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 		}
 
 		// Visit Occurrence mapping
-		Reference encounterReference = fhirResource.getContext();
+		Reference encounterReference = fhirResource.getEncounter();
 		if (encounterReference.getReferenceElement().getResourceType().equals(EncounterResourceProvider.getType())) {
 			Long encounterFhirId = encounterReference.getReferenceElement().getIdPartAsLong();
 			Long omopVisitOccurrenceId = IdMapping.getOMOPfromFHIR(encounterFhirId, EncounterResourceProvider.getType());
@@ -474,7 +474,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 				if (provider == null || provider.getId() == 0L) continue;
 				
 				// specialty mapping
-				CodeableConcept roleCodeableConcept = performer.getRole();
+				CodeableConcept roleCodeableConcept = performer.getFunction();
 				Concept specialtyConcept = null;
 				if (!roleCodeableConcept.isEmpty()) {
 					List<Coding> codings = roleCodeableConcept.getCoding();

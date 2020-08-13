@@ -153,8 +153,8 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 				mapList.add(paramWrapper);
 			}
 			break;
-		case DocumentReference.SP_CREATED:
-		case DocumentReference.SP_INDEXED:
+		case DocumentReference.SP_DATE:
+		//case DocumentReference.SP_DATE:   //<---Review
 			Date date = ((DateParam) value).getValue();
 			ParamPrefixEnum prefix = ((DateParam) value).getPrefix();
 			String inequality = "=";
@@ -339,7 +339,7 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 		}
 		
 		// get indexed.
-		Date indexedDate = fhirResource.getIndexed();
+		Date indexedDate = fhirResource.getDate();
 		if (indexedDate != null) {
 			note.setNoteDate(indexedDate);
 			
@@ -513,8 +513,8 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 		}
 		
 		if (createdDateTime != null) {
-			documentReference.setCreated(createdDateTime);
-			documentReference.setIndexed(createdDateTime);
+			documentReference.setDate(createdDateTime);
+			//documentReference.setIndexed(createdDateTime); <---Review
 		}
 		
 		// Set author 
@@ -544,7 +544,7 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 		if (visitOccurrence != null) {
 			Reference encounterReference = new Reference(new IdType(EncounterResourceProvider.getType(), IdMapping.getFHIRfromOMOP(visitOccurrence.getId(), EncounterResourceProvider.getType())));
 			DocumentReferenceContextComponent documentReferenceContextComponent = new DocumentReferenceContextComponent();
-			documentReferenceContextComponent.setEncounter(encounterReference);
+			documentReferenceContextComponent.setEncounter((List<Reference>) encounterReference); //<---Review
 			documentReferenceContextComponent.setSourcePatientInfo(patientReference);
 			
 			documentReference.setContext(documentReferenceContextComponent);
