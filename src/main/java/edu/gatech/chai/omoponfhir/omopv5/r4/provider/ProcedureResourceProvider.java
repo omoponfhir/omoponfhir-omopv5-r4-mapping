@@ -211,7 +211,7 @@ public class ProcedureResourceProvider implements IResourceProvider {
 	 */
 	@Search()
 	public IBundleProvider findProceduresByParams(@OptionalParam(name = Procedure.SP_CODE) TokenOrListParam theOrCodes,
-			@OptionalParam(name = Procedure.SP_CONTEXT) ReferenceParam theContextParam,
+			@OptionalParam(name = Procedure.SP_ENCOUNTER) ReferenceParam theContextParam, //<---Review
 			@OptionalParam(name = Procedure.SP_DATE) DateParam theDateParm,
 			@OptionalParam(name = Procedure.SP_ENCOUNTER) ReferenceParam theEncounterParam,
 			@OptionalParam(name = Procedure.SP_SUBJECT) ReferenceParam theSubjectParam,
@@ -241,7 +241,7 @@ public class ProcedureResourceProvider implements IResourceProvider {
 		}
 
 		if (theContextParam != null) {
-			paramList.addAll(myMapper.mapParameter(Procedure.SP_CONTEXT, theContextParam, false));
+			paramList.addAll(myMapper.mapParameter(Procedure.SP_ENCOUNTER, theContextParam, false));
 		}
 		if (theDateParm != null) {
 			paramList.addAll(myMapper.mapParameter(Procedure.SP_DATE, theDateParm, false));
