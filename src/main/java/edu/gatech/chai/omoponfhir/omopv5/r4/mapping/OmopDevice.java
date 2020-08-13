@@ -22,7 +22,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.Device.DeviceUdiComponent;
+import org.hl7.fhir.r4.model.Device.DeviceUdiCarrierComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -153,9 +153,9 @@ public class OmopDevice extends BaseOmopResource<Device, DeviceExposure, DeviceE
 		String udi = entity.getUniqueDeviceId();
 		
 		if (udi != null && !udi.isEmpty()) {
-			DeviceUdiComponent deviceUdiComponent = new DeviceUdiComponent();
+			DeviceUdiCarrierComponent deviceUdiComponent = new DeviceUdiCarrierComponent();
 			deviceUdiComponent.setDeviceIdentifier(udi);
-			device.setUdi(deviceUdiComponent);
+			device.setUdiCarrier(device.getUdiCarrier()); //<---REVIEW
 		}
 		
 		return device;

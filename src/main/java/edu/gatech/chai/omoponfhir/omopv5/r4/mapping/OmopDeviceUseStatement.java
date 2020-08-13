@@ -23,7 +23,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.Device.DeviceUdiComponent;
+import org.hl7.fhir.r4.model.Device.DeviceUdiCarrierComponent;
 import org.hl7.fhir.r4.model.DeviceUseStatement;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -143,7 +143,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 			whenUsedPeriod.setEnd(endDate);
 		}
 		
-		myDeviceUseStatement.setWhenUsed(whenUsedPeriod);
+		myDeviceUseStatement.setTiming(whenUsedPeriod); //<----Review
 		
 		// set source with Practitioner.
 		Provider provider = entity.getProvider();
@@ -300,7 +300,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 		deviceExposure.setFPerson(fPerson);
 		
 		// start and end datetime.
-		Period periodUsed = deviceUseStatement.getWhenUsed();
+		Period periodUsed = deviceUseStatement.getTimingPeriod(); //<----Review
 		if (periodUsed != null && !periodUsed.isEmpty()) {
 			Date startDate = periodUsed.getStart();
 			if (startDate != null) {
@@ -355,7 +355,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 			}
 			
 			// set device UDI
-			DeviceUdiComponent udi = device.getUdi();
+			DeviceUdiCarrierComponent udi = (DeviceUdiCarrierComponent) device.getUdiCarrier();
 			if (udi != null && !udi.isEmpty()) {
 				String deviceIdentifier = udi.getDeviceIdentifier();
 				if (deviceIdentifier != null && !deviceIdentifier.isEmpty()) {
