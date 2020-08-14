@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.r4.model.Coding;
 
 import edu.gatech.chai.omoponfhir.local.model.FhirOmopCodeMapEntry;
 
