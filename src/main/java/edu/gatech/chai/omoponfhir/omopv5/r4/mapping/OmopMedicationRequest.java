@@ -20,19 +20,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Duration;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Medication.MedicationIngredientComponent;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestDispenseRequestComponent;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -707,7 +697,7 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 				drugExposure.setRefills(refills);
 			}
 
-			SimpleQuantity qty = dispenseRequest.getQuantity();
+			Quantity qty = dispenseRequest.getQuantity();
 			if (qty != null) {
 				drugExposure.setQuantity(qty.getValue().doubleValue());
 				String doseCode = qty.getCode();
