@@ -22,23 +22,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.r4.model.Annotation;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Dosage;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.MedicationStatement;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.MedicationStatement.MedicationStatementStatus;
 //import org.hl7.fhir.r4.model.MedicationStatement.MedicationStatementTaken; <---Review
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -315,7 +301,9 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 
 		Dosage dosage = new Dosage();
 		if (!quantity.isEmpty()) {
-			dosage.setDose(quantity);
+			Dosage.DosageDoseAndRateComponent tempComponent = new Dosage.DosageDoseAndRateComponent();
+			tempComponent.setDose(quantity);
+			dosage.addDoseAndRate(tempComponent);
 		}
 
 		Concept routeConcept = entity.getRouteConcept();
@@ -356,9 +344,6 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 				infoSourceReference.setDisplay(provider.getProviderName());
 			medicationStatement.setInformationSource(infoSourceReference);
 		}
-
-		// taken. We do not have this information. Set to y
-		medicationStatement.setTaken(MedicationStatementTaken.Y);
 
 		// If OMOP medication type has the following prescription type, we set
 		// basedOn reference to the prescription.
@@ -716,7 +701,8 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		MedicationStatementStatus status = fhirResource.getStatus();
 		if (status != null && status.equals(MedicationStatementStatus.STOPPED)) {
 			// This medication is stopped. See if we have a reason stopped.
-			List<CodeableConcept> reasonNotTakens = fhirResource.getReasonNotTaken();
+			List<CodeableConcept> reasonNotTakens = fhirResource.getStatusReason();
+//			TODO we may need to adjust this code block since we're no longer sure that this is only the reason not taken
 			String reasonsForStopped = "";
 			for (CodeableConcept reasonNotTaken : reasonNotTakens) {
 				List<Coding> rNTCodings = reasonNotTaken.getCoding();
@@ -902,10 +888,15 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		Concept routeConcept = null;
 		for (Dosage dosage : dosages) {
 			// We need quantity.
-			SimpleQuantity qty;
+			Quantity qty=null;
 			try {
-				qty = dosage.getDoseSimpleQuantity();
-				if (!qty.isEmpty()) {
+				List<Dosage.DosageDoseAndRateComponent> dosesAndRates = dosage.getDoseAndRate();
+				for(Dosage.DosageDoseAndRateComponent doseAndRate : dosesAndRates){
+					if(doseAndRate.hasDoseQuantity()){
+						qty=doseAndRate.getDoseQuantity();
+					}
+				}
+				if (!qty.isEmpty() && qty!=null) {
 					// get value
 					BigDecimal value = qty.getValue();
 					if (value != null) {

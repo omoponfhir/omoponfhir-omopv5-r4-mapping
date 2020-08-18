@@ -35,3 +35,23 @@ SP Context is removed. Potentially change to encounter
 
 ## OmopConceptMap
 `getConcept2`  becomes `getConceptId2` for 5.3.1
+
+## MedicationStatement
+`dosage.setDose(quantity);` becomes 
+```
+Dosage.DosageDoseAndRateComponent tempComponent = new Dosage.DosageDoseAndRateComponent();
+tempComponent.setDose(quantity);
+dosage.addDoseAndRate(tempComponent);
+```
+`setTaken` is removed
+`getReasonNotTaken` is removed, use `getStatusReason` instead
+	note that you may have to parse though the 
+`dosage.getDoseSimpleQuantity();` becomes 
+```
+List<Dosage.DosageDoseAndRateComponent> dosesAndRates = dosage.getDoseAndRate();
+for(Dosage.DosageDoseAndRateComponent doseAndRate : dosesAndRates){
+	if(doseAndRate.hasDoseQuantity()){
+		qty=doseAndRate.getDoseQuantity();
+	}
+}
+```
