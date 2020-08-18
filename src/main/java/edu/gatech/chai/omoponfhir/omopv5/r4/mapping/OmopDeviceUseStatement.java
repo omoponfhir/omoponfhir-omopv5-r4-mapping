@@ -300,7 +300,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 		deviceExposure.setFPerson(fPerson);
 		
 		// start and end datetime.
-		Period periodUsed = deviceUseStatement.getTimingPeriod(); //<----Review
+		Period periodUsed = deviceUseStatement.getTimingPeriod();
 		if (periodUsed != null && !periodUsed.isEmpty()) {
 			Date startDate = periodUsed.getStart();
 			if (startDate != null) {

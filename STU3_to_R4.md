@@ -67,3 +67,6 @@ Annotation tempAnnotation = new Annotation();
 
 ## DocumentReference
 `setEncounter` becomes `addEncounter`
+
+## DeviceUseStatement
+`whenUsed` is removed, going to use `getTimingPeriod` instead of `getWhenUsed`
