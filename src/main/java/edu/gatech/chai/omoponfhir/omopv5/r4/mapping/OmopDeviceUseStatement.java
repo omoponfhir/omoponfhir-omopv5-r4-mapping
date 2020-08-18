@@ -143,7 +143,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 			whenUsedPeriod.setEnd(endDate);
 		}
 		
-		myDeviceUseStatement.setTiming(whenUsedPeriod); //<----Review
+		myDeviceUseStatement.setTiming(whenUsedPeriod);	
 		
 		// set source with Practitioner.
 		Provider provider = entity.getProvider();
