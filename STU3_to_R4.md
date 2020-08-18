@@ -23,3 +23,12 @@
 SP asserted-date is removed. Potentially changed to recorded date?
 SP abatement_boolean is removed
 SP Context is removed. Potentially change to encounter
+`getSourceConceptId` changes to `getConditionSourceConcept` for 5.3.1
+`getConceptId` becomes `getConditionConcept` for 5.3.1
+`setConceptId` becomes `setConditionConcept` for 5.3.1
+`getStartDate` becomes `getConditionStartDate` for 5.3.1
+`setStartDate` becomes `setConditionStartDate` for 5.3.1
+`getEndDate` becomes `getConditionEndDate` for 5.3.1
+`setEndDate` becomes `setConditionEndDate` for 5.3.1
+`getTypeConceptId` becomes `getConditionTypeConcept` for 5.3.1
+`setTypeConceptId` becomes `setConditionTypeConcept` for 5.3.1

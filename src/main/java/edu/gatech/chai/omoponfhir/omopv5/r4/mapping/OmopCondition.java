@@ -100,7 +100,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		// ??
 		String sourceValue = conditionOccurrence.getConditionSourceValue();
 		// ??
-		Concept sourceConceptId = conditionOccurrence.getSourceConceptId();
+		Concept sourceConceptId = conditionOccurrence.getConditionSourceConcept();
 
 		return condition;
 	}
@@ -352,7 +352,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 	private void addCodeToCondition(ConditionOccurrence conditionOccurrence, Condition condition) {
 		// Condition.code SNOMED-CT
-		Concept conceptId = conditionOccurrence.getConceptId();
+		Concept conceptId = conditionOccurrence.getConditionConcept();
 		if (conceptId != null) {
 			CodeableConcept conditionCodeableConcept = retrieveCodeableConcept(conceptId);
 			if (conditionCodeableConcept != null) {
@@ -363,13 +363,13 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 	private void addStartAndEndDateToCondition(ConditionOccurrence conditionOccurrence, Condition condition) {
 		// Condition.onsetDateTime
-		Date startDate = conditionOccurrence.getStartDate();
+		Date startDate = conditionOccurrence.getConditionStartDate();
 		if (startDate != null) {
 			DateTimeType onsetDateTime = new DateTimeType(startDate);
 			condition.setOnset(onsetDateTime);
 		}
 		// Condition.abatementDateTime
-		Date endDate = conditionOccurrence.getEndDate();
+		Date endDate = conditionOccurrence.getConditionEndDate();
 		if (endDate != null) {
 			DateTimeType abatementDateTime = new DateTimeType(endDate);
 			condition.setAbatement(abatementDateTime);
@@ -378,7 +378,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 	private void addTypeToCondition(ConditionOccurrence conditionOccurrence, Condition condition) {
 		// Condition.category
-		Concept typeConceptId = conditionOccurrence.getTypeConceptId();
+		Concept typeConceptId = conditionOccurrence.getConditionTypeConcept();
 		if (typeConceptId != null) {
 			String systemUri = ConditionCategory.PROBLEMLISTITEM.getSystem();
 			String code = null;
@@ -479,7 +479,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		CodeableConcept code = fhirResource.getCode();
 		String valueSourceString = null;
 		Concept concept = fhirCode2OmopConcept(conceptService, code, valueSourceString);
-		conditionOccurrence.setConceptId(concept);
+		conditionOccurrence.setConditionConcept(concept);
 
 //		if (code != null) {
 //			List<Coding> codes = code.getCoding();
@@ -506,17 +506,17 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		// get the start and end date. We are expecting both to be of type DateTimeType
 		Type onSet = fhirResource.getOnset();
 		if (onSet != null && onSet instanceof DateTimeType) {
-			conditionOccurrence.setStartDate(((DateTimeType) fhirResource.getOnset()).toCalendar().getTime());
+			conditionOccurrence.setConditionStartDate(((DateTimeType) fhirResource.getOnset()).toCalendar().getTime());
 		} if (onSet != null && onSet instanceof Period) {
 			Period period = (Period)onSet;
 			Date start = period.getStart();
 			Date end = period.getEnd();
-			if (start != null) conditionOccurrence.setStartDate(start);
-			if (end != null) conditionOccurrence.setEndDate(end);
+			if (start != null) conditionOccurrence.setConditionStartDate(start);
+			if (end != null) conditionOccurrence.setConditionEndDate(end);
 		} 
 
 		if (fhirResource.getAbatement() != null && fhirResource.getAbatement() instanceof DateTimeType) {
-			conditionOccurrence.setEndDate(((DateTimeType) fhirResource.getAbatement()).toCalendar().getTime());
+			conditionOccurrence.setConditionEndDate(((DateTimeType) fhirResource.getAbatement()).toCalendar().getTime());
 		} else {
 			// leave alone, end date not required
 		}
@@ -545,7 +545,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		}
 
 		concept = conceptService.findById(typeConceptId);
-		conditionOccurrence.setTypeConceptId(concept);
+		conditionOccurrence.setConditionTypeConcept(concept);
 
 		// set the context
 		/* Set visit occurrence */
