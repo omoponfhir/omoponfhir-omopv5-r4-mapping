@@ -32,3 +32,6 @@ SP Context is removed. Potentially change to encounter
 `setEndDate` becomes `setConditionEndDate` for 5.3.1
 `getTypeConceptId` becomes `getConditionTypeConcept` for 5.3.1
 `setTypeConceptId` becomes `setConditionTypeConcept` for 5.3.1
+
+## OmopConceptMap
+`getConcept2`  becomes `getConceptId2` for 5.3.1

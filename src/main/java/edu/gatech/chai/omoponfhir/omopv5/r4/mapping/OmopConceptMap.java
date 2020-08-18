@@ -139,7 +139,7 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 			partParameter = parameter.addPart();
 			partParameter.setName("concept");
 			
-			Long targetConceptId = conceptRealationship.getId().getConcept2();
+			Long targetConceptId = conceptRealationship.getId().getConceptId2();
 			Concept targetConcept = conceptService.findById(targetConceptId);
 			
 			logger.debug("$translate: target concept obtained with vocabulary_id="+targetConcept.getVocabularyId());
