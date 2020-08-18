@@ -285,7 +285,6 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 			paramWrapper.setRelationship("and");
 			mapList.add(paramWrapper);
 			break;
-		//case Procedure.SP_CONTEXT: <---Review
 		case Procedure.SP_ENCOUNTER:
 			Long fhirEncounterId = ((ReferenceParam) value).getIdPartAsLong();
 			Long omopVisitOccurrenceId = IdMapping.getOMOPfromFHIR(fhirEncounterId, EncounterResourceProvider.getType());
