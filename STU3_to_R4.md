@@ -55,3 +55,12 @@ for(Dosage.DosageDoseAndRateComponent doseAndRate : dosesAndRates){
 	}
 }
 ```
+
+## OmopObservation
+`setDomainConcept1` becomes `setDomainConceptId1` for 5.3.1
+`setDomainConcept2` becomes `setDomainConceptId2` for 5.3.1
+`observation.setNote(comments);` becomes 
+```
+Annotation tempAnnotation = new Annotation();
+tempAnnotation.setText(comments);
+```

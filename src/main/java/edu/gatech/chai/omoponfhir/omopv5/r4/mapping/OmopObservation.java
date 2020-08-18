@@ -25,22 +25,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationComponentComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationReferenceRangeComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.SimpleQuantity;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -467,7 +455,8 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				comments = comments.concat(noteService.findById(note.getId()).getNoteText());
 			}
 			if (!comments.isEmpty()) {
-				observation.setNote(comments);
+				Annotation tempAnnotation = new Annotation();
+				tempAnnotation.setText(comments);
 			}
 		}
 
@@ -738,8 +727,8 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				continue;
 
 			// Get high and low values.
-			SimpleQuantity highQtyValue = range.getHigh();
-			SimpleQuantity lowQtyValue = range.getLow();
+			Quantity highQtyValue = range.getHigh();
+			Quantity lowQtyValue = range.getLow();
 			if (highQtyValue.isEmpty() && lowQtyValue.isEmpty()) {
 				// We need these values. If these are empty.
 				// We have no reason to look at the appliesTo data.
@@ -1185,7 +1174,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		// Get low and high range if available. This is only applicable to
 		// measurement.
 		if (!fhirResource.getReferenceRangeFirstRep().isEmpty()) {
-			SimpleQuantity high = fhirResource.getReferenceRangeFirstRep().getHigh();
+			Quantity high = fhirResource.getReferenceRangeFirstRep().getHigh();
 			if (!high.isEmpty()) {
 				measurement.setRangeHigh(high.getValue().doubleValue());
 
@@ -1209,7 +1198,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					}
 				}
 			}
-			SimpleQuantity low = fhirResource.getReferenceRangeFirstRep().getLow();
+			Quantity low = fhirResource.getReferenceRangeFirstRep().getLow();
 			if (!low.isEmpty()) {
 				measurement.setRangeLow(low.getValue().doubleValue());
 
@@ -1922,9 +1911,12 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 		// Check comments. If exists, put them in note table. And create relationship
 		// entry.
-		String comment = fhirResource.getNote();
-		if (comment != null && !comment.isEmpty()) {
-			createFactRelationship(date, fPerson, comment, domainConceptId, 26L, 44818721L, retId, null);
+//		String comment = fhirResource.getNote();
+		List<Annotation> templist =fhirResource.getNote();
+		for (Annotation comment: templist){
+			String commentText = comment.getText();
+			if (commentText != null && !commentText.isEmpty()) {
+				createFactRelationship(date, fPerson, commentText, domainConceptId, 26L, 44818721L, retId, null);
 //			Note methodNote = new Note();
 //			methodNote.setDate(date);
 //			methodNote.setFPerson(fPerson);
@@ -1940,7 +1932,9 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 //			factRelationship.setFactId2(note.getId());
 //			factRelationship.setRelationshipConcept(new Concept(44818721L));
 //			factRelationshipService.create(factRelationship);
+			}
 		}
+
 
 		Long retFhirId = IdMapping.getFHIRfromOMOP(retId, ObservationResourceProvider.getType());
 		return retFhirId;
@@ -2013,9 +2007,9 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			factRelationship.setFactId2(factId2);
 		}
 
-		factRelationship.setDomainConcept1(domainConceptId1);
+		factRelationship.setDomainConceptId1(domainConceptId1);
 		factRelationship.setFactId1(factId1);
-		factRelationship.setDomainConcept2(domainConceptId2);
+			factRelationship.setDomainConceptId2(domainConceptId2);
 		factRelationship.setRelationshipConcept(new Concept(relationshipId));
 		factRelationshipService.create(factRelationship);
 	}
