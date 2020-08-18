@@ -179,7 +179,6 @@ public class DocumentReferenceResourceProvider implements IResourceProvider {
 			@OptionalParam(name=DocumentReference.SP_ENCOUNTER) ReferenceParam theEncounter,
 			@OptionalParam(name=DocumentReference.SP_TYPE) TokenOrListParam theOrType,
 			@OptionalParam(name=DocumentReference.SP_DATE) DateParam theCreated,
-			//@OptionalParam(name=DocumentReference.SP_INDEXED) DateParam theIndexed, <---Review
 			
 			@IncludeParam(allow={"DocumentReference:patient", "DocumentReference:subject", 
 					"DocumentReference:encounter"})
@@ -203,10 +202,6 @@ public class DocumentReferenceResourceProvider implements IResourceProvider {
 		if (theCreated != null) {
 			paramList.addAll(getMyMapper().mapParameter(DocumentReference.SP_DATE, theCreated, false));
 		}
-
-		if (theIndexed != null) {
-			paramList.addAll(getMyMapper().mapParameter(DocumentReference.SP_DATE, theIndexed, false));
-		} //<---Review; I think these lines need to be deleted
 
 		if (theSubject != null) {
 			if (theSubject.getResourceType() != null && 
