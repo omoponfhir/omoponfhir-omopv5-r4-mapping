@@ -70,8 +70,8 @@ public class ServerOperations {
 				messageHeader = (MessageHeader) entries.get(0).getResource();
 				// We handle observation-type.
 				// TODO: Add other types later.
-				Coding event = messageHeader.getEvent();
-				Coding obsprovided = new Coding(MessageEvent.OBSERVATIONPROVIDE.getSystem(), MessageEvent.OBSERVATIONPROVIDE.toCode(), MessageEvent.OBSERVATIONPROVIDE.getDefinition());
+				Coding event = messageHeader.getEventCoding();
+				Coding obsprovided = new Coding("http://hl7.org/fhir/message-events", "observation-provide", "Provide a simple observation or update a previously provided simple observation.");
 				if (CodeableConceptUtil.compareCodings(event, obsprovided) == 0) {
 					// This is lab report. they are all to be added to the server.
 					for (int i=1; i<entries.size(); i++) {

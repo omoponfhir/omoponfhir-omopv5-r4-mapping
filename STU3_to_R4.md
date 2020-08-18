@@ -62,5 +62,8 @@ for(Dosage.DosageDoseAndRateComponent doseAndRate : dosesAndRates){
 `observation.setNote(comments);` becomes 
 ```
 Annotation tempAnnotation = new Annotation();
-tempAnnotation.setText(comments);
+	tempAnnotation.setText(comments);
 ```
+
+## DocumentReference
+`setEncounter` becomes `addEncounter`
