@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.MedicationStatement.MedicationStatementStatus;
-//import org.hl7.fhir.r4.model.MedicationStatement.MedicationStatementTaken; <---Review
 import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.exceptions.FHIRException;
