@@ -63,6 +63,7 @@ for(Dosage.DosageDoseAndRateComponent doseAndRate : dosesAndRates){
 ```
 Annotation tempAnnotation = new Annotation();
 	tempAnnotation.setText(comments);
+	observation.addNote(tempAnnotation);
 ```
 
 ## DocumentReference
