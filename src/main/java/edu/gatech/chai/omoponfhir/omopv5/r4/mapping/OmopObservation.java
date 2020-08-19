@@ -457,6 +457,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			if (!comments.isEmpty()) {
 				Annotation tempAnnotation = new Annotation();
 				tempAnnotation.setText(comments);
+				observation.addNote(tempAnnotation);
 			}
 		}
 
@@ -785,24 +786,20 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			Date date = ((DateTimeType) fhirResource.getEffective()).getValue();
 			if (systolicMeasurement != null) {
 				systolicMeasurement.setMeasurementDate(date);
-				systolicMeasurement.setTime(timeFormat.format(date));
 			}
 			if (diastolicMeasurement != null) {
 				diastolicMeasurement.setMeasurementDate(date);
-				diastolicMeasurement.setTime(timeFormat.format(date));
 			}
 		} else if (fhirResource.getEffective() instanceof Period) {
 			Date startDate = ((Period) fhirResource.getEffective()).getStart();
 			if (startDate != null) {
 				if (systolicMeasurement != null) {
 					systolicMeasurement.setMeasurementDate(startDate);
-					systolicMeasurement.setTime(timeFormat.format(startDate));
 				}
 			}
 			if (startDate != null) {
 				if (diastolicMeasurement != null) {
 					diastolicMeasurement.setMeasurementDate(startDate);
-					diastolicMeasurement.setTime(timeFormat.format(startDate));
 				}
 			}
 		}
@@ -1084,7 +1081,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		}
 
 		if (concept != null)
-			measurement.setMeasurementSourceValueConcept(concept);
+			measurement.setMeasurementSourceConcept(concept);// TODO Need to double check this one
 
 		/* Set the value of the observation */
 		Type valueType = fhirResource.getValue();
@@ -1227,12 +1224,10 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		if (fhirResource.getEffective() instanceof DateTimeType) {
 			Date date = ((DateTimeType) fhirResource.getEffective()).getValue();
 			measurement.setMeasurementDate(date);
-			measurement.setTime(timeFormat.format(date));
 		} else if (fhirResource.getEffective() instanceof Period) {
 			Date startDate = ((Period) fhirResource.getEffective()).getStart();
 			if (startDate != null) {
 				measurement.setMeasurementDate(startDate);
-				measurement.setTime(timeFormat.format(startDate));
 			}
 		}
 		/* Set visit occurrence */
