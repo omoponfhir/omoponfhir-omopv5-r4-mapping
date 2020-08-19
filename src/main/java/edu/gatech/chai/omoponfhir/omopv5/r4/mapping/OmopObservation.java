@@ -457,6 +457,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			if (!comments.isEmpty()) {
 				Annotation tempAnnotation = new Annotation();
 				tempAnnotation.setText(comments);
+				observation.addNote(tempAnnotation);
 			}
 		}
 
