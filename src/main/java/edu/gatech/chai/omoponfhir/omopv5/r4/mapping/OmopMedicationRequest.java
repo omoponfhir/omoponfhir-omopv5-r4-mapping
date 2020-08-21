@@ -266,7 +266,7 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 		if (unitUnit != null && !unitUnit.isEmpty()) {
 			Concept unitConcept = CodeableConceptUtil.getOmopConceptWithOmopCode(conceptService, unitUnit);
 			if (unitConcept != null) {
-				String vocId = unitConcept.getVocabularyId();
+				String vocId = unitConcept.getVocabulary();
 				unitSystem = fhirOmopVocabularyMap.getFhirSystemNameFromOmopVocabulary(vocId);
 				unitCode = unitConcept.getConceptCode();
 				unitUnit = unitConcept.getConceptName();

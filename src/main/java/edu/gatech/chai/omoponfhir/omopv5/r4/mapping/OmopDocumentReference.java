@@ -462,7 +462,7 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 		// type: map OMOP's Note Type concept to LOINC code if possible.
 		Concept omopTypeConcept = entity.getNoteTypeConcept();
 		CodeableConcept typeCodeableConcept = null;
-		if ("Note Type".equals(omopTypeConcept.getVocabularyId())) {
+		if ("Note Type".equals(omopTypeConcept.getVocabulary())) {
 			Long loincConceptId = OmopNoteTypeMapping.getLoincConceptIdFor(omopTypeConcept.getId());
 			System.out.println("origin:"+omopTypeConcept.getId()+" loinc:"+loincConceptId);
 			try {

@@ -71,3 +71,13 @@ Annotation tempAnnotation = new Annotation();
 
 ## DeviceUseStatement
 `whenUsed` is removed, going to use `getTimingPeriod` instead of `getWhenUsed`
+
+## Codeable Concept Util
+`getVocabularyId` becomes `getVocabulary`
+
+## ScheduledTask
+`getDomainId` becomes `getDomain`
+`setConceptClassId` becomes `setConceptClass`
+`getConceptClassId` becomes `getConceptClass`
+`setName` becomes `setVocabularyName`
+`setName` becomes `setRelationshipName`

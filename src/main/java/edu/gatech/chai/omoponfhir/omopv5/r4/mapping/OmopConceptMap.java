@@ -142,7 +142,7 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 			Long targetConceptId = conceptRealationship.getId().getConceptId2();
 			Concept targetConcept = conceptService.findById(targetConceptId);
 			
-			logger.debug("$translate: target concept obtained with vocabulary_id="+targetConcept.getVocabularyId());
+			logger.debug("$translate: target concept obtained with vocabulary_id="+targetConcept.getVocabulary());
 			Coding targetCoding = CodeableConceptUtil.getCodingFromOmopConcept(targetConcept, getFhirOmopVocabularyMap());
 			partParameter.setValue(targetCoding);
 		}

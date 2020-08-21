@@ -280,7 +280,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 				Concept unitConcept = CodeableConceptUtil.getOmopConceptWithOmopCode(conceptService, unitString);
 				if (unitConcept != null) {
 					String unitFhirUri = OmopCodeableConceptMapping
-							.fhirUriforOmopVocabulary(unitConcept.getVocabularyId());
+							.fhirUriforOmopVocabulary(unitConcept.getVocabulary());
 					if (!"None".equals(unitFhirUri)) {
 						String unitDisplay = unitConcept.getConceptName();
 						String unitCode = unitConcept.getConceptCode();
@@ -308,7 +308,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		Concept routeConcept = entity.getRouteConcept();
 		if (routeConcept != null) {
 			try {
-				String myUri = fhirOmopVocabularyMap.getFhirSystemNameFromOmopVocabulary(routeConcept.getVocabularyId());
+				String myUri = fhirOmopVocabularyMap.getFhirSystemNameFromOmopVocabulary(routeConcept.getVocabulary());
 				if (!"None".equals(myUri)) {
 					CodeableConcept routeCodeableConcept = new CodeableConcept();
 					Coding routeCoding = new Coding();

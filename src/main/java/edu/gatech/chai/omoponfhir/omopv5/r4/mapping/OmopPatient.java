@@ -252,7 +252,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 			// WARNING check if mapping for lines are correct
 			patient.addAddress().setUse(AddressUse.HOME).addLine(fPerson.getLocation().getAddress1())
 					.addLine(fPerson.getLocation().getAddress2()).setCity(fPerson.getLocation().getCity())
-					.setPostalCode(fPerson.getLocation().getZip()).setState(fPerson.getLocation().getState());
+					.setPostalCode(fPerson.getLocation().getZipCode()).setState(fPerson.getLocation().getState());
 		}
 
 		if (fPerson.getGenderConcept() != null) {
