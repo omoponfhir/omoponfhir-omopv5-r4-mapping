@@ -18,7 +18,14 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.utilities;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 
 public class DateUtil {
 	public static Date constructDateTime(Date date, String time) {
@@ -40,5 +47,64 @@ public class DateUtil {
 		}
 		
 		return dateTime;
+	}
+	
+	public static String getSqlOperator (ParamPrefixEnum apiOperator) {
+		String sqlOperator = null;
+		if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN)) {
+			sqlOperator = ">";
+		} else if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS)) {
+			sqlOperator = ">=";
+		} else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN)) {
+			sqlOperator = "<";
+		} else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN_OR_EQUALS)) {
+			sqlOperator = "<=";
+		} else if (apiOperator.equals(ParamPrefixEnum.NOT_EQUAL)) {
+			sqlOperator = "!=";
+		} else {
+			sqlOperator = "=";
+		}
+
+		return sqlOperator;
+	}
+	
+	public static void constructParameterWrapper(DateRangeParam dateRangeParam, String dateColumn, ParameterWrapper paramWrapper, List<ParameterWrapper> mapList) {
+		// There are 3 possible cases. 
+		// case 1 is range.
+		// case 2 is lower bound and no upper bound
+		// case 3 is upper bound and no lower bound
+		
+		DateParam lowerDateParam = dateRangeParam.getLowerBound();
+		DateParam upperDateParam = dateRangeParam.getUpperBound();
+		if (lowerDateParam != null && upperDateParam != null) {
+			// case 1
+			String lowerSqlOperator = DateUtil.getSqlOperator(lowerDateParam.getPrefix());
+			String upperSqlOperator = DateUtil.getSqlOperator(upperDateParam.getPrefix());
+			
+			paramWrapper.setParameterType("Date");
+			paramWrapper.setParameters(Arrays.asList(dateColumn, dateColumn));
+			paramWrapper.setOperators(Arrays.asList(lowerSqlOperator, upperSqlOperator));
+			paramWrapper.setValues(Arrays.asList(String.valueOf(lowerDateParam.getValue().getTime()),
+					String.valueOf(upperDateParam.getValue().getTime())));
+			paramWrapper.setRelationship("and");
+		} else if (lowerDateParam != null && upperDateParam == null) {
+			String lowerSqlOperator = DateUtil.getSqlOperator(lowerDateParam.getPrefix());
+			
+			paramWrapper.setParameterType("Date");
+			paramWrapper.setParameters(Arrays.asList(dateColumn));
+			paramWrapper.setOperators(Arrays.asList(lowerSqlOperator));
+			paramWrapper.setValues(Arrays.asList(String.valueOf(lowerDateParam.getValue().getTime())));
+			paramWrapper.setRelationship("and");
+		} else {
+			String upperSqlOperator = DateUtil.getSqlOperator(upperDateParam.getPrefix());
+			
+			paramWrapper.setParameterType("Date");
+			paramWrapper.setParameters(Arrays.asList(dateColumn));
+			paramWrapper.setOperators(Arrays.asList(upperSqlOperator));
+			paramWrapper.setValues(Arrays.asList(String.valueOf(upperDateParam.getValue().getTime())));
+			paramWrapper.setRelationship("and");
+		}
+		
+		mapList.add(paramWrapper);
 	}
 }

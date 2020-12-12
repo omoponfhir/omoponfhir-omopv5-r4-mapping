@@ -35,11 +35,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
+import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.DateUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvider;
@@ -301,30 +301,33 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 			}
 			break;
 		case Procedure.SP_DATE:
-			DateParam dateParam = ((DateParam) value);
-			ParamPrefixEnum apiOperator = dateParam.getPrefix();
-			String sqlOperator = null;
-			if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN)) {
-				sqlOperator = ">";
-			} else if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS)) {
-				sqlOperator = ">=";
-			} else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN)) {
-				sqlOperator = "<";
-			} else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN_OR_EQUALS)) {
-				sqlOperator = "<=";
-			} else if (apiOperator.equals(ParamPrefixEnum.NOT_EQUAL)) {
-				sqlOperator = "!=";
-			} else {
-				sqlOperator = "=";
-			}
-			Date date = dateParam.getValue();
-			
-			paramWrapper.setParameterType("Date");
-			paramWrapper.setParameters(Arrays.asList("procedureDate"));
-			paramWrapper.setOperators(Arrays.asList(sqlOperator));
-			paramWrapper.setValues(Arrays.asList(String.valueOf(date.getTime())));
-			paramWrapper.setRelationship("or");
-			mapList.add(paramWrapper);
+			DateRangeParam dateRangeParam = ((DateRangeParam) value);
+ 			DateUtil.constructParameterWrapper(dateRangeParam, "procedureDate", paramWrapper, mapList);
+ 			
+//			DateParam dateParam = ((DateParam) value);
+//			ParamPrefixEnum apiOperator = dateParam.getPrefix();
+//			String sqlOperator = null;
+//			if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN)) {
+//				sqlOperator = ">";
+//			} else if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS)) {
+//				sqlOperator = ">=";
+//			} else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN)) {
+//				sqlOperator = "<";
+//			} else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN_OR_EQUALS)) {
+//				sqlOperator = "<=";
+//			} else if (apiOperator.equals(ParamPrefixEnum.NOT_EQUAL)) {
+//				sqlOperator = "!=";
+//			} else {
+//				sqlOperator = "=";
+//			}
+//			Date date = dateParam.getValue();
+//			
+//			paramWrapper.setParameterType("Date");
+//			paramWrapper.setParameters(Arrays.asList("procedureDate"));
+//			paramWrapper.setOperators(Arrays.asList(sqlOperator));
+//			paramWrapper.setValues(Arrays.asList(String.valueOf(date.getTime())));
+//			paramWrapper.setRelationship("or");
+//			mapList.add(paramWrapper);
 			break;
 		case Procedure.SP_SUBJECT:
 		case Procedure.SP_PATIENT:

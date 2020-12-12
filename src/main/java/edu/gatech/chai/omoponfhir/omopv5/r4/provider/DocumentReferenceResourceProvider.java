@@ -41,7 +41,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -178,7 +178,7 @@ public class DocumentReferenceResourceProvider implements IResourceProvider {
 			@OptionalParam(name=DocumentReference.SP_SUBJECT, chainWhitelist = { "", Patient.SP_NAME }) ReferenceParam theSubject,
 			@OptionalParam(name=DocumentReference.SP_ENCOUNTER) ReferenceParam theEncounter,
 			@OptionalParam(name=DocumentReference.SP_TYPE) TokenOrListParam theOrType,
-			@OptionalParam(name=DocumentReference.SP_DATE) DateParam theCreated,
+			@OptionalParam(name=DocumentReference.SP_DATE) DateRangeParam theRangeCreated,
 			
 			@IncludeParam(allow={"DocumentReference:patient", "DocumentReference:subject", 
 					"DocumentReference:encounter"})
@@ -199,8 +199,8 @@ public class DocumentReferenceResourceProvider implements IResourceProvider {
 			}
 		}
 
-		if (theCreated != null) {
-			paramList.addAll(getMyMapper().mapParameter(DocumentReference.SP_DATE, theCreated, false));
+		if (theRangeCreated != null) {
+			paramList.addAll(getMyMapper().mapParameter(DocumentReference.SP_DATE, theRangeCreated, false));
 		}
 
 		if (theSubject != null) {
