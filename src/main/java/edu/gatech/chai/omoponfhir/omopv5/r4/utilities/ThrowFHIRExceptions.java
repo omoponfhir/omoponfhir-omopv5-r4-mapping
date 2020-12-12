@@ -30,7 +30,7 @@ public class ThrowFHIRExceptions {
 		CodeableConcept detailCode = new CodeableConcept();
 		detailCode.setText(message);
 		outcome.addIssue().setSeverity(IssueSeverity.FATAL).setDetails(detailCode);
-		throw new UnprocessableEntityException(FhirContext.forDstu3(), outcome);
+		throw new UnprocessableEntityException(StaticValues.myFhirContext, outcome);
 	}
 	
 	public static InternalErrorException internalErrorException(String message) {
