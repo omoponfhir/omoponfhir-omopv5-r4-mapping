@@ -26,12 +26,11 @@
 		<hapi_current_version>4.2.0-SNAPSHOT</hapi_current_version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<hibernate_version>5.4.6.Final</hibernate_version>
-		<hibernate_validator_version>5.4.2.Final</hibernate_validator_version>
-		<hibernate_search_version>5.11.3.Final</hibernate_search_version>
+		<hibernate_version>5.4.21.Final</hibernate_version>
+		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
+		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<spring_version>5.2.4.RELEASE</spring_version>
-		<hibernate_version>5.4.6.Final</hibernate_version>
 		<omoponfhir_jpa_version>1.2.0</omoponfhir_jpa_version>
 	</properties>
 	

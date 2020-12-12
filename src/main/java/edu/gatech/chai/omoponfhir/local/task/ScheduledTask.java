@@ -377,7 +377,7 @@ public class ScheduledTask {
 		newVocab.setId(values[0]);
 		if (values.length > 1) {
 			vocName = values[1];
-			newVocab.setName(values[1]);
+			newVocab.setVocabularyName(values[1]);
 		}
 		
 		if (values.length > 2) {
@@ -430,7 +430,7 @@ public class ScheduledTask {
 	private Relationship createOmopRelationshipConcept(String id, String name, String revId) {
 		Relationship newRelationship = new Relationship();
 		newRelationship.setId(id);
-		newRelationship.setName(name);
+		newRelationship.setRelationshipName(name);
 		newRelationship.setIsHierarchical('0');
 		newRelationship.setDefinesAncestry('0');
 		newRelationship.setReverseRelationshipId(revId);

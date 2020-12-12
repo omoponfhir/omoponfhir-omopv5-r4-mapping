@@ -48,7 +48,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -169,7 +169,7 @@ public class ObservationResourceProvider implements IResourceProvider {
 	@Search()
 	public IBundleProvider findObservationsByParams(
 			@OptionalParam(name=Observation.SP_CODE) TokenOrListParam theOrCodes,
-			@OptionalParam(name=Observation.SP_DATE) DateParam theDate,
+			@OptionalParam(name=Observation.SP_DATE) DateRangeParam theRangeDate,
 			@OptionalParam(name=Observation.SP_PATIENT, chainWhitelist={"", Patient.SP_NAME, Patient.SP_IDENTIFIER}) ReferenceParam thePatient,
 			@OptionalParam(name=Observation.SP_SUBJECT, chainWhitelist={"", Patient.SP_NAME, Patient.SP_IDENTIFIER}) ReferenceParam theSubject,
 			@Sort SortSpec theSort,
@@ -195,8 +195,8 @@ public class ObservationResourceProvider implements IResourceProvider {
 			}
 		}
 		
-		if (theDate != null) {
-			paramList.addAll(getMyMapper().mapParameter(Observation.SP_DATE, theDate, false));
+		if (theRangeDate != null) {
+			paramList.addAll(getMyMapper().mapParameter(Observation.SP_DATE, theRangeDate, false));
 		}
 		
 		// With OMOP, we only support subject to be patient.

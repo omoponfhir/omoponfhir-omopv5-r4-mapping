@@ -15,8 +15,6 @@
  *******************************************************************************/
 package edu.gatech.chai.omoponfhir.omopv5.r4.mapping;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -37,8 +35,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
@@ -154,47 +151,50 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 			}
 			break;
 		case DocumentReference.SP_DATE:
-			Date date = ((DateParam) value).getValue();
-			ParamPrefixEnum prefix = ((DateParam) value).getPrefix();
-			String inequality = "=";
-			if (prefix.equals(ParamPrefixEnum.EQUAL)) inequality = "=";
-			else if (prefix.equals(ParamPrefixEnum.LESSTHAN)) inequality = "<";
-			else if (prefix.equals(ParamPrefixEnum.LESSTHAN_OR_EQUALS)) inequality = "<=";
-			else if (prefix.equals(ParamPrefixEnum.GREATERTHAN)) inequality = ">";
-			else if (prefix.equals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS)) inequality = ">=";
-			else if (prefix.equals(ParamPrefixEnum.NOT_EQUAL)) inequality = "!=";
-
-			// get Date.
-			SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-			String time = timeFormat.format(date);
-
-			// get only date part.
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			Date dateWithoutTime = null;
-			try {
-				dateWithoutTime = sdf.parse(sdf.format(date));
-			} catch (ParseException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-				break;
-			}
-
-			System.out.println("TIME VALUE:"+String.valueOf(dateWithoutTime.getTime()));
-			paramWrapper.setParameterType("Date");
-			paramWrapper.setParameters(Arrays.asList("noteDate"));
-			paramWrapper.setOperators(Arrays.asList(inequality));
-			paramWrapper.setValues(Arrays.asList(String.valueOf(dateWithoutTime.getTime())));
-			paramWrapper.setRelationship("and");
-			mapList.add(paramWrapper);
+			DateRangeParam dateRangeParam = ((DateRangeParam) value);
+			DateUtil.constructParameterWrapper(dateRangeParam, "noteDate", paramWrapper, mapList);
 			
-			// Time
-			ParameterWrapper paramWrapper_time = new ParameterWrapper();
-			paramWrapper_time.setParameterType("String");
-			paramWrapper_time.setParameters(Arrays.asList("noteDateTime"));
-			paramWrapper_time.setOperators(Arrays.asList(inequality));
-			paramWrapper_time.setValues(Arrays.asList(time));
-			paramWrapper_time.setRelationship("and");
-			mapList.add(paramWrapper_time);
+//			Date date = ((DateParam) value).getValue();
+//			ParamPrefixEnum prefix = ((DateParam) value).getPrefix();
+//			String inequality = "=";
+//			if (prefix.equals(ParamPrefixEnum.EQUAL)) inequality = "=";
+//			else if (prefix.equals(ParamPrefixEnum.LESSTHAN)) inequality = "<";
+//			else if (prefix.equals(ParamPrefixEnum.LESSTHAN_OR_EQUALS)) inequality = "<=";
+//			else if (prefix.equals(ParamPrefixEnum.GREATERTHAN)) inequality = ">";
+//			else if (prefix.equals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS)) inequality = ">=";
+//			else if (prefix.equals(ParamPrefixEnum.NOT_EQUAL)) inequality = "!=";
+//
+//			// get Date.
+//			SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+//			String time = timeFormat.format(date);
+//
+//			// get only date part.
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//			Date dateWithoutTime = null;
+//			try {
+//				dateWithoutTime = sdf.parse(sdf.format(date));
+//			} catch (ParseException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//				break;
+//			}
+//
+//			System.out.println("TIME VALUE:"+String.valueOf(dateWithoutTime.getTime()));
+//			paramWrapper.setParameterType("Date");
+//			paramWrapper.setParameters(Arrays.asList("noteDate"));
+//			paramWrapper.setOperators(Arrays.asList(inequality));
+//			paramWrapper.setValues(Arrays.asList(String.valueOf(dateWithoutTime.getTime())));
+//			paramWrapper.setRelationship("and");
+//			mapList.add(paramWrapper);
+//			
+//			// Time
+//			ParameterWrapper paramWrapper_time = new ParameterWrapper();
+//			paramWrapper_time.setParameterType("String");
+//			paramWrapper_time.setParameters(Arrays.asList("noteDateTime"));
+//			paramWrapper_time.setOperators(Arrays.asList(inequality));
+//			paramWrapper_time.setValues(Arrays.asList(time));
+//			paramWrapper_time.setRelationship("and");
+//			mapList.add(paramWrapper_time);
 			break;
 		case DocumentReference.SP_TYPE:
 			String system = ((TokenParam) value).getSystem();
