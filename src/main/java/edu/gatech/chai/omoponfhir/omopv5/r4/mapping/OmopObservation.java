@@ -2113,17 +2113,10 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 	private static Date createDateTime(FObservationView fObservationView) {
 		Date myDate = null;
 		if (fObservationView.getObservationDate() != null) {
-			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-			String dateString = fmt.format(fObservationView.getObservationDate());
-			fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			try {
-				if (fObservationView.getObservationTime() != null && fObservationView.getObservationTime().isEmpty() == false) {
-					myDate = fmt.parse(dateString + " " + fObservationView.getObservationTime());
-				} else {
-					myDate = fObservationView.getObservationDate();
-				}
-			} catch (ParseException e) {
-				e.printStackTrace();
+			if (fObservationView.getObservationDateTime() != null) {
+				myDate = fObservationView.getObservationDateTime();
+			} else {
+				myDate = fObservationView.getObservationDate();
 			}
 		}
 
