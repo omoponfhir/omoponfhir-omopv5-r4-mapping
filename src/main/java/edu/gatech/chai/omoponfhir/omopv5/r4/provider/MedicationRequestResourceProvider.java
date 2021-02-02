@@ -193,7 +193,7 @@ public class MedicationRequestResourceProvider implements IResourceProvider {
 			@OptionalParam(name = MedicationRequest.SP_CODE) TokenOrListParam theOrCodes,
 			@OptionalParam(name = MedicationRequest.SP_MEDICATION+"."+Medication.SP_CODE) TokenOrListParam theMedicationOrCodes,
 			@OptionalParam(name = MedicationRequest.SP_MEDICATION, chainWhitelist={""}) ReferenceParam theMedication,
-			@OptionalParam(name = MedicationRequest.SP_AUTHOREDON) DateParam theDate,
+			@OptionalParam(name = MedicationRequest.SP_AUTHOREDON) DateRangeParam theDateRange,
 			@OptionalParam(name = MedicationRequest.SP_PATIENT, chainWhitelist = { "", Patient.SP_NAME,
 					Patient.SP_IDENTIFIER }) ReferenceOrListParam thePatients,
 			@OptionalParam(name = MedicationRequest.SP_SUBJECT, chainWhitelist = { "", Patient.SP_NAME,
@@ -215,8 +215,8 @@ public class MedicationRequestResourceProvider implements IResourceProvider {
 			}
 		}
 
-		if (theDate != null) {
-			paramList.addAll(myMapper.mapParameter (MedicationRequest.SP_AUTHOREDON, theDate, false));
+		if (theDateRange != null) {
+			paramList.addAll(myMapper.mapParameter (MedicationRequest.SP_AUTHOREDON, theDateRange, false));
 		}
 
 		if (theMedicationOrCodes != null) {
