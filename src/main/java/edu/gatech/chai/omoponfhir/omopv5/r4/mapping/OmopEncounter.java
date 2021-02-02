@@ -271,6 +271,7 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 		case Encounter.SP_DATE:
 			DateRangeParam theDateRange = ((DateRangeParam) value);
 			DateUtil.constructParameterWrapper(theDateRange, "visitStartDate", paramWrapper, mapList);
+			break;
 		case "Patient:" + Patient.SP_RES_ID:
 			addParamlistForPatientIDName(parameter, (String)value, paramWrapper, mapList);
 			break;
