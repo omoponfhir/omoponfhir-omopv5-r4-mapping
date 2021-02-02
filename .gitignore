@@ -13,6 +13,8 @@ Servers/
 nohup.out
 .DS_Store
 *.orig
+*.sh
+*.code-workspace
 
 # Vagrant stuff.
 .vagrant
