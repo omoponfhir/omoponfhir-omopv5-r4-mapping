@@ -100,7 +100,7 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 		List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
 		ParameterWrapper paramConceptId1 = new ParameterWrapper(
 				"Long",
-				Arrays.asList("id.concept1"),
+				Arrays.asList("id.conceptId1"),
 				Arrays.asList("="),
 				Arrays.asList(String.valueOf(omopSrcConcept.getId())),
 				"or"
