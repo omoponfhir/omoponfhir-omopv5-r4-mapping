@@ -178,7 +178,8 @@ public class ConditionResourceProvider implements IResourceProvider {
 	public IBundleProvider findConditionByParams(
 			@OptionalParam(name = Condition.SP_CODE) TokenOrListParam theOrCodes,
 			@OptionalParam(name = Condition.SP_SUBJECT) ReferenceParam theSubjectId,
-			@OptionalParam(name = Condition.SP_PATIENT) ReferenceParam thePatientId) {
+			@OptionalParam(name = Condition.SP_PATIENT) ReferenceParam thePatientId,
+			@OptionalParam(name = Condition.SP_ASSERTED_DATE) DateRangeParam theDateAsserted) {
 		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 
 		if (theOrCodes != null) {
@@ -202,6 +203,10 @@ public class ConditionResourceProvider implements IResourceProvider {
 			paramList.addAll(myMapper.mapParameter(Condition.SP_PATIENT, thePatientId, false));
 		}
 
+		if (theDateAsserted != null) {
+			paramList.addAll(myMapper.mapParameter(Condition.SP_ASSERTED_DATE, theDateAsserted, false));
+		}
+		
 		MyBundleProvider myBundleProvider = new MyBundleProvider(paramList);
 		myBundleProvider.setTotalSize(getTotalSize(paramList));
 		myBundleProvider.setPreferredPageSize(preferredPageSize);
