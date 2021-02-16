@@ -157,9 +157,13 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 			// not supporting
 			break;
 		case Condition.SP_RECORDED_DATE:
+		case Condition.SP_ASSERTED_DATE:
 			// Condition.assertedDate -> Omop ConditionOccurrence.conditionStartDate
-			putDateInParamWrapper(paramWrapper, value, "conditionStartDate");
-			mapList.add(paramWrapper);
+			DateRangeParam dateRangeParam = ((DateRangeParam) value);
+			DateUtil.constructParameterWrapper(dateRangeParam, "conditionStartDate", paramWrapper, mapList);	
+			ParameterWrapper paramWrapper1 = new ParameterWrapper();
+			paramWrapper1.setUpperRelationship("or");
+			DateUtil.constructParameterWrapper(dateRangeParam, "conditionEndDate", paramWrapper1, mapList);	
 			break;
 		case Condition.SP_ASSERTER:
 			// Condition.asserter -> Omop Provider
