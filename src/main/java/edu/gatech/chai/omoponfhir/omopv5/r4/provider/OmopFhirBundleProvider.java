@@ -17,6 +17,7 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.provider;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -27,15 +28,23 @@ import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 public abstract class OmopFhirBundleProvider implements IBundleProvider {
 	InstantType searchTime;
 	List<ParameterWrapper> paramList;
+	Map<String, String> parameterSet;
 	Integer preferredPageSize;
 	Integer totalSize;
 	String orderParams = null;
+	String searchSql;
 
 	public OmopFhirBundleProvider (List<ParameterWrapper> paramList) {
 		this.searchTime = InstantType.withCurrentTime();
 		this.paramList = paramList;
 	}
 	
+	public OmopFhirBundleProvider (Map<String, String> parameterSet, String searchSql) {
+		this.searchTime = InstantType.withCurrentTime();
+		this.searchSql = searchSql;
+		this.parameterSet = parameterSet;
+	}
+
 	public void setPreferredPageSize(Integer preferredPageSize) {
 		this.preferredPageSize = preferredPageSize;
 	}
