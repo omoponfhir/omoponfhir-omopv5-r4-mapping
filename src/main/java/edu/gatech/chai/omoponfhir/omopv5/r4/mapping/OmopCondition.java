@@ -20,12 +20,21 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
+import edu.gatech.chai.omopv5.dba.service.ConceptService;
+import edu.gatech.chai.omopv5.dba.service.ConditionOccurrenceService;
+import edu.gatech.chai.omopv5.dba.service.FPersonService;
+import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
+import edu.gatech.chai.omopv5.dba.service.ProviderService;
+import edu.gatech.chai.omopv5.dba.service.VisitOccurrenceService;
+import edu.gatech.chai.omopv5.model.entity.Concept;
+import edu.gatech.chai.omopv5.model.entity.ConditionOccurrence;
+import edu.gatech.chai.omopv5.model.entity.FPerson;
+import edu.gatech.chai.omopv5.model.entity.Provider;
+import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ConditionResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvider;
-import edu.gatech.chai.omopv5.dba.service.*;
-import edu.gatech.chai.omopv5.model.entity.*;
 
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConditionCategory;
@@ -47,7 +56,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 	private static OmopCondition omopCondition = new OmopCondition();
 
-	private ConditionOccurrenceService conditionOccurrenceService;
+//	private ConditionOccurrenceService conditionOccurrenceService;
 	private FPersonService fPersonService;
 	private ProviderService providerService;
 	private ConceptService conceptService;
@@ -67,7 +76,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 	private void initialize(WebApplicationContext context) {
 		// Get bean for other services that we need for mapping.
-		conditionOccurrenceService = context.getBean(ConditionOccurrenceService.class);
+//		conditionOccurrenceService = context.getBean(ConditionOccurrenceService.class);
 		fPersonService = context.getBean(FPersonService.class);
 		providerService = context.getBean(ProviderService.class);
 		conceptService = context.getBean(ConceptService.class);
@@ -96,11 +105,11 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		// TODO: Need to map the following
 		// ??Condition.abatement.abatementString, but we are using abatementDateTime for
 		// the end date and Abatement[x] has a 0..1 cardinality.
-		String stopReason = conditionOccurrence.getStopReason();
+//		String stopReason = conditionOccurrence.getStopReason();
 		// ??
-		String sourceValue = conditionOccurrence.getConditionSourceValue();
+//		String sourceValue = conditionOccurrence.getConditionSourceValue();
 		// ??
-		Concept sourceConceptId = conditionOccurrence.getConditionSourceConcept();
+//		Concept sourceConceptId = conditionOccurrence.getConditionSourceConcept();
 
 		return condition;
 	}
@@ -125,9 +134,9 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		// TODO: Do you need to call other services to update links resources.
 
 		if (conditionOccurrence.getId() != null) {
-			retval = conditionOccurrenceService.update(conditionOccurrence).getId();
+			retval = getMyOmopService().update(conditionOccurrence).getId();
 		} else {
-			retval = conditionOccurrenceService.create(conditionOccurrence).getId();
+			retval = getMyOmopService().create(conditionOccurrence).getId();
 		}
 
 		return IdMapping.getFHIRfromOMOP(retval, ConditionResourceProvider.getType());
@@ -436,7 +445,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 		// check for an existing condition
 		if (omopId != null) {
-			conditionOccurrence = conditionOccurrenceService.findById(omopId);
+			conditionOccurrence = getMyOmopService().findById(omopId);
 		} else {
 			conditionOccurrence = new ConditionOccurrence();
 		}
