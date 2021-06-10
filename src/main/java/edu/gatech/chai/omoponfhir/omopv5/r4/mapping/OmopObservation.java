@@ -41,6 +41,7 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.DateUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
@@ -2163,59 +2164,17 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		case Observation.SP_DATE:
 			DateRangeParam dateRangeParam = ((DateRangeParam) value);
 			DateUtil.constructParameterWrapper(dateRangeParam, "observationDate", paramWrapper, mapList);
-			
-//			Date date = ((DateParam) value).getValue();
-//			ParamPrefixEnum prefix = ((DateParam) value).getPrefix();
-//			String inequality = "=";
-//			if (prefix.equals(ParamPrefixEnum.EQUAL))
-//				inequality = "=";
-//			else if (prefix.equals(ParamPrefixEnum.LESSTHAN))
-//				inequality = "<";
-//			else if (prefix.equals(ParamPrefixEnum.LESSTHAN_OR_EQUALS))
-//				inequality = "<=";
-//			else if (prefix.equals(ParamPrefixEnum.GREATERTHAN))
-//				inequality = ">";
-//			else if (prefix.equals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS))
-//				inequality = ">=";
-//			else if (prefix.equals(ParamPrefixEnum.NOT_EQUAL))
-//				inequality = "!=";
-//
-//			// get Date.
-//			SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-//			String time = timeFormat.format(date);
-//
-//			// get only date part.
-//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//			Date dateWithoutTime = null;
-//			try {
-//				dateWithoutTime = sdf.parse(sdf.format(date));
-//			} catch (ParseException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//				break;
-//			}
-//
-//			System.out.println("TIME VALUE:" + String.valueOf(dateWithoutTime.getTime()));
-//			paramWrapper.setParameterType("Date");
-//			paramWrapper.setParameters(Arrays.asList("observationDate"));
-//			paramWrapper.setOperators(Arrays.asList(inequality));
-//			paramWrapper.setValues(Arrays.asList(String.valueOf(dateWithoutTime.getTime())));
-//			paramWrapper.setRelationship("and");
-//			mapList.add(paramWrapper);
-//
-//			// Time
-//			ParameterWrapper paramWrapper_time = new ParameterWrapper();
-//			paramWrapper_time.setParameterType("String");
-//			paramWrapper_time.setParameters(Arrays.asList("observationTime"));
-//			paramWrapper_time.setOperators(Arrays.asList(inequality));
-//			paramWrapper_time.setValues(Arrays.asList(time));
-//			paramWrapper_time.setRelationship("and");
-//			mapList.add(paramWrapper_time);
-
 			break;
 		case Observation.SP_CODE:
 			String system = ((TokenParam) value).getSystem();
 			String code = ((TokenParam) value).getValue();
+			TokenParamModifier modifier = ((TokenParam) value).getModifier();
+			
+			String modifierString = null;
+			if (modifier != null) {
+				modifierString = modifier.getValue();
+			}
+			
 			String omopVocabulary = null;
 			if (system != null && !system.isEmpty()) {
 				try {
@@ -2240,27 +2199,48 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 						// constructFHIR
 						// will search matching diastolic value.
 						paramWrapper.setParameterType("String");
-						paramWrapper.setParameters(
-								Arrays.asList("observationConcept.vocabularyId", "observationConcept.conceptCode"));
-						paramWrapper.setOperators(Arrays.asList("like", "like"));
-						paramWrapper.setValues(Arrays.asList(omopVocabulary, SYSTOLIC_LOINC_CODE));
+						if (modifierString != null && modifierString.equalsIgnoreCase("text")) {
+							paramWrapper.setParameters(
+									Arrays.asList("observationConcept.conceptName"));
+							paramWrapper.setOperators(Arrays.asList("like"));
+							paramWrapper.setValues(Arrays.asList("%"+code+"%"));
+						} else {
+							paramWrapper.setParameters(
+									Arrays.asList("observationConcept.vocabularyId", "observationConcept.conceptCode"));
+							paramWrapper.setOperators(Arrays.asList("like", "like"));
+							paramWrapper.setValues(Arrays.asList(omopVocabulary, SYSTOLIC_LOINC_CODE));
+						}
 						paramWrapper.setRelationship("and");
 						mapList.add(paramWrapper);
 					} else {
 						paramWrapper.setParameterType("String");
-						paramWrapper.setParameters(
-								Arrays.asList("observationConcept.vocabularyId", "observationConcept.conceptCode"));
-						paramWrapper.setOperators(Arrays.asList("like", "like"));
-						paramWrapper.setValues(Arrays.asList(omopVocabulary, code));
+						if (modifierString != null && modifierString.equalsIgnoreCase("text")) {
+							paramWrapper.setParameters(
+									Arrays.asList("observationConcept.conceptName"));
+							paramWrapper.setOperators(Arrays.asList("like"));
+							paramWrapper.setValues(Arrays.asList("%"+code+"%"));
+						} else {
+							paramWrapper.setParameters(
+									Arrays.asList("observationConcept.vocabularyId", "observationConcept.conceptCode"));
+							paramWrapper.setOperators(Arrays.asList("like", "like"));
+							paramWrapper.setValues(Arrays.asList(omopVocabulary, code));
+						}
 						paramWrapper.setRelationship("and");
 						mapList.add(paramWrapper);
 					}
 				} else {
 					// We have no code specified. Search by system.
 					paramWrapper.setParameterType("String");
-					paramWrapper.setParameters(Arrays.asList("observationConcept.vocabularyId"));
-					paramWrapper.setOperators(Arrays.asList("like"));
-					paramWrapper.setValues(Arrays.asList(omopVocabulary));
+					if (modifierString != null && modifierString.equalsIgnoreCase("text")) {
+						paramWrapper.setParameters(
+								Arrays.asList("observationConcept.conceptName"));
+						paramWrapper.setOperators(Arrays.asList("like"));
+						paramWrapper.setValues(Arrays.asList("%"+code+"%"));
+					} else {
+						paramWrapper.setParameters(Arrays.asList("observationConcept.vocabularyId"));
+						paramWrapper.setOperators(Arrays.asList("like"));
+						paramWrapper.setValues(Arrays.asList(omopVocabulary));
+					}
 					paramWrapper.setRelationship("or");
 					mapList.add(paramWrapper);
 				}
@@ -2272,12 +2252,19 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					} else {
 						// no system but code.
 						paramWrapper.setParameterType("String");
-						paramWrapper.setParameters(Arrays.asList("observationConcept.conceptCode"));
-						paramWrapper.setOperators(Arrays.asList("like"));
-						if (BP_SYSTOLIC_DIASTOLIC_CODE.equals(code))
-							paramWrapper.setValues(Arrays.asList(SYSTOLIC_LOINC_CODE));
-						else
-							paramWrapper.setValues(Arrays.asList(code));
+						if (modifierString != null && modifierString.equalsIgnoreCase("text")) {
+							paramWrapper.setParameters(
+									Arrays.asList("observationConcept.conceptName"));
+							paramWrapper.setOperators(Arrays.asList("like"));
+							paramWrapper.setValues(Arrays.asList("%"+code+"%"));
+						} else {
+							paramWrapper.setParameters(Arrays.asList("observationConcept.conceptCode"));
+							paramWrapper.setOperators(Arrays.asList("like"));
+							if (BP_SYSTOLIC_DIASTOLIC_CODE.equals(code))
+								paramWrapper.setValues(Arrays.asList(SYSTOLIC_LOINC_CODE));
+							else
+								paramWrapper.setValues(Arrays.asList(code));
+						}
 						paramWrapper.setRelationship("or");
 						mapList.add(paramWrapper);
 					}
@@ -2285,18 +2272,32 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					if (code == null || code.isEmpty()) {
 						// yes system but no code.
 						paramWrapper.setParameterType("String");
-						paramWrapper.setParameters(Arrays.asList("observationConcept.vocabularyId"));
-						paramWrapper.setOperators(Arrays.asList("like"));
-						paramWrapper.setValues(Arrays.asList(omopVocabulary));
+						if (modifierString != null && modifierString.equalsIgnoreCase("text")) {
+							paramWrapper.setParameters(
+									Arrays.asList("observationConcept.conceptName"));
+							paramWrapper.setOperators(Arrays.asList("like"));
+							paramWrapper.setValues(Arrays.asList("%"+code+"%"));
+						} else {
+							paramWrapper.setParameters(Arrays.asList("observationConcept.vocabularyId"));
+							paramWrapper.setOperators(Arrays.asList("like"));
+							paramWrapper.setValues(Arrays.asList(omopVocabulary));
+						}
 						paramWrapper.setRelationship("or");
 						mapList.add(paramWrapper);
 					} else {
 						// We have both system and code.
 						paramWrapper.setParameterType("String");
-						paramWrapper.setParameters(
-								Arrays.asList("observationConcept.vocabularyId", "observationConcept.conceptCode"));
-						paramWrapper.setOperators(Arrays.asList("like", "like"));
-						paramWrapper.setValues(Arrays.asList(omopVocabulary, code));
+						if (modifierString != null && modifierString.equalsIgnoreCase("text")) {
+							paramWrapper.setParameters(
+									Arrays.asList("observationConcept.conceptName"));
+							paramWrapper.setOperators(Arrays.asList("like"));
+							paramWrapper.setValues(Arrays.asList("%"+code+"%"));
+						} else {
+							paramWrapper.setParameters(
+									Arrays.asList("observationConcept.vocabularyId", "observationConcept.conceptCode"));
+							paramWrapper.setOperators(Arrays.asList("like", "like"));
+							paramWrapper.setValues(Arrays.asList(omopVocabulary, code));
+						}
 						paramWrapper.setRelationship("and");
 						mapList.add(paramWrapper);
 					}
