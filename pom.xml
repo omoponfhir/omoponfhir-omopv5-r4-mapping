@@ -32,7 +32,7 @@
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<spring_version>5.2.4.RELEASE</spring_version>
 		<hibernate_version>5.4.6.Final</hibernate_version>
-		<omoponfhir_jpa_version>1.2.0</omoponfhir_jpa_version>
+		<omoponfhir_jpa_version>1.2.2</omoponfhir_jpa_version>
 	</properties>
 	
 	<dependencies>

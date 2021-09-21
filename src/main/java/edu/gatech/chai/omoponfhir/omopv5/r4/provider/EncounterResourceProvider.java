@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -123,7 +124,7 @@ public class EncounterResourceProvider implements IResourceProvider {
 			@OptionalParam(name = Encounter.SP_SUBJECT, chainWhitelist = { "",
 					Patient.SP_NAME }) ReferenceParam theSubject,
 			@OptionalParam(name = Encounter.SP_DIAGNOSIS) ReferenceParam theDiagnosis,
-
+			@OptionalParam(name = Encounter.SP_DATE) DateRangeParam theDateRange,
 			@IncludeParam(allow = { "Encounter:appointment", "Encounter:diagnosis", "Encounter:episodeofcare",
 					"Encounter:incomingreferral", "Encounter:location", "Encounter:part-of", "Encounter:participant",
 					"Encounter:service-provider", "Encounter:patient", "Encounter:practitioner",
@@ -172,6 +173,10 @@ public class EncounterResourceProvider implements IResourceProvider {
 		
 		if (theDiagnosis != null) {
 			paramList.addAll(getMyMapper().mapParameter(Encounter.SP_DIAGNOSIS, theDiagnosis, false));
+		}
+
+		if (theDateRange != null) {
+			paramList.addAll(getMyMapper().mapParameter(Encounter.SP_DATE, theDateRange, false));
 		}
 
 		MyBundleProvider myBundleProvider = new MyBundleProvider(paramList, theIncludes, theReverseIncludes);
