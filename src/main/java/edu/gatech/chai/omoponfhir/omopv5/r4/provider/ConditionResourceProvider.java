@@ -181,7 +181,6 @@ public class ConditionResourceProvider implements IResourceProvider {
 			@OptionalParam(name = Condition.SP_SUBJECT) ReferenceParam theSubjectId,
 			@OptionalParam(name = Condition.SP_PATIENT) ReferenceParam thePatientId,
 			@OptionalParam(name = Condition.SP_RECORDED_DATE) DateRangeParam theRecordedDate) {
-		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 
 		if (theOrCodes != null) {
 			List<TokenParam> codes = theOrCodes.getValuesAsQueryTokens();
