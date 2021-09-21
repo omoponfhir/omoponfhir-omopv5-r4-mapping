@@ -33,11 +33,13 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
+import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.DateUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.TerminologyServiceClient;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.MedicationRequestResourceProvider;
@@ -515,30 +517,12 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 			}
 			break;
 		case MedicationStatement.SP_EFFECTIVE:
-			DateParam effectiveDateParam = ((DateParam) value);
-			ParamPrefixEnum apiOperator = effectiveDateParam.getPrefix();
-			String sqlOperator = null;
-			if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN)) {
-				sqlOperator = ">";
-			} else if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS)) {
-				sqlOperator = ">=";
-			} else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN)) {
-				sqlOperator = "<";
-			} else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN_OR_EQUALS)) {
-				sqlOperator = "<=";
-			} else if (apiOperator.equals(ParamPrefixEnum.NOT_EQUAL)) {
-				sqlOperator = "!=";
-			} else {
-				sqlOperator = "=";
-			}
-			Date effectiveDate = effectiveDateParam.getValue();
-
-			paramWrapper.setParameterType("Date");
-			paramWrapper.setParameters(Arrays.asList("drugExposureStartDate"));
-			paramWrapper.setOperators(Arrays.asList(sqlOperator));
-			paramWrapper.setValues(Arrays.asList(String.valueOf(effectiveDate.getTime())));
-			paramWrapper.setRelationship("or");
-			mapList.add(paramWrapper);
+			DateRangeParam effectiveDateParam = ((DateRangeParam) value);
+ 			paramWrapper.setUpperRelationship("or"); // or these two maps
+ 			DateUtil.constructParameterWrapper(effectiveDateParam, "drugExposureStartDate", paramWrapper, mapList);
+ 			ParameterWrapper paramWrapper1 = new ParameterWrapper();
+ 			paramWrapper1.setUpperRelationship("or");
+ 			DateUtil.constructParameterWrapper(effectiveDateParam, "drugExposureEndDate", paramWrapper1, mapList);
 			break;
 		case "Patient:" + Patient.SP_RES_ID:
 			addParamlistForPatientIDName(parameter, (String) value, paramWrapper, mapList);

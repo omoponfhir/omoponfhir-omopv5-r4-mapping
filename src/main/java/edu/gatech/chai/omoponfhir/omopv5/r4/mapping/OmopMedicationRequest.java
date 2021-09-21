@@ -392,32 +392,11 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 			}
 			break;
 		case MedicationRequest.SP_AUTHOREDON:
-			// DateParam authoredOnDataParam = ((DateParam) value);
-			// ParamPrefixEnum apiOperator = authoredOnDataParam.getPrefix();
-			// String sqlOperator = null;
-			// if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN)) {
-			// 	sqlOperator = ">";
-			// } else if (apiOperator.equals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS)) {
-			// 	sqlOperator = ">=";
-			// } else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN)) {
-			// 	sqlOperator = "<";
-			// } else if (apiOperator.equals(ParamPrefixEnum.LESSTHAN_OR_EQUALS)) {
-			// 	sqlOperator = "<=";
-			// } else if (apiOperator.equals(ParamPrefixEnum.NOT_EQUAL)) {
-			// 	sqlOperator = "!=";
-			// } else {
-			// 	sqlOperator = "=";
-			// }
-			// Date authoredOnDate = authoredOnDataParam.getValue();
-			
-			// paramWrapper.setParameterType("Date");
-			// paramWrapper.setParameters(Arrays.asList("drugExposureStartDate"));
-			// paramWrapper.setOperators(Arrays.asList(sqlOperator));
-			// paramWrapper.setValues(Arrays.asList(String.valueOf(authoredOnDate.getTime())));
-			// paramWrapper.setRelationship("or");
-			// mapList.add(paramWrapper);
-			DateRangeParam dateAuthoredOnRangeParam = ((DateRangeParam) value);
-			DateUtil.constructParameterWrapper(dateAuthoredOnRangeParam, "drugExposureStartDate", paramWrapper, mapList);
+			DateRangeParam authoredOnDataParam = ((DateRangeParam) value);
+ 			DateUtil.constructParameterWrapper(authoredOnDataParam, "drugExposureStartDate", paramWrapper, mapList);
+ 			ParameterWrapper paramWrapper1 = new ParameterWrapper();
+ 			paramWrapper1.setUpperRelationship("or");
+ 			DateUtil.constructParameterWrapper(authoredOnDataParam, "drugExposureEndDate", paramWrapper1, mapList);
 			break;
 //		case MedicationRequest.SP_PATIENT:
 //		case MedicationRequest.SP_SUBJECT:

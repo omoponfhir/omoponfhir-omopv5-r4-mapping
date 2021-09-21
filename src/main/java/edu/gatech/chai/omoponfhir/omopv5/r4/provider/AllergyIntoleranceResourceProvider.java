@@ -18,32 +18,29 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.provider;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.gatech.chai.omoponfhir.omopv5.r4.mapping.OmopCondition;
-import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ThrowFHIRExceptions;
+import edu.gatech.chai.omoponfhir.omopv5.r4.mapping.OmopAllergyIntolerance;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.exceptions.FHIRException;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
-//import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
-//import ca.uhn.fhir.model.dstu2.valueset.ContactPointUseEnum;
-//import ca.uhn.fhir.model.primitive.CodeDt;
-//import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -60,21 +57,15 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
  * See the MyOrganization definition to see how the custom resource definition
  * works.
  */
-public class ConditionResourceProvider implements IResourceProvider {
+public class AllergyIntoleranceResourceProvider implements IResourceProvider {
 	// private CareSiteService careSiteService;
 	private WebApplicationContext myAppCtx;
-	private String myDbType;
-	private OmopCondition myMapper;
+	private OmopAllergyIntolerance myMapper;
 	private int preferredPageSize = 30;
 
-	public ConditionResourceProvider() {
+	public AllergyIntoleranceResourceProvider() {
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		myDbType = myAppCtx.getServletContext().getInitParameter("backendDbType");
-		if (myDbType.equalsIgnoreCase("omopv5") == true) {
-			myMapper = new OmopCondition(myAppCtx);
-		} else {
-			myMapper = new OmopCondition(myAppCtx);
-		}
+		myMapper = new OmopAllergyIntolerance(myAppCtx);
 
 		String pageSizeStr = myAppCtx.getServletContext().getInitParameter("preferredPageSize");
 		if (pageSizeStr != null && pageSizeStr.isEmpty() == false) {
@@ -86,10 +77,10 @@ public class ConditionResourceProvider implements IResourceProvider {
 	}
 
 	public static String getType() {
-		return "Condition";
+		return "AllergyIntolerance";
 	}
 
-	public OmopCondition getMyMapper() {
+	public OmopAllergyIntolerance getMyMapper() {
 		return myMapper;
 	}
 
@@ -109,16 +100,15 @@ public class ConditionResourceProvider implements IResourceProvider {
 	 * "create=type", which adds a new instance of a resource to the server.
 	 */
 	@Create()
-	public MethodOutcome createCondition(@ResourceParam Condition condition) {
+	public MethodOutcome createAllergyIntolerance(@ResourceParam AllergyIntolerance allergyIntolerance) {
 
 		Long id = null;
 		try {
-			id = myMapper.toDbase(condition, null);
+			id = myMapper.toDbase(allergyIntolerance, null);
 		} catch (FHIRException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return new MethodOutcome(new IdDt(id));
+		return new MethodOutcome(new IdType(id));
 	}
 
 	/**
@@ -126,12 +116,12 @@ public class ConditionResourceProvider implements IResourceProvider {
 	 * overridden to indicate what type of resource this provider supplies.
 	 */
 	@Override
-	public Class<Condition> getResourceType() {
-		return Condition.class;
+	public Class<AllergyIntolerance> getResourceType() {
+		return AllergyIntolerance.class;
 	}
 
 	@Delete()
-	public void deleteCondition(@IdParam IdType theId) {
+	public void deleteAllergyIntolerance(@IdParam IdType theId) {
 		if (myMapper.removeByFhirId(theId) <= 0) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -149,8 +139,8 @@ public class ConditionResourceProvider implements IResourceProvider {
 	 *         exists.
 	 */
 	@Read()
-	public Condition getResourceById(@IdParam IdType theId) {
-		Condition retVal = (Condition) myMapper.toFHIR(theId);
+	public AllergyIntolerance getResourceById(@IdParam IdType theId) {
+		AllergyIntolerance retVal = (AllergyIntolerance) myMapper.toFHIR(theId);
 		if (retVal == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -159,13 +149,13 @@ public class ConditionResourceProvider implements IResourceProvider {
 	}
 
 	@Search()
-	public IBundleProvider findConditionById(
-			@RequiredParam(name = Condition.SP_RES_ID) TokenParam theConditionId
+	public IBundleProvider findAllergyIntoleranceById(
+			@RequiredParam(name = AllergyIntolerance.SP_RES_ID) TokenParam theConditionId
 			) {
 		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 
 		if (theConditionId != null) {
-			paramList.addAll(myMapper.mapParameter(Condition.SP_RES_ID, theConditionId, false));
+			paramList.addAll(myMapper.mapParameter(AllergyIntolerance.SP_RES_ID, theConditionId, false));
 		}
 		
 		MyBundleProvider myBundleProvider = new MyBundleProvider(paramList);
@@ -176,11 +166,14 @@ public class ConditionResourceProvider implements IResourceProvider {
 	}
 
 	@Search()
-	public IBundleProvider findConditionByParams(
-			@OptionalParam(name = Condition.SP_CODE) TokenOrListParam theOrCodes,
-			@OptionalParam(name = Condition.SP_SUBJECT) ReferenceParam theSubjectId,
-			@OptionalParam(name = Condition.SP_PATIENT) ReferenceParam thePatientId,
-			@OptionalParam(name = Condition.SP_RECORDED_DATE) DateRangeParam theRecordedDate) {
+	public IBundleProvider findAllergyIntoleranceByParams(
+			@OptionalParam(name = AllergyIntolerance.SP_RECORDER) ReferenceParam theRecorder,
+			@OptionalParam(name = AllergyIntolerance.SP_PATIENT, chainWhitelist={"", Patient.SP_NAME, Patient.SP_IDENTIFIER}) ReferenceParam thePatient,
+			@OptionalParam(name = AllergyIntolerance.SP_CODE) TokenOrListParam theOrCodes,
+			@OptionalParam(name = AllergyIntolerance.SP_ONSET) DateRangeParam theRangeDate,
+			@Sort SortSpec theSort) {
+		
+		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 
 		if (theOrCodes != null) {
 			List<TokenParam> codes = theOrCodes.getValuesAsQueryTokens();
@@ -188,28 +181,41 @@ public class ConditionResourceProvider implements IResourceProvider {
 			if (codes.size() <= 1)
 				orValue = false;
 			for (TokenParam code : codes) {
-				paramList.addAll(myMapper.mapParameter(Condition.SP_CODE, code, orValue));
+				paramList.addAll(myMapper.mapParameter(AllergyIntolerance.SP_CODE, code, orValue));
 			}
 		}
 
-		if (theSubjectId != null) {
-			if (theSubjectId.getResourceType().equals(PatientResourceProvider.getType())) {
-				thePatientId = theSubjectId;
+		if (thePatient != null) {
+			String patientChain = thePatient.getChain();
+			if (patientChain != null) {
+				if (Patient.SP_NAME.equals(patientChain)) {
+					String thePatientName = thePatient.getValue();
+					paramList.addAll(getMyMapper().mapParameter ("Patient:"+Patient.SP_NAME, thePatientName, false));
+				} else if (Patient.SP_IDENTIFIER.equals(patientChain)) {
+					paramList.addAll(getMyMapper().mapParameter ("Patient:"+Patient.SP_IDENTIFIER, thePatient.getValue(), false));
+				} else if ("".equals(patientChain)) {
+					paramList.addAll(getMyMapper().mapParameter ("Patient:"+Patient.SP_RES_ID, thePatient.getValue(), false));
+				}
 			} else {
-				ThrowFHIRExceptions.unprocessableEntityException("We only support Patient resource for subject");
+				paramList.addAll(getMyMapper().mapParameter ("Patient:"+Patient.SP_RES_ID, thePatient.getIdPart(), false));
 			}
-		}
-		if (thePatientId != null) {
-			paramList.addAll(myMapper.mapParameter(Condition.SP_PATIENT, thePatientId, false));
-		}
-
-		if (theRecordedDate != null) {
-			paramList.addAll(myMapper.mapParameter(Condition.SP_RECORDED_DATE, theRecordedDate, false));
 		}
 		
+		if (theRangeDate != null) {
+			paramList.addAll(getMyMapper().mapParameter(AllergyIntolerance.SP_DATE, theRangeDate, false));
+		}
+
+
+		if (theRecorder != null) {
+			paramList.addAll(getMyMapper().mapParameter(AllergyIntolerance.SP_RECORDER, theRecorder, false));
+		}
+		
+		String orderParams = getMyMapper().constructOrderParams(theSort);
+
 		MyBundleProvider myBundleProvider = new MyBundleProvider(paramList);
 		myBundleProvider.setTotalSize(getTotalSize(paramList));
 		myBundleProvider.setPreferredPageSize(preferredPageSize);
+		myBundleProvider.setOrderParams(orderParams);
 
 		return myBundleProvider;
 	}
@@ -224,14 +230,14 @@ public class ConditionResourceProvider implements IResourceProvider {
 	 *
 	 * @param theId
 	 *            The read operation takes one parameter, which must be of type
-	 *            IdDt and must be annotated with the "@Read.IdParam"
+	 *            IdType and must be annotated with the "@Read.IdParam"
 	 *            annotation.
 	 * @return Returns a resource matching this identifier, or null if none
 	 *         exists.
 	 */
 	@Read()
-	public Condition readCondition(@IdParam IdType theId) {
-		Condition retval = (Condition) myMapper.toFHIR(theId);
+	public AllergyIntolerance readAllergyIntolerance(@IdParam IdType theId) {
+		AllergyIntolerance retval = (AllergyIntolerance) myMapper.toFHIR(theId);
 		if (retval == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -250,12 +256,12 @@ public class ConditionResourceProvider implements IResourceProvider {
 	 * @return This method returns a "MethodOutcome"
 	 */
 	@Update()
-	public MethodOutcome updateCondition(@IdParam IdType theId, @ResourceParam Condition theCondition) {
-		validateResource(theCondition);
+	public MethodOutcome updateAllergyIntolerance(@IdParam IdType theId, @ResourceParam AllergyIntolerance theAllergyIntolerance) {
+		validateResource(theAllergyIntolerance);
 
 		Long fhirId = null;
 		try {
-			fhirId = myMapper.toDbase(theCondition, theId);
+			fhirId = myMapper.toDbase(theAllergyIntolerance, theId);
 		} catch (FHIRException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -268,7 +274,7 @@ public class ConditionResourceProvider implements IResourceProvider {
 	}
 
 	// TODO: Add more validation code here.
-	private void validateResource(Condition theCondition) {
+	private void validateResource(AllergyIntolerance theAllergyIntolerance) {
 	}
 
 	class MyBundleProvider extends OmopFhirBundleProvider implements IBundleProvider {
