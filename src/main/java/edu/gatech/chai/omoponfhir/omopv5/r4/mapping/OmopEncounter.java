@@ -36,12 +36,14 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ConditionResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.OrganizationResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvider;
+import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.DateUtil;
 import edu.gatech.chai.omopv5.dba.service.CareSiteService;
 import edu.gatech.chai.omopv5.dba.service.ConditionOccurrenceService;
 import edu.gatech.chai.omopv5.dba.service.FPersonService;
@@ -265,6 +267,10 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 			break;
 		case Encounter.SP_DIAGNOSIS:
 			// TODO: handle diagnosis. This is condition id. Add join capability to parameter wrapper.
+			break;
+		case Encounter.SP_DATE:
+			DateRangeParam theDateRange = ((DateRangeParam) value);
+			DateUtil.constructParameterWrapper(theDateRange, "visitStartDate", paramWrapper, mapList);
 			break;
 		case "Patient:" + Patient.SP_RES_ID:
 			addParamlistForPatientIDName(parameter, (String)value, paramWrapper, mapList);

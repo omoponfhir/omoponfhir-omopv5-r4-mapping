@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -178,7 +179,8 @@ public class ConditionResourceProvider implements IResourceProvider {
 	public IBundleProvider findConditionByParams(
 			@OptionalParam(name = Condition.SP_CODE) TokenOrListParam theOrCodes,
 			@OptionalParam(name = Condition.SP_SUBJECT) ReferenceParam theSubjectId,
-			@OptionalParam(name = Condition.SP_PATIENT) ReferenceParam thePatientId) {
+			@OptionalParam(name = Condition.SP_PATIENT) ReferenceParam thePatientId,
+			@OptionalParam(name = Condition.SP_RECORDED_DATE) DateRangeParam theDateRecordedRangeParam) {
 		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 
 		if (theOrCodes != null) {
@@ -200,6 +202,10 @@ public class ConditionResourceProvider implements IResourceProvider {
 		}
 		if (thePatientId != null) {
 			paramList.addAll(myMapper.mapParameter(Condition.SP_PATIENT, thePatientId, false));
+		}
+
+		if (theDateRecordedRangeParam != null) {
+			paramList.addAll(myMapper.mapParameter(Condition.SP_RECORDED_DATE, theDateRecordedRangeParam, false));
 		}
 
 		MyBundleProvider myBundleProvider = new MyBundleProvider(paramList);
