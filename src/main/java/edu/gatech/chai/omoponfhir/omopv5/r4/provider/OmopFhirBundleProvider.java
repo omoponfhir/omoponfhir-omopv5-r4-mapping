@@ -28,7 +28,8 @@ import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 public abstract class OmopFhirBundleProvider implements IBundleProvider {
 	InstantType searchTime;
 	List<ParameterWrapper> paramList;
-	Map<String, String> parameterSet;
+	List<String> parameterList;
+	List<String> valueList;
 	Integer preferredPageSize;
 	Integer totalSize;
 	String orderParams = null;
@@ -39,10 +40,11 @@ public abstract class OmopFhirBundleProvider implements IBundleProvider {
 		this.paramList = paramList;
 	}
 	
-	public OmopFhirBundleProvider (Map<String, String> parameterSet, String searchSql) {
+	public OmopFhirBundleProvider (List<String> parameterList, List<String> valueList, String searchSql) {
 		this.searchTime = InstantType.withCurrentTime();
 		this.searchSql = searchSql;
-		this.parameterSet = parameterSet;
+		this.parameterList = parameterList;
+		this.valueList = valueList;
 	}
 
 	public void setPreferredPageSize(Integer preferredPageSize) {
@@ -60,7 +62,6 @@ public abstract class OmopFhirBundleProvider implements IBundleProvider {
 
 	@Override
 	public String getUuid() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

@@ -16,22 +16,18 @@
 	<groupId>edu.gatech.chai</groupId>
 	<artifactId>omoponfhir-omopv5-r4-mapping</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<name>omoponfhir-omopv5-r4-mapping</name>
 	<description>OMOP on FHIR Mapping between OMOP version 5 and FHIR R4</description>
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<hapi_stable_version>4.2.0</hapi_stable_version>
-		<hapi_current_version>4.2.0-SNAPSHOT</hapi_current_version>
+		<hapi_stable_version>5.5.1</hapi_stable_version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<hibernate_version>5.4.21.Final</hibernate_version>
-		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
-		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
-		<spring_version>5.2.4.RELEASE</spring_version>
-		<omoponfhir_jpa_version>1.3.0</omoponfhir_jpa_version>
+		<spring_version>5.3.7</spring_version>
+		<omoponfhir_sql_version>1.2.0</omoponfhir_sql_version>
 	</properties>
 	
 	<dependencies>
@@ -87,46 +83,12 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.2.6</version>
-		</dependency>
-
-<!-- 
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>${hibernate_version}</version>
-		</dependency>
-
- -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-ehcache</artifactId>
-			<version>${hibernate_version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-			<version>${hibernate_version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>${hibernate_validator_version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-search-orm</artifactId>
-			<version>${hibernate_search_version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-envers</artifactId>
-			<version>${hibernate_version}</version>
+			<version>42.2.23.jre7</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.gatech.chai</groupId>
-			<artifactId>omoponfhir-omopv5-jpabase</artifactId>
-			<version>${omoponfhir_jpa_version}</version>
+			<artifactId>omoponfhir-omopv5-sql</artifactId>
+			<version>${omoponfhir_sql_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.xml.bind</groupId>

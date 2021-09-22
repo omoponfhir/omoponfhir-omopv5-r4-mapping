@@ -105,9 +105,9 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 		return myOmopService.getSize(mapList);
 	}
 
-	public Long getSize(String queryString, Map<String, String> parameterSet) {
-		Long size = myOmopService.getSize(queryString, parameterSet);
-		if (parameterSet == null || parameterSet.size() == 0) {
+	public Long getSize(String queryString, List<String> parameterList, List<String> valueList) {
+		Long size = myOmopService.getSize(queryString, parameterList, valueList);
+		if (parameterList == null || parameterList.isEmpty()) {
 			ExtensionUtil.addResourceCount(myFhirResourceType, size);
 		}
 
@@ -186,8 +186,8 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 		}
 	}
 	
-	public void searchWithSql(String sql, Map<String, String> parameters, int fromIndex, int toIndex, String sort, List<IBaseResource> listResources) {
-		List<t> entities = getMyOmopService().searchBySql(fromIndex, toIndex, sql, parameters, sort);
+	public void searchWithSql(String sql, List<String> parameterList, List<String> valueList, int fromIndex, int toIndex, String sort, List<IBaseResource> listResources) {
+		List<t> entities = getMyOmopService().searchBySql(fromIndex, toIndex, sql, parameterList, valueList, sort);
 
 		for (t entity : entities) {
 			Long omopId = entity.getIdAsLong();

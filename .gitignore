@@ -144,3 +144,7 @@ local.properties
 
 # TeXlipse plugin
 .texlipse
+
+# vscode
+.factorypath
+.vscode

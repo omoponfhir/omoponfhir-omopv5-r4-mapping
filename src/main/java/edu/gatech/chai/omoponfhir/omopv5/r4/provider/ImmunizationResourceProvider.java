@@ -69,8 +69,8 @@ public class ImmunizationResourceProvider implements IResourceProvider {
     	return myMapper;
     }
 
-	private Integer getTotalSize(String queryString, Map<String, String> parameterSet) {
-		final Long totalSize = getMyMapper().getSize(queryString, parameterSet);
+	private Integer getTotalSize(String queryString, List<String> parameterList, List<String> valueList) {
+		final Long totalSize = getMyMapper().getSize(queryString, parameterList, valueList);
 			
 		return totalSize.intValue();
 	}
@@ -146,11 +146,12 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 	public IBundleProvider findImmunizationById(
 			@RequiredParam(name = Immunization.SP_RES_ID) TokenParam theImmunizationId
 			) {
-		Map<String, String> parameterSet = new HashMap<String, String> ();
+		List<String> parameterList = new ArrayList<String> ();
+		List<String> valueList = new ArrayList<String> ();
 		String whereStatement = "";
 
 		if (theImmunizationId != null) {
-			whereStatement += getMyMapper().mapParameter (Immunization.SP_RES_ID, theImmunizationId, parameterSet);
+			whereStatement += getMyMapper().mapParameter (Immunization.SP_RES_ID, theImmunizationId, parameterList, valueList);
 		}
 				
 		whereStatement = whereStatement.trim();
@@ -158,8 +159,8 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 		String searchSql = getMyMapper().constructSearchSql(whereStatement);
 		String sizeSql = getMyMapper().constructSizeSql(whereStatement);
 		
-		MyBundleProvider myBundleProvider = new MyBundleProvider(parameterSet, searchSql);
-		myBundleProvider.setTotalSize(getTotalSize(sizeSql, parameterSet));
+		MyBundleProvider myBundleProvider = new MyBundleProvider(parameterList, valueList, searchSql);
+		myBundleProvider.setTotalSize(getTotalSize(sizeSql, parameterList, valueList));
 		myBundleProvider.setPreferredPageSize(preferredPageSize);
 
 		return myBundleProvider;
@@ -172,25 +173,27 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 			@OptionalParam(name = Immunization.SP_PATIENT) ReferenceParam thePatient,
 			@Sort SortSpec theSort
 			) {
-		Map<String, String> parameterSet = new HashMap<String, String> ();
+		List<String> parameterList = new ArrayList<String> ();
+		List<String> valueList = new ArrayList<String> ();
+
 		String whereStatement = "";
 				
 		if (theVaccineOrVCodes != null) {
-			String newWhere = getMyMapper().mapParameter(Immunization.SP_VACCINE_CODE, theVaccineOrVCodes, parameterSet);
+			String newWhere = getMyMapper().mapParameter(Immunization.SP_VACCINE_CODE, theVaccineOrVCodes, parameterList, valueList);
 			if (newWhere != null && !newWhere.isEmpty()) {
 				whereStatement = "(" + newWhere + ")";
 			}
 		}
 		
 		if (thePatient != null) {
-			String newWhere = getMyMapper().mapParameter(Immunization.SP_PATIENT, thePatient, parameterSet);
+			String newWhere = getMyMapper().mapParameter(Immunization.SP_PATIENT, thePatient, parameterList, valueList);
 			if (newWhere != null && !newWhere.isEmpty()) {
 				whereStatement = whereStatement.isEmpty() ? newWhere : whereStatement + " and " + newWhere;
 			}
 		}
 
 		if (theDateRangeParam != null) {
-			String newWhere = getMyMapper().mapParameter(Immunization.SP_DATE, theDateRangeParam, parameterSet);
+			String newWhere = getMyMapper().mapParameter(Immunization.SP_DATE, theDateRangeParam, parameterList, valueList);
 			if (newWhere != null && !newWhere.isEmpty()) {
 				whereStatement = whereStatement.isEmpty() ? newWhere : whereStatement + " and " + newWhere; 
 			}
@@ -202,8 +205,8 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 		String sizeSql = getMyMapper().constructSizeSql(whereStatement);
 		String orderParams = getMyMapper().constructOrderParams(theSort);
 
-		MyBundleProvider myBundleProvider = new MyBundleProvider(parameterSet, searchSql);
-		myBundleProvider.setTotalSize(getTotalSize(sizeSql, parameterSet));
+		MyBundleProvider myBundleProvider = new MyBundleProvider(parameterList, valueList, searchSql);
+		myBundleProvider.setTotalSize(getTotalSize(sizeSql, parameterList, valueList));
 		myBundleProvider.setPreferredPageSize(preferredPageSize);
 		myBundleProvider.setOrderParams(orderParams);
 		
@@ -216,8 +219,8 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 	}
 
 	class MyBundleProvider extends OmopFhirBundleProvider implements IBundleProvider {
-		public MyBundleProvider(Map<String, String> parameterSet, String searchSql) {
-			super(parameterSet, searchSql);
+		public MyBundleProvider(List<String> parameterList, List<String> valueList, String searchSql) {
+			super(parameterList, valueList, searchSql);
 			setPreferredPageSize (preferredPageSize);
 		}
 
@@ -225,12 +228,9 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 		public List<IBaseResource> getResources(int fromIndex, int toIndex) {
 			List<IBaseResource> retv = new ArrayList<IBaseResource>();
 
-			// _Include
-//			List<String> includes = new ArrayList<String>();
-
 			String finalSql = searchSql + " " + orderParams;
 			logger.debug("Final SQL: " + finalSql);
-			getMyMapper().searchWithSql(searchSql, parameterSet, fromIndex, toIndex, orderParams, retv);
+			getMyMapper().searchWithSql(searchSql, parameterList, valueList, fromIndex, toIndex, orderParams, retv);
 
 			return retv;
 		}		
