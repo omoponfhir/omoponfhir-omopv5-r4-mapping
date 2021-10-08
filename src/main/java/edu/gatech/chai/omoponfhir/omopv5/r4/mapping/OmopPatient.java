@@ -188,7 +188,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 
 		// if source column is not empty, add it to identifier.
 		String personSourceValue = fPerson.getPersonSourceValue();
-		if (personSourceValue != null && !personSourceValue.isEmpty() && personSourceValue.trim() != "") {
+		if (personSourceValue != null && !personSourceValue.isEmpty() && !"".equals(personSourceValue.trim())) {
 			Identifier identifier = new Identifier();
 			String[] personIdentifier = personSourceValue.trim().split("\\^");
 			if (personIdentifier.length == 1) {
@@ -197,7 +197,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 			} else {
 				String omopVoc = personIdentifier[0];
 				String system = fhirOmopVocabularyMap.getFhirSystemNameFromOmopVocabulary(omopVoc);
-				String value = new String();
+				String value = "";
 
 				if (personIdentifier.length > 2) {
 					// if the length is more than 2, it means we have to set type not system.
@@ -226,6 +226,21 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 			}
 
 //			identifier.setValue(personSourceValue.trim());
+			patient.addIdentifier(identifier);
+		}
+
+		String ssn = fPerson.getSsn();
+		if (ssn != null && !ssn.isEmpty()) {
+			// add ssn to identifier
+			Identifier identifier = new Identifier();
+			identifier.setSystem("http://hl7.org/fhir/sid/us-ssn");
+			identifier.setValue(ssn);
+			patient.addIdentifier(identifier);
+		}
+
+		if (patient.getIdentifier().isEmpty()) {
+			Identifier identifier = new Identifier();
+			identifier.setValue(fhirId.toString());
 			patient.addIdentifier(identifier);
 		}
 
@@ -725,6 +740,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 			String identifierValue = ((TokenParam) value).getValue();
 
 			String searchString = identifierValue;
+
 			if (identifierSystem != null && !identifierSystem.isEmpty()) {
 				String omopVocabId = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(identifierSystem);
 				if (!"None".equals(omopVocabId)) {
@@ -733,20 +749,48 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 			}
 
 			paramWrapper.setParameterType("String");
-			paramWrapper.setParameters(Arrays.asList("personSourceValue"));
+			List<String> parameterList = new ArrayList<String>();
+			parameterList.add("personSourceValue");
+			paramWrapper.setParameters(parameterList);
+
+			List<String> operatorList = new ArrayList<String>();
+			List<String> valueList = new ArrayList<String>();
+
 			if (identifierValue == null || identifierValue.trim().isEmpty()) {
 				// We are only searching by system. So, we should select with % after system
 				// name.
-				paramWrapper.setOperators(Arrays.asList("like"));
-				paramWrapper.setValues(Arrays.asList(searchString + "%"));
+				operatorList.add("like");
+				paramWrapper.setOperators(operatorList);
+
+				valueList.add(searchString + "%");
+				paramWrapper.setValues(valueList);
 			} else if (identifierSystem == null || identifierSystem.isEmpty()) {
-				paramWrapper.setOperators(Arrays.asList("like"));
-				paramWrapper.setValues(Arrays.asList("%" + searchString));
+				operatorList.add("like");
+				paramWrapper.setOperators(operatorList);
+
+				valueList.add("%" + searchString);
+				paramWrapper.setValues(valueList);
 			} else {
-				paramWrapper.setOperators(Arrays.asList("="));
-				paramWrapper.setValues(Arrays.asList(searchString));
+				operatorList.add("=");
+				paramWrapper.setOperators(operatorList);
+
+				valueList.add(searchString);
+				paramWrapper.setValues(valueList);
 			}
 			paramWrapper.setRelationship("or");
+
+			if ("http://hl7.org/fhir/sid/us-ssn".equals(identifierSystem) 
+				|| "urn:oid:2.16.840.1.113883.4.1".equals(identifierSystem)) {
+				paramWrapper.addParameter("ssn");
+				if (identifierValue == null || identifierValue.trim().isEmpty()) {
+					paramWrapper.addOperator("like");
+					paramWrapper.addValue("%");
+				} else {
+					paramWrapper.addOperator("=");
+					paramWrapper.addValue(identifierValue);
+				}
+			}
+
 			mapList.add(paramWrapper);
 			break;
 		case Patient.SP_ADDRESS:

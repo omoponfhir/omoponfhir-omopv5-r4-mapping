@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
@@ -166,6 +167,32 @@ public class PatientResourceProvider implements IResourceProvider {
 //		
 //		return orderParams;
 //	}
+
+	@Search()
+	public IBundleProvider findPatientsById(
+			@RequiredParam(name=Patient.SP_RES_ID) TokenParam thePatientId,
+			@Sort SortSpec theSort,
+
+			@IncludeParam(allow = { "Patient:general-practitioner", "Patient:organization",
+			"Patient:link" }) final Set<Include> theIncludes,
+
+			@IncludeParam(allow = { "Encounter:subject",
+			"Observation:subject" }, reverse = true) final Set<Include> theReverseIncludes) {
+
+		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper> ();
+
+		if (thePatientId != null) {
+			paramList.addAll(getMyMapper().mapParameter (Patient.SP_RES_ID, thePatientId, false));
+		}
+
+		String orderParams = getMyMapper().constructOrderParams(theSort);
+
+		MyBundleProvider myBundleProvider = new MyBundleProvider(paramList, theIncludes, theReverseIncludes);
+		myBundleProvider.setTotalSize(getTotalSize(paramList));
+		myBundleProvider.setPreferredPageSize(preferredPageSize);
+		myBundleProvider.setOrderParams(orderParams);
+		return myBundleProvider;
+	}
 	
 	/**
 	 * The "@Search" annotation indicates that this method supports the search
@@ -184,7 +211,8 @@ public class PatientResourceProvider implements IResourceProvider {
 	 *         contain multiple matching resources, or it may also be empty.
 	 */
 	@Search(allowUnknownParams=true)
-	public IBundleProvider findPatientsByParams(RequestDetails theRequestDetails, @OptionalParam(name = Patient.SP_RES_ID) TokenParam thePatientId,
+	public IBundleProvider findPatientsByParams(RequestDetails theRequestDetails, 
+			@OptionalParam(name = Patient.SP_RES_ID) TokenParam thePatientId,
 			@OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam thePatientIdentifier,
 			@OptionalParam(name = Patient.SP_ACTIVE) TokenParam theActive,
 			@OptionalParam(name = Patient.SP_FAMILY) StringParam theFamilyName,

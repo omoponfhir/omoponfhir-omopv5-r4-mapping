@@ -62,21 +62,15 @@ import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 public class ObservationResourceProvider implements IResourceProvider {
 
 	private WebApplicationContext myAppCtx;
-	private String myDbType;
 	private OmopObservation myMapper;
 	private int preferredPageSize = 30;
 
 	public ObservationResourceProvider() {
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		myDbType = myAppCtx.getServletContext().getInitParameter("backendDbType");
-		if (myDbType.equalsIgnoreCase("omopv5") == true) {
-			myMapper = new OmopObservation(myAppCtx);
-		} else {
-			myMapper = new OmopObservation(myAppCtx);
-		}
+		myMapper = new OmopObservation(myAppCtx);
 		
 		String pageSizeStr = myAppCtx.getServletContext().getInitParameter("preferredPageSize");
-		if (pageSizeStr != null && pageSizeStr.isEmpty() == false) {
+		if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
 			int pageSize = Integer.parseInt(pageSizeStr);
 			if (pageSize > 0) {
 				preferredPageSize = pageSize;

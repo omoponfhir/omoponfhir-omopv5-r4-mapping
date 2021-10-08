@@ -59,12 +59,7 @@ public class ProcedureResourceProvider implements IResourceProvider {
 
 	public ProcedureResourceProvider() {
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		myDbType = myAppCtx.getServletContext().getInitParameter("backendDbType");
-		if (myDbType.equalsIgnoreCase("omopv5") == true) {
-			myMapper = new OmopProcedure(myAppCtx);
-		} else {
-			myMapper = new OmopProcedure(myAppCtx);
-		}
+		myMapper = new OmopProcedure(myAppCtx);
 
 		String pageSizeStr = myAppCtx.getServletContext().getInitParameter("preferredPageSize");
 		if (pageSizeStr != null && pageSizeStr.isEmpty() == false) {
