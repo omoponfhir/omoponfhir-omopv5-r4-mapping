@@ -393,14 +393,13 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 			String code = null;
 			
 			String fhirCategoryCode = OmopConceptMapping.fhirForConditionTypeConcept(typeConceptId.getId());
-			if (OmopConceptMapping.COND_NULL.fhirCode.equals(fhirCategoryCode)) {
+			if (OmopConceptMapping.COND_NULL.fhirCode == fhirCategoryCode) {
 				// We couldn't fine one. Default to problem-list
 				code = ConditionCategory.PROBLEMLISTITEM.toCode(); // default
 			} else {
 				code = fhirCategoryCode;
 			}
 			
-//			CodeableConcept typeCodeableConcept = retrieveCodeableConcept(typeConceptId);
 			Coding typeCoding = new Coding();
 			typeCoding.setSystem(systemUri);
 			typeCoding.setCode(code);
