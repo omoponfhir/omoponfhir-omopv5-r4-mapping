@@ -949,7 +949,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 				if (personSourceValueTemp != null) {
 					List<FPerson> fPersons = getMyOmopService().searchByColumnString("personSourceValue",
 							personSourceValueTemp);
-					if (fPersons.size() > 0) {
+					if (!fPersons.isEmpty()) {
 						fperson = fPersons.get(0);
 						omopId = fperson.getId();
 						break;
@@ -1005,7 +1005,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		// If not, create this one.
 		List<Address> addresses = patient.getAddress();
 		Location retLocation = null;
-		if (addresses != null && addresses.size() > 0) {
+		if (addresses != null && !addresses.isEmpty()) {
 			Address address = addresses.get(0);
 			retLocation = AddressUtil.searchAndUpdate(locationService, address, null);
 			if (retLocation != null) {
@@ -1055,7 +1055,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		}
 
 		List<Reference> generalPractitioners = patient.getGeneralPractitioner();
-		if (generalPractitioners.size() > 0) {
+		if (!generalPractitioners.isEmpty()) {
 			// We can handle only one provider.
 			Provider retProvider = searchAndUpdate(generalPractitioners.get(0));
 			if (retProvider != null) {

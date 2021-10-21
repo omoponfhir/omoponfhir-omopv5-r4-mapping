@@ -38,7 +38,7 @@ public class AddressUtil {
 		List<StringType> addressLines = address.getLine();
 		String line1 = null;
 		String line2 = null;
-		if (addressLines.size() > 0) {
+		if (!addressLines.isEmpty()) {
 			line1 = addressLines.get(0).getValue();
 			if (address.getLine().size() > 1) {
 				line2 = address.getLine().get(1).getValue();

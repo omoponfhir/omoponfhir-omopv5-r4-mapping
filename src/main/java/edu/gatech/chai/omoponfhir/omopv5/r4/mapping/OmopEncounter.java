@@ -104,11 +104,8 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 				coding.setSystem(V3ActCode.IMP.getSystem());
 				coding.setCode(V3ActCode.IMP.toCode());
 				coding.setDisplay(V3ActCode.IMP.getDisplay());
-			} else if (visitString.toLowerCase().contains("outpatient")) {
-				coding.setSystem(V3ActCode.AMB.getSystem());
-				coding.setCode(V3ActCode.AMB.toCode());
-				coding.setDisplay(V3ActCode.AMB.getDisplay());
-			} else if (visitString.toLowerCase().contains("ambulatory")
+			} else if (visitString.toLowerCase().contains("outpatient")
+					|| visitString.toLowerCase().contains("ambulatory")
 					|| visitString.toLowerCase().contains("office")) {
 				coding.setSystem(V3ActCode.AMB.getSystem());
 				coding.setCode(V3ActCode.AMB.toCode());
