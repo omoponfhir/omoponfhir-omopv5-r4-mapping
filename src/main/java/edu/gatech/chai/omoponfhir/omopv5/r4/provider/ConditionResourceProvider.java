@@ -69,12 +69,7 @@ public class ConditionResourceProvider implements IResourceProvider {
 
 	public ConditionResourceProvider() {
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		myDbType = myAppCtx.getServletContext().getInitParameter("backendDbType");
-		if (myDbType.equalsIgnoreCase("omopv5") == true) {
-			myMapper = new OmopCondition(myAppCtx);
-		} else {
-			myMapper = new OmopCondition(myAppCtx);
-		}
+		myMapper = new OmopCondition(myAppCtx);
 
 		String pageSizeStr = myAppCtx.getServletContext().getInitParameter("preferredPageSize");
 		if (pageSizeStr != null && pageSizeStr.isEmpty() == false) {
@@ -95,7 +90,7 @@ public class ConditionResourceProvider implements IResourceProvider {
 
 	private Integer getTotalSize(List<ParameterWrapper> paramList) {
 		final Long totalSize;
-		if (paramList.size() == 0) {
+		if (paramList.isEmpty()) {
 			totalSize = getMyMapper().getSize();
 		} else {
 			totalSize = getMyMapper().getSize(paramList);

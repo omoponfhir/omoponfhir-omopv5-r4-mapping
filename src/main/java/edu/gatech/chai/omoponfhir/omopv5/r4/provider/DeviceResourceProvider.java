@@ -49,17 +49,11 @@ public class DeviceResourceProvider implements IResourceProvider {
 
 	private WebApplicationContext myAppCtx;
 	private OmopDevice myMapper;
-	private String myDbType;
 	private int preferredPageSize = 30;
 
 	public DeviceResourceProvider() {
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		myDbType = myAppCtx.getServletContext().getInitParameter("backendDbType");
-		if (myDbType.equalsIgnoreCase("omopv5") == true) {
-			myMapper = new OmopDevice(myAppCtx);
-		} else {
-			myMapper = new OmopDevice(myAppCtx);
-		}
+		myMapper = new OmopDevice(myAppCtx);
 		
 		String pageSizeStr = myAppCtx.getServletContext().getInitParameter("preferredPageSize");
 		if (pageSizeStr != null && pageSizeStr.isEmpty() == false) {
@@ -80,7 +74,7 @@ public class DeviceResourceProvider implements IResourceProvider {
 
 	private Integer getTotalSize(List<ParameterWrapper> paramList) {
 		final Long totalSize;
-		if (paramList.size() == 0) {
+		if (paramList.isEmpty()) {
 			totalSize = getMyMapper().getSize();
 		} else {
 			totalSize = getMyMapper().getSize(paramList);

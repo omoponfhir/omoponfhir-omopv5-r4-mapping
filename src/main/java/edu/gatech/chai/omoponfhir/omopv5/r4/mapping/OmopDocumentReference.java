@@ -66,8 +66,7 @@ import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
  *         maps to Note table
  *
  */
-public class OmopDocumentReference extends BaseOmopResource<DocumentReference, Note, NoteService>
-		implements IResourceMapping<DocumentReference, Note> {
+public class OmopDocumentReference extends BaseOmopResource<DocumentReference, Note, NoteService> {
 
 	private static OmopDocumentReference omopDocumentReference = new OmopDocumentReference();
 	private ConceptService conceptService;
@@ -84,6 +83,9 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 	public OmopDocumentReference(WebApplicationContext context) {
 		super(context, Note.class, NoteService.class, DocumentReferenceResourceProvider.getType());
 		initialize(context);
+		
+		// Get count and put it in the counts.
+		getSize();
 	}
 
 	private void initialize(WebApplicationContext context) {
@@ -91,9 +93,6 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 		fPersonService = context.getBean(FPersonService.class);
 		providerService = context.getBean(ProviderService.class);
 		visitOccurrenceService = context.getBean(VisitOccurrenceService.class);
-		
-		// Get count and put it in the counts.
-		getSize();
 	}
 
 	public static OmopDocumentReference getInstance() {

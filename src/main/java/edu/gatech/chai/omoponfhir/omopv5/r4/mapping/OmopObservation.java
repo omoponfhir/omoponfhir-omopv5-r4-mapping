@@ -66,8 +66,7 @@ import edu.gatech.chai.omopv5.model.entity.Measurement;
 import edu.gatech.chai.omopv5.model.entity.Note;
 import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
 
-public class OmopObservation extends BaseOmopResource<Observation, FObservationView, FObservationViewService>
-		implements IResourceMapping<Observation, FObservationView> {
+public class OmopObservation extends BaseOmopResource<Observation, FObservationView, FObservationViewService> {
 
 	final static Logger logger = LoggerFactory.getLogger(OmopObservation.class);
 	private static OmopObservation omopObservation = new OmopObservation();
@@ -89,6 +88,9 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 	public OmopObservation(WebApplicationContext context) {
 		super(context, FObservationView.class, FObservationViewService.class, ObservationResourceProvider.getType());
 		initialize(context);
+
+		// Get count and put it in the counts.
+		getSize();
 	}
 
 	public OmopObservation() {
@@ -104,10 +106,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		observationService = context.getBean(ObservationService.class);
 		visitOccurrenceService = context.getBean(VisitOccurrenceService.class);
 		noteService = context.getBean(NoteService.class);
-		factRelationshipService = context.getBean(FactRelationshipService.class);
-		
-		// Get count and put it in the counts.
-		getSize();
+		factRelationshipService = context.getBean(FactRelationshipService.class);		
 	}
 
 	public Long getDiastolicConcept() {
@@ -132,9 +131,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			systemUriString = omopVocabulary;
 		}
 
-		long vocabTS = System.currentTimeMillis()-start;
-		System.out.println("vocab: at "+Long.toString(vocabTS)+" duration: "+Long.toString(vocabTS));
-
 		// If we have unit, this should be used across all the value.
 		String unitSystemUri = null;
 		String unitCode = null;
@@ -150,9 +146,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			}
 		}
 		
-		long unitTS = System.currentTimeMillis()-start;
-		System.out.println("unit: at "+Long.toString(unitTS)+" duration: "+Long.toString(unitTS-vocabTS));
-		
 		if (unitConcept != null && unitConcept.getId() != 0L) {
 			String omopUnitVocabularyId = unitConcept.getVocabularyId();
 			unitSystemUri = fhirOmopVocabularyMap.getFhirSystemNameFromOmopVocabulary(omopUnitVocabularyId);
@@ -164,9 +157,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			unitCode = unitConcept.getConceptCode();
 		} 
 
-		long unitConceptTS = System.currentTimeMillis()-start;
-		System.out.println("unitConcept: at "+Long.toString(unitConceptTS)+" duration: "+Long.toString(unitConceptTS-unitTS));
-
 		String codeString = fObservationView.getObservationConcept().getConceptCode();
 		String displayString;
 		if (fObservationView.getObservationConcept().getId() == 0L) {
@@ -174,9 +164,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		} else {
 			displayString = fObservationView.getObservationConcept().getConceptName();
 		}
-
-		long codeStringTS = System.currentTimeMillis()-start;
-		System.out.println("codeString: at "+Long.toString(codeStringTS)+" duration: "+Long.toString(codeStringTS-unitConceptTS));
 
 		// OMOP database maintains Systolic and Diastolic Blood Pressures
 		// separately.
@@ -312,9 +299,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			}
 		}
 
-		long mesureOrBPTS = System.currentTimeMillis()-start;
-		System.out.println("measureOrBPTS: at "+Long.toString(mesureOrBPTS)+" duration: "+Long.toString(mesureOrBPTS-codeStringTS));
-
 		if (fObservationView.getRangeLow() != null) {
 			SimpleQuantity low = new SimpleQuantity();
 			low.setValue(fObservationView.getRangeLow().doubleValue());
@@ -347,9 +331,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			}
 		}
 		
-		long directFieldTS = System.currentTimeMillis()-start;
-		System.out.println("directFieldTS: at "+Long.toString(directFieldTS)+" duration: "+Long.toString(directFieldTS-mesureOrBPTS));
-
 		if (fObservationView.getFPerson() != null) {
 			Reference personRef = new Reference(
 					new IdType(PatientResourceProvider.getType(), fObservationView.getFPerson().getId()));
@@ -357,15 +338,9 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			observation.setSubject(personRef);
 		}
 		
-		long personTS = System.currentTimeMillis()-start;
-		System.out.println("personTS: at "+Long.toString(personTS)+" duration: "+Long.toString(personTS-directFieldTS));
-
 		if (fObservationView.getVisitOccurrence() != null)
 			observation.getEncounter().setReferenceElement(
 					new IdType(EncounterResourceProvider.getType(), fObservationView.getVisitOccurrence().getId()));
-
-		long visitTS = System.currentTimeMillis()-start;
-		System.out.println("visitTS: at "+Long.toString(visitTS)+" duration: "+Long.toString(visitTS-personTS));
 
 		if (fObservationView.getObservationTypeConcept() != null) {
 			if (fObservationView.getObservationTypeConcept().getId() == 44818701L) {
@@ -391,22 +366,17 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			} else if (fObservationView.getObservationTypeConcept().getId() == 38000277L
 					|| fObservationView.getObservationTypeConcept().getId() == 38000278L) {
 				CodeableConcept typeConcept = new CodeableConcept();
-				// This is Lab result
 				Coding typeCoding = new Coding("http://hl7.org/fhir/observation-category", "laboratory", "");
 				typeConcept.addCoding(typeCoding);
 				observation.addCategory(typeConcept);
 			} else if (fObservationView.getObservationTypeConcept().getId() == 38000280L
 					|| fObservationView.getObservationTypeConcept().getId() == 38000281L) {
 				CodeableConcept typeConcept = new CodeableConcept();
-				// This is Lab result
 				Coding typeCoding = new Coding("http://hl7.org/fhir/observation-category", "exam", "");
 				typeConcept.addCoding(typeCoding);
 				observation.addCategory(typeConcept);
 			}
 		}
-
-		long obsTypeTS = System.currentTimeMillis()-start;
-		System.out.println("obsTypeTS: at "+Long.toString(obsTypeTS)+" duration: "+Long.toString(obsTypeTS-visitTS));
 
 		if (fObservationView.getProvider() != null) {
 			Reference performerRef = new Reference(
@@ -417,19 +387,12 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			observation.addPerformer(performerRef);
 		}
 		
-		long providerTS = System.currentTimeMillis()-start;
-		System.out.println("providerTS: at "+Long.toString(providerTS)+" duration: "+Long.toString(providerTS-obsTypeTS));
-
-
 		String identifierString = fObservationView.getObservationSourceValue();
 		if (identifierString != null && !identifierString.isEmpty()) {
 			Identifier identifier = new Identifier();
 			identifier.setValue(identifierString);
 			observation.addIdentifier(identifier);
 		}
-
-		long identifierTS = System.currentTimeMillis()-start;
-		System.out.println("identifierTS: at "+Long.toString(identifierTS)+" duration: "+Long.toString(identifierTS-providerTS));
 
 		if (fObservationView.getId() > 0) {
 			List<BaseEntity> methods = factRelationshipService.searchMeasurementUsingMethod(fObservationView.getId());
@@ -463,9 +426,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				observation.addNote(tempAnnotation);
 			}
 		}
-
-		long methodTS = System.currentTimeMillis()-start;
-		System.out.println("methodTS: at "+Long.toString(methodTS)+" duration: "+Long.toString(methodTS-identifierTS));
 
 		return observation;
 	}

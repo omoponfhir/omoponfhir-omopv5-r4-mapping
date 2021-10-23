@@ -36,8 +36,7 @@ import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.model.entity.Concept;
 
-public class OmopMedication extends BaseOmopResource<Medication, Concept, ConceptService>
-		implements IResourceMapping<Medication, Concept> {
+public class OmopMedication extends BaseOmopResource<Medication, Concept, ConceptService> {
 
 	private static OmopMedication omopMedication = new OmopMedication();
 	
@@ -45,6 +44,9 @@ public class OmopMedication extends BaseOmopResource<Medication, Concept, Concep
 		super(context, Concept.class, ConceptService.class, MedicationResourceProvider.getType());
 		
 		initialize(context);
+
+		// Get count and put it in the counts.
+		getSize();
 	}
 
 	public OmopMedication() {
@@ -54,8 +56,6 @@ public class OmopMedication extends BaseOmopResource<Medication, Concept, Concep
 	}
 	
 	private void initialize(WebApplicationContext context) {
-		// Get count and put it in the counts.
-		getSize();
 	}
 
 	
@@ -85,7 +85,7 @@ public class OmopMedication extends BaseOmopResource<Medication, Concept, Concep
 
 		// See if we can add ingredient version of this medication.
 		List<Concept> ingredients = getMyOmopService().getIngredient(entity);
-		if (ingredients.size() > 0) {
+		if (!ingredients.isEmpty()) {
 			CodeableConcept ingredientCodeableConcept;
 			try {
 				for (Concept ingredient: ingredients) {

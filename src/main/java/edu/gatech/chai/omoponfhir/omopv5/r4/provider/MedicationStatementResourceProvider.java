@@ -301,7 +301,7 @@ public class MedicationStatementResourceProvider implements IResourceProvider {
 //		}
 	}
 
-	class MyBundleProvider extends OmopFhirBundleProvider implements IBundleProvider {
+	class MyBundleProvider extends OmopFhirBundleProvider {
 
 		public MyBundleProvider(List<ParameterWrapper> paramList) {
 			super(paramList);

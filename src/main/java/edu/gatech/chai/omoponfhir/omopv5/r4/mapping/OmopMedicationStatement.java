@@ -98,6 +98,9 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 	public OmopMedicationStatement(WebApplicationContext context) {
 		super(context, DrugExposure.class, DrugExposureService.class, MedicationStatementResourceProvider.getType());
 		initialize(context);
+
+		// Get count and put it in the counts.
+		getSize();
 	}
 
 	public OmopMedicationStatement() {
@@ -111,9 +114,6 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		conceptService = context.getBean(ConceptService.class);
 		providerService = context.getBean(ProviderService.class);
 		fPersonService = context.getBean(FPersonService.class);
-
-		// Get count and put it in the counts.
-		getSize();
 	}
 
 	public static OmopMedicationStatement getInstance() {

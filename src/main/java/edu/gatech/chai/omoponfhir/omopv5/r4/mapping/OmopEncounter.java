@@ -57,8 +57,7 @@ import edu.gatech.chai.omopv5.model.entity.FPerson;
 import edu.gatech.chai.omopv5.model.entity.Provider;
 import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
 
-public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, VisitOccurrenceService>
-		implements IResourceMapping<Encounter, VisitOccurrence> {
+public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, VisitOccurrenceService> {
 
 	private static OmopEncounter omopEncounter = new OmopEncounter();
 	private FPersonService fPersonService;
@@ -75,6 +74,9 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 	public OmopEncounter(WebApplicationContext context) {
 		super(context, VisitOccurrence.class, VisitOccurrenceService.class, EncounterResourceProvider.getType());
 		initialize(context);
+		
+		// Get count and put it in the counts.
+		getSize();
 	}
 
 	private void initialize(WebApplicationContext context) {
@@ -83,9 +85,6 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 		careSiteService = context.getBean(CareSiteService.class);
 		providerService = context.getBean(ProviderService.class);
 		conditionOccurrenceService = context.getBean(ConditionOccurrenceService.class);
-		
-		// Get count and put it in the counts.
-		getSize();
 	}
 
 	public static OmopEncounter getInstance() {

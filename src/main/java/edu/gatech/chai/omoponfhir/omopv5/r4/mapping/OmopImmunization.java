@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Type;
@@ -95,6 +96,10 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 	public OmopImmunization(WebApplicationContext context) {
 		super(context, FImmunizationView.class, FImmunizationViewService.class, ImmunizationResourceProvider.getType());
 		initialize(context);
+
+		// String sizeSql = "select count(distinct d) from " + _from + " where " + _where;
+		// getSize(sizeSql, null, null);
+		getSize();
 	}
 
 	private void initialize(WebApplicationContext context) {
@@ -102,9 +107,6 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		conceptService = context.getBean(ConceptService.class);
 		providerService = context.getBean(ProviderService.class);
 		fPersonService = context.getBean(FPersonService.class);
-
-		String sizeSql = "select count(distinct d) from " + _from + " where " + _where;
-		getSize(sizeSql, null, null);
 	}
 
 	@Override
@@ -178,27 +180,20 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 				}
 				paramWrapper.setRelationship("and");
 				mapList.add(paramWrapper);
-	
 				break;
-	
 			case Immunization.SP_DATE:
 				DateRangeParam dateRangeParam = ((DateRangeParam) value);
 				DateUtil.constructParameterWrapper(dateRangeParam, "immunizationDate", paramWrapper, mapList);
 				break;
-				
-			case Immunization.SP_PATIENT:
-				ReferenceParam patientReference = ((ReferenceParam) value);
-				Long fhirPatientId = patientReference.getIdPartAsLong();
-				String omopPersonIdString = String.valueOf(fhirPatientId);
-				
-				paramWrapper.setParameterType("Long");
-				paramWrapper.setParameters(Arrays.asList("fPerson.id"));
-				paramWrapper.setOperators(Arrays.asList("="));
-				paramWrapper.setValues(Arrays.asList(omopPersonIdString));
-				paramWrapper.setRelationship("or");
-				mapList.add(paramWrapper);			
+			case "Patient:" + Patient.SP_RES_ID:
+				addParamlistForPatientIDName(parameter, (String) value, paramWrapper, mapList);
 				break;
-				
+			case "Patient:" + Patient.SP_NAME:
+				addParamlistForPatientIDName(parameter, (String) value, paramWrapper, mapList);
+				break;
+			case "Patient:" + Patient.SP_IDENTIFIER:
+				addParamlistForPatientIDName(parameter, (String) value, paramWrapper, mapList);
+				break;				
 			default:
 				mapList = null;
 		}

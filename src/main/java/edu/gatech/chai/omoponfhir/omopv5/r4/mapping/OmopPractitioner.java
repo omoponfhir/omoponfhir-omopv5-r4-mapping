@@ -56,6 +56,9 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 	public OmopPractitioner(WebApplicationContext context) {
 		super(context, Provider.class, ProviderService.class, PractitionerResourceProvider.getType());
 		initialize(context);
+		
+		// Get count and put it in the counts.
+		getSize();
 	}
 	
 	public OmopPractitioner() {
@@ -67,9 +70,6 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 		
 		careSiteService = context.getBean(CareSiteService.class);
 		locationService = context.getBean(LocationService.class);
-		
-		// Get count and put it in the counts.
-		getSize();
 
 	}
 	

@@ -71,6 +71,8 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 		super(ContextLoader.getCurrentWebApplicationContext(), Observation.class,
 				ObservationService.class, AllergyIntoleranceResourceProvider.getType());
 		initialize(ContextLoader.getCurrentWebApplicationContext());
+		
+		getSize();
 	}
 
 	private void initialize(WebApplicationContext context) {
@@ -82,8 +84,6 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 		} else {
 			logger.error("context must be NOT null");
 		}
-		
-		getSize();
 	}
 
 	public static OmopAllergyIntolerance getInstance() {

@@ -70,6 +70,9 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 	public OmopProcedure(WebApplicationContext context) {
 		super(context, ProcedureOccurrence.class, ProcedureOccurrenceService.class, ProcedureResourceProvider.getType());
 		initialize(context);
+		
+		// Get count and put it in the counts.
+		getSize();
 	}
 
 	public OmopProcedure() {
@@ -82,9 +85,6 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 		fPersonService = context.getBean(FPersonService.class);
 		visitOccurrenceService = context.getBean(VisitOccurrenceService.class);
 		providerService = context.getBean(ProviderService.class);
-		
-		// Get count and put it in the counts.
-		getSize();
 
 	}
 	

@@ -44,7 +44,7 @@ import edu.gatech.chai.omopv5.model.entity.CareSite;
 import edu.gatech.chai.omopv5.model.entity.Concept;
 import edu.gatech.chai.omopv5.model.entity.Location;
 
-public class OmopOrganization extends BaseOmopResource<Organization, CareSite, CareSiteService> implements IResourceMapping<Organization, CareSite> {
+public class OmopOrganization extends BaseOmopResource<Organization, CareSite, CareSiteService> {
 	
 	private static OmopOrganization omopOrganization = new OmopOrganization();
 	private LocationService locationService;
@@ -52,7 +52,10 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 
 	public OmopOrganization(WebApplicationContext context) {
 		super(context, CareSite.class, CareSiteService.class, OrganizationResourceProvider.getType());
+		initialize(context);
 		
+		// Get count and put it in the counts.
+		getSize();
 	}
 
 	public OmopOrganization() {
@@ -64,9 +67,6 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 		// Get bean for other service(s) for mapping.
 		locationService = context.getBean(LocationService.class);
 		vocabularyService = context.getBean(VocabularyService.class);
-		
-		// Get count and put it in the counts.
-		getSize();
 
 	}
 	
