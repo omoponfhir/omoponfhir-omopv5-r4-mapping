@@ -28,6 +28,8 @@ import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContentComponent
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.DocumentReferenceStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -67,6 +69,7 @@ import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
  *
  */
 public class OmopDocumentReference extends BaseOmopResource<DocumentReference, Note, NoteService> {
+	private static final Logger logger = LoggerFactory.getLogger(OmopDocumentReference.class);
 
 	private static OmopDocumentReference omopDocumentReference = new OmopDocumentReference();
 	private ConceptService conceptService;
@@ -268,11 +271,7 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 			// Update
 			note = getMyOmopService().findById(omopId);
 			if (note == null) {
-				try {
-					throw new FHIRException(fhirResource.getId() + " does not exist");
-				} catch (FHIRException e) {
-					e.printStackTrace();
-				}
+				throw new FHIRException(fhirResource.getId() + " does not exist");
 			}
 		}
 		
@@ -463,7 +462,7 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 		CodeableConcept typeCodeableConcept = null;
 		if ("Note Type".equals(omopTypeConcept.getVocabularyId())) {
 			Long loincConceptId = OmopNoteTypeMapping.getLoincConceptIdFor(omopTypeConcept.getId());
-			System.out.println("origin:"+omopTypeConcept.getId()+" loinc:"+loincConceptId);
+			logger.debug("origin:"+omopTypeConcept.getId()+" loinc:"+loincConceptId);
 			try {
 				if (loincConceptId != 0L) {
 					// We found lonic code for this. Find this concept and create FHIR codeable

@@ -57,18 +57,12 @@ import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 public class MedicationStatementResourceProvider implements IResourceProvider {
 
 	private WebApplicationContext myAppCtx;
-	private String myDbType;
 	private OmopMedicationStatement myMapper;
 	private int preferredPageSize = 30;
 
 	public MedicationStatementResourceProvider() {
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		myDbType = myAppCtx.getServletContext().getInitParameter("backendDbType");
-		if (myDbType.equalsIgnoreCase("omopv5") == true) {
-			myMapper = new OmopMedicationStatement(myAppCtx);
-		} else {
-			myMapper = new OmopMedicationStatement(myAppCtx);
-		}
+		myMapper = new OmopMedicationStatement(myAppCtx);
 
 		String pageSizeStr = myAppCtx.getServletContext().getInitParameter("preferredPageSize");
 		if (pageSizeStr != null && pageSizeStr.isEmpty() == false) {

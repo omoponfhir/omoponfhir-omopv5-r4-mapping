@@ -32,9 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -84,8 +82,7 @@ import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
  *         It's hard to distinguish the medicaitons for MedicationStatement.
  *
  */
-public class OmopMedicationStatement extends BaseOmopResource<MedicationStatement, DrugExposure, DrugExposureService>
-		implements IResourceMapping<MedicationStatement, DrugExposure> {
+public class OmopMedicationStatement extends BaseOmopResource<MedicationStatement, DrugExposure, DrugExposureService> {
 	private static final Logger logger = LoggerFactory.getLogger(OmopMedicationStatement.class);
 
 	private static Long MEDICATIONSTATEMENT_CONCEPT_TYPE_ID = 44787730L;
@@ -475,7 +472,6 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 			} else {
 				if (system != null && !system.isEmpty()) {
 					try {
-//						omopVocabulary = OmopCodeableConceptMapping.omopVocabularyforFhirUri(system);
 						omopVocabulary = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system);
 					} catch (FHIRException e) {
 						e.printStackTrace();
@@ -623,12 +619,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 			// Update
 			drugExposure = getMyOmopService().findById(omopId);
 			if (drugExposure == null) {
-				try {
-					throw new FHIRException(fhirResource.getId() + " does not exist");
-				} catch (FHIRException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				throw new FHIRException(fhirResource.getId() + " does not exist");
 			}
 		} else {
 			// Create
@@ -639,7 +630,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 				String identifierValue = identifier.getValue();
 				List<DrugExposure> results = getMyOmopService().searchByColumnString("drugSourceValue",
 						identifierValue);
-				if (results.size() > 0) {
+				if (!results.isEmpty()) {
 					drugExposure = results.get(0);
 					omopId = drugExposure.getId();
 					break;
@@ -669,13 +660,8 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 					if (newVisitOccurrence != null) {
 						drugExposure.setVisitOccurrence(newVisitOccurrence);
 					} else {
-						try {
-							throw new FHIRException("Context Reference (Encounter/" + encounterFhirIdLong
-									+ ") couldn't be found in our local database");
-						} catch (FHIRException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						throw new FHIRException("Context Reference (Encounter/" + encounterFhirIdLong
+								+ ") couldn't be found in our local database");
 					}
 				}
 			}
@@ -700,7 +686,6 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 								reasonsForStopped = reasonsForStopped.concat(" " + rNTOmopConcept.getConceptName());
 							}
 						} catch (FHIRException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					} else {
@@ -748,38 +733,25 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 					}
 				}
 			} catch (FHIRException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		} else {
 			try {
 				medicationCodeableConcept = fhirResource.getMedicationCodeableConcept();
 			} catch (FHIRException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 
 		if (medicationCodeableConcept == null || medicationCodeableConcept.isEmpty()) {
-			try {
-				throw new FHIRException("Medication[CodeableConcept or Reference] could not be mapped");
-			} catch (FHIRException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			throw new FHIRException("Medication[CodeableConcept or Reference] could not be mapped");
 		}
 
-		try {
-			omopConcept = CodeableConceptUtil.searchConcept(conceptService, medicationCodeableConcept);
-			if (omopConcept == null) {
-				throw new FHIRException("Medication[CodeableConcept or Reference] could not be found");
-			} else {
-				drugExposure.setDrugConcept(omopConcept);
-			}
-		} catch (FHIRException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		omopConcept = CodeableConceptUtil.searchConcept(conceptService, medicationCodeableConcept);
+		if (omopConcept == null) {
+			throw new FHIRException("Medication[CodeableConcept or Reference] could not be found");
+		} else {
+			drugExposure.setDrugConcept(omopConcept);
 		}
 
 		// Effective Time.
@@ -794,18 +766,18 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 				Date startDate = ((Period) effective).getStart();
 				Date endDate = ((Period) effective).getEnd();
 				if (startDate == null) {
-					try {
-						throw new FHIRException("Effective start time cannot be empty");
-					} catch (FHIRException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					throw new FHIRException("Effective start time cannot be empty");
 				} else {
 					drugExposure.setDrugExposureStartDate(startDate);
+					drugExposure.setDrugExposureStartDateTime(startDate);
 				}
 
 				if (endDate != null) {
+					drugExposure.setDrugExposureStartDate(startDate);
+					drugExposure.setDrugExposureStartDateTime(startDate);
+				} else {
 					drugExposure.setDrugExposureEndDate(endDate);
+					drugExposure.setDrugExposureEndDateTime(endDate);
 				}
 			}
 		}
@@ -838,31 +810,27 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 
 		// Subject
 		Reference subjectReference = fhirResource.getSubject();
-		try {
-			if (!subjectReference.isEmpty()) {
-				if (PatientResourceProvider.getType()
-						.equals(subjectReference.getReferenceElement().getResourceType())) {
-					Long patientIdLong = subjectReference.getReferenceElement().getIdPartAsLong();
-					if (patientIdLong != null) {
-						Long fPersonId = IdMapping.getOMOPfromFHIR(patientIdLong, PatientResourceProvider.getType());
-						if (fPersonId != null) {
-							FPerson fPerson = fPersonService.findById(fPersonId);
-							if (fPerson != null) {
-								drugExposure.setFPerson(fPerson);
-							} else {
-								throw new FHIRException("Subject (Patient/" + patientIdLong + ") does not exist");
-							}
+		if (!subjectReference.isEmpty()) {
+			if (PatientResourceProvider.getType()
+					.equals(subjectReference.getReferenceElement().getResourceType())) {
+				Long patientIdLong = subjectReference.getReferenceElement().getIdPartAsLong();
+				if (patientIdLong != null) {
+					Long fPersonId = IdMapping.getOMOPfromFHIR(patientIdLong, PatientResourceProvider.getType());
+					if (fPersonId != null) {
+						FPerson fPerson = fPersonService.findById(fPersonId);
+						if (fPerson != null) {
+							drugExposure.setFPerson(fPerson);
 						} else {
-							throw new FHIRException("Subject (Patient/" + patientIdLong + ") does not have ID mapping");
+							throw new FHIRException("Subject (Patient/" + patientIdLong + ") does not exist");
 						}
 					} else {
-						throw new FHIRException(
-								"Subject (Patient/" + patientIdLong + ") does not have Long part of ID");
+						throw new FHIRException("Subject (Patient/" + patientIdLong + ") does not have ID mapping");
 					}
+				} else {
+					throw new FHIRException(
+							"Subject (Patient/" + patientIdLong + ") does not have Long part of ID");
 				}
 			}
-		} catch (FHIRException e) {
-			e.printStackTrace();
 		}
 
 		// Dosage.
@@ -879,7 +847,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 						qty=doseAndRate.getDoseQuantity();
 					}
 				}
-				if (!qty.isEmpty() && qty!=null) {
+				if (qty!=null && !qty.isEmpty()) {
 					// get value
 					BigDecimal value = qty.getValue();
 					if (value != null) {
@@ -910,7 +878,6 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 					}
 				}
 			} catch (FHIRException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -943,6 +910,31 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		}
 		drugExposure.setDrugTypeConcept(drugTypeConcept);
 
+		// Follows are default settings for OMOP's not null requirement
+		if (drugExposure.getDrugConcept() == null) {
+			drugExposure.setDrugConcept(new Concept(0L));
+		}
+
+		if (drugExposure.getDrugExposureStartDateTime() == null) {
+			drugExposure.setDrugExposureStartDateTime(new Date());
+		}
+
+		if (drugExposure.getDrugExposureEndDateTime() == null) {
+			drugExposure.setDrugExposureEndDateTime(new Date());
+		}
+
+		if (drugExposure.getDrugTypeConcept() == null) {
+			drugExposure.setDrugTypeConcept(new Concept(0L));
+		}
+
+		if (drugExposure.getDrugSourceConcept() == null) {
+			drugExposure.setDrugSourceConcpet(new Concept(0L));
+		}
+
+		if (drugExposure.getRouteConcept() == null) {
+			drugExposure.setRouteConcept(new Concept(0L));
+		}
+		
 		return drugExposure;
 	}
 }

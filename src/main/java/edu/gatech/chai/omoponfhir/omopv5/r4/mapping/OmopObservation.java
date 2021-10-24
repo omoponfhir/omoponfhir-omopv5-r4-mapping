@@ -25,7 +25,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.Observation.ObservationComponentComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationReferenceRangeComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -122,8 +135,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		Observation observation = new Observation();
 		observation.setId(new IdType(fhirId));
 
-		long start = System.currentTimeMillis();
-		
 		String omopVocabulary = fObservationView.getObservationConcept().getVocabularyId();
 		String systemUriString = fhirOmopVocabularyMap.getFhirSystemNameFromOmopVocabulary(omopVocabulary);
 		if ("None".equals(systemUriString)) {
@@ -255,7 +266,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				components.add(comp);
 			}
 
-			if (components.size() > 0) {
+			if (!components.isEmpty()) {
 				observation.setComponent(components);
 			}
 		} else {
@@ -343,15 +354,19 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					new IdType(EncounterResourceProvider.getType(), fObservationView.getVisitOccurrence().getId()));
 
 		if (fObservationView.getObservationTypeConcept() != null) {
-			if (fObservationView.getObservationTypeConcept().getId() == 44818701L) {
-				// This is From physical examination.
+			if (fObservationView.getObservationTypeConcept().getId() == 44818701L
+				|| fObservationView.getObservationTypeConcept().getId() == 38000280L
+				|| fObservationView.getObservationTypeConcept().getId() == 38000281L) {
+			// This is From physical examination.
 
 				CodeableConcept typeConcept = new CodeableConcept();
 				Coding typeCoding = new Coding("http://hl7.org/fhir/observation-category", "exam", "");
 				typeConcept.addCoding(typeCoding);
 				observation.addCategory(typeConcept);
 			} else if (fObservationView.getObservationTypeConcept().getId() == 44818702L
-					|| fObservationView.getObservationTypeConcept().getId() == 44791245L) {
+					|| fObservationView.getObservationTypeConcept().getId() == 44791245L
+					|| fObservationView.getObservationTypeConcept().getId() == 38000277L
+					|| fObservationView.getObservationTypeConcept().getId() == 38000278L) {
 				CodeableConcept typeConcept = new CodeableConcept();
 				// This is Lab result
 				Coding typeCoding = new Coding("http://hl7.org/fhir/observation-category", "laboratory", "");
@@ -361,18 +376,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				CodeableConcept typeConcept = new CodeableConcept();
 				// This is Lab result
 				Coding typeCoding = new Coding("http://hl7.org/fhir/observation-category", "survey", "");
-				typeConcept.addCoding(typeCoding);
-				observation.addCategory(typeConcept);
-			} else if (fObservationView.getObservationTypeConcept().getId() == 38000277L
-					|| fObservationView.getObservationTypeConcept().getId() == 38000278L) {
-				CodeableConcept typeConcept = new CodeableConcept();
-				Coding typeCoding = new Coding("http://hl7.org/fhir/observation-category", "laboratory", "");
-				typeConcept.addCoding(typeCoding);
-				observation.addCategory(typeConcept);
-			} else if (fObservationView.getObservationTypeConcept().getId() == 38000280L
-					|| fObservationView.getObservationTypeConcept().getId() == 38000281L) {
-				CodeableConcept typeConcept = new CodeableConcept();
-				Coding typeCoding = new Coding("http://hl7.org/fhir/observation-category", "exam", "");
 				typeConcept.addCoding(typeCoding);
 				observation.addCategory(typeConcept);
 			}
@@ -396,7 +399,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 		if (fObservationView.getId() > 0) {
 			List<BaseEntity> methods = factRelationshipService.searchMeasurementUsingMethod(fObservationView.getId());
-			if (methods != null && methods.size() > 0) {
+			if (methods != null && !methods.isEmpty()) {
 				for (BaseEntity method : methods) {
 					if (method instanceof Note) {
 						Note note = (Note) method;
@@ -430,15 +433,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		return observation;
 	}
 
-	// @Override
-	// public Observation constructResource(Long fhirId, FObservationView
-	// entity, List<String> includes) {
-	// Observation observation = constructFHIR(fhirId, entity);
-	//
-	// return observation;
-	// }
-
-	private List<Measurement> HandleBloodPressure(Long omopId, Observation fhirResource) {
+	private List<Measurement> handleBloodPressure(Long omopId, Observation fhirResource) {
 		List<Measurement> retVal = new ArrayList<Measurement>();
 
 		// This is measurement. And, fhirId is for systolic.
@@ -449,12 +444,8 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		if (omopId != null) {
 			Measurement measurement = measurementService.findById(omopId);
 			if (measurement == null) {
-				try {
-					throw new FHIRException(
-							"Couldn't find the matching resource, " + fhirResource.getIdElement().asStringValue());
-				} catch (FHIRException e) {
-					e.printStackTrace();
-				}
+				throw new FHIRException(
+						"Couldn't find the matching resource, " + fhirResource.getIdElement().asStringValue());
 			}
 
 			if (measurement.getMeasurementConcept().getId() == SYSTOLIC_CONCEPT_ID) {
@@ -465,29 +456,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				diastolicMeasurement = measurement;
 			}
 		}
-
-		// String identifier_value = null;
-		// List<Identifier> identifiers = fhirResource.getIdentifier();
-		// for (Identifier identifier : identifiers) {
-		// identifier_value = identifier.getValue();
-		// List<Measurement> measurements =
-		// measurementService.searchByColumnString("sourceValue",
-		// identifier_value);
-		//
-		// for (Measurement measurement : measurements) {
-		// if (systolicMeasurement == null &&
-		// measurement.getMeasurementConcept().getId() == SYSTOLIC_CONCEPT_ID) {
-		// systolicMeasurement = measurement;
-		// }
-		// if (diastolicMeasurement == null
-		// && measurement.getMeasurementConcept().getId() ==
-		// DIASTOLIC_CONCEPT_ID) {
-		// diastolicMeasurement = measurement;
-		// }
-		// }
-		// if (systolicMeasurement != null && diastolicMeasurement != null)
-		// break;
-		// }
 
 		Type systolicValue = null;
 		Type diastolicValue = null;
@@ -515,11 +483,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		}
 
 		if (systolicValue == null && diastolicValue == null) {
-			try {
-				throw new FHIRException("Either systolic or diastolic needs to be available in component");
-			} catch (FHIRException e) {
-				e.printStackTrace();
-			}
+			throw new FHIRException("Either systolic or diastolic needs to be available in component");
 		}
 
 		Long fhirSubjectId = fhirResource.getSubject().getReferenceElement().getIdPartAsLong();
@@ -554,51 +518,35 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			// Update
 			// Sanity check. The entry found from identifier should have
 			// matching id.
-			try {
-				if (systolicMeasurement != null) {
-					if (systolicMeasurement.getId() != omopId) {
-						throw new FHIRException("The systolic measurement has incorrect id or identifier.");
-					}
-				} else {
-					// Now check if we have disastoic measurement.
-					if (diastolicMeasurement != null) {
-						// OK, originally, we had no systolic. Do the sanity
-						// check
-						// with diastolic measurement.
-						if (diastolicMeasurement.getId() != omopId) {
-							throw new FHIRException("The diastolic measurement has incorrect id or identifier.");
-						}
-					}
+			if (systolicMeasurement != null && systolicMeasurement.getId() != omopId) {
+					throw new FHIRException("The systolic measurement has incorrect id or identifier.");
+			} else {
+				// Now check if we have disastoic measurement.
+				if (diastolicMeasurement != null && diastolicMeasurement.getId() != omopId) {
+					// OK, originally, we had no systolic. Do the sanity
+					// check
+					// with diastolic measurement.
+					throw new FHIRException("The diastolic measurement has incorrect id or identifier.");
 				}
-			} catch (FHIRException e) {
-				e.printStackTrace();
 			}
 
 			// Update. We use systolic measurement id as our prime id. However,
 			// sometimes, there is a chance that only one is available.
 			// If systolic is not available, diastolic will use the id.
 			// Thus, we first need to check if
-			if (systolicMeasurement == null) {
-				if (systolicValue != null) {
-					systolicMeasurement = measurementService.findById(omopId);
-					systolicMeasurement.setFPerson(tPerson);
-				}
+			if (systolicMeasurement == null && systolicValue != null) {
+				systolicMeasurement = measurementService.findById(omopId);
+				systolicMeasurement.setFPerson(tPerson);
 			}
-			if (diastolicMeasurement == null) {
-				if (diastolicValue != null) {
+			if (diastolicMeasurement == null && diastolicValue != null) {
 					// We have diastolic value. But, we cannot use omopId here.
 					//
-					diastolicMeasurement = measurementService.findById(omopId);
-					diastolicMeasurement.setFPerson(tPerson);
-				}
+				diastolicMeasurement = measurementService.findById(omopId);
+				diastolicMeasurement.setFPerson(tPerson);
 			}
 
 			if (systolicMeasurement == null && diastolicMeasurement == null) {
-				try {
-					throw new FHIRException("Failed to get either systolic or diastolic measurement for update.");
-				} catch (FHIRException e) {
-					e.printStackTrace();
-				}
+				throw new FHIRException("Failed to get either systolic or diastolic measurement for update.");
 			}
 		}
 
@@ -608,36 +556,31 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			codeConcept.setId(SYSTOLIC_CONCEPT_ID);
 			systolicMeasurement.setMeasurementConcept(codeConcept);
 
-			try {
-				if (systolicValue instanceof Quantity) {
-					systolicMeasurement.setValueAsNumber(((Quantity) systolicValue).getValue().doubleValue());
+			if (systolicValue instanceof Quantity) {
+				systolicMeasurement.setValueAsNumber(((Quantity) systolicValue).getValue().doubleValue());
 
-					// Save the unit in the unit source column to save the
-					// source
-					// value.
-					String unitString = ((Quantity) systolicValue).getUnit();
-					systolicMeasurement.setUnitSourceValue(unitString);
+				// Save the unit in the unit source column to save the
+				// source
+				// value.
+				String unitString = ((Quantity) systolicValue).getUnit();
+				systolicMeasurement.setUnitSourceValue(unitString);
 
-					String unitSystem = ((Quantity) systolicValue).getSystem();
-					String unitCode = ((Quantity) systolicValue).getCode();
-//					String omopVocabularyId = OmopCodeableConceptMapping.omopVocabularyforFhirUri(unitSystem);
-					String omopVocabularyId = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(unitSystem);
-					if (omopVocabularyId != null) {
-						Concept unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService,
-								omopVocabularyId, unitCode);
-						systolicMeasurement.setUnitConcept(unitConcept);
-					}
-					systolicMeasurement.setValueSourceValue(((Quantity) systolicValue).getValue().toString());
-				} else if (systolicValue instanceof CodeableConcept) {
-					Concept systolicValueConcept = CodeableConceptUtil.searchConcept(conceptService,
-							(CodeableConcept) systolicValue);
-					systolicMeasurement.setValueAsConcept(systolicValueConcept);
-					systolicMeasurement.setValueSourceValue(((CodeableConcept) systolicValue).toString());
-				} else
-					throw new FHIRException("Systolic measurement should be either Quantity or CodeableConcept");
-			} catch (FHIRException e) {
-				e.printStackTrace();
-			}
+				String unitSystem = ((Quantity) systolicValue).getSystem();
+				String unitCode = ((Quantity) systolicValue).getCode();
+				String omopVocabularyId = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(unitSystem);
+				if (omopVocabularyId != null) {
+					Concept unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService,
+							omopVocabularyId, unitCode);
+					systolicMeasurement.setUnitConcept(unitConcept);
+				}
+				systolicMeasurement.setValueSourceValue(((Quantity) systolicValue).getValue().toString());
+			} else if (systolicValue instanceof CodeableConcept) {
+				Concept systolicValueConcept = CodeableConceptUtil.searchConcept(conceptService,
+						(CodeableConcept) systolicValue);
+				systolicMeasurement.setValueAsConcept(systolicValueConcept);
+				systolicMeasurement.setValueSourceValue(((CodeableConcept) systolicValue).toString());
+			} else
+				throw new FHIRException("Systolic measurement should be either Quantity or CodeableConcept");
 		}
 
 		if (diastolicMeasurement != null) {
@@ -645,36 +588,31 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			codeConcept.setId(DIASTOLIC_CONCEPT_ID);
 			diastolicMeasurement.setMeasurementConcept(codeConcept);
 
-			try {
-				if (diastolicValue instanceof Quantity) {
-					diastolicMeasurement.setValueAsNumber(((Quantity) diastolicValue).getValue().doubleValue());
+			if (diastolicValue instanceof Quantity) {
+				diastolicMeasurement.setValueAsNumber(((Quantity) diastolicValue).getValue().doubleValue());
 
-					// Save the unit in the unit source column to save the
-					// source
-					// value.
-					String unitString = ((Quantity) diastolicValue).getUnit();
-					diastolicMeasurement.setUnitSourceValue(unitString);
+				// Save the unit in the unit source column to save the
+				// source
+				// value.
+				String unitString = ((Quantity) diastolicValue).getUnit();
+				diastolicMeasurement.setUnitSourceValue(unitString);
 
-					String unitSystem = ((Quantity) diastolicValue).getSystem();
-					String unitCode = ((Quantity) diastolicValue).getCode();
-//					String omopVocabularyId = OmopCodeableConceptMapping.omopVocabularyforFhirUri(unitSystem);
-					String omopVocabularyId = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(unitSystem);
-					if (omopVocabularyId != null) {
-						Concept unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService,
-								omopVocabularyId, unitCode);
-						diastolicMeasurement.setUnitConcept(unitConcept);
-					}
-					diastolicMeasurement.setValueSourceValue(((Quantity) diastolicValue).getValue().toString());
-				} else if (diastolicValue instanceof CodeableConcept) {
-					Concept diastolicValueConcept = CodeableConceptUtil.searchConcept(conceptService,
-							(CodeableConcept) diastolicValue);
-					diastolicMeasurement.setValueAsConcept(diastolicValueConcept);
-					diastolicMeasurement.setValueSourceValue(((CodeableConcept) diastolicValue).toString());
-				} else
-					throw new FHIRException("Diastolic measurement should be either Quantity or CodeableConcept");
-			} catch (FHIRException e) {
-				e.printStackTrace();
-			}
+				String unitSystem = ((Quantity) diastolicValue).getSystem();
+				String unitCode = ((Quantity) diastolicValue).getCode();
+				String omopVocabularyId = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(unitSystem);
+				if (omopVocabularyId != null) {
+					Concept unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService,
+							omopVocabularyId, unitCode);
+					diastolicMeasurement.setUnitConcept(unitConcept);
+				}
+				diastolicMeasurement.setValueSourceValue(((Quantity) diastolicValue).getValue().toString());
+			} else if (diastolicValue instanceof CodeableConcept) {
+				Concept diastolicValueConcept = CodeableConceptUtil.searchConcept(conceptService,
+						(CodeableConcept) diastolicValue);
+				diastolicMeasurement.setValueAsConcept(diastolicValueConcept);
+				diastolicMeasurement.setValueSourceValue(((CodeableConcept) diastolicValue).toString());
+			} else
+				throw new FHIRException("Diastolic measurement should be either Quantity or CodeableConcept");
 		}
 
 		// Get low and high range if available.
@@ -744,18 +682,15 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			}
 		}
 
-		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 		if (fhirResource.getEffective() instanceof DateTimeType) {
 			Date date = ((DateTimeType) fhirResource.getEffective()).getValue();
 			if (systolicMeasurement != null) {
 				systolicMeasurement.setMeasurementDate(date);
 				systolicMeasurement.setMeasurementDateTime(date);
-//				systolicMeasurement.setTime(timeFormat.format(date));
 			}
 			if (diastolicMeasurement != null) {
 				diastolicMeasurement.setMeasurementDate(date);
 				diastolicMeasurement.setMeasurementDateTime(date);
-//				diastolicMeasurement.setTime(timeFormat.format(date));
 			}
 		} else if (fhirResource.getEffective() instanceof Period) {
 			Date startDate = ((Period) fhirResource.getEffective()).getStart();
@@ -763,14 +698,12 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				if (systolicMeasurement != null) {
 					systolicMeasurement.setMeasurementDate(startDate);
 					systolicMeasurement.setMeasurementDateTime(startDate);
-//					systolicMeasurement.setTime(timeFormat.format(startDate));
 				}
 			}
 			if (startDate != null) {
 				if (diastolicMeasurement != null) {
 					diastolicMeasurement.setMeasurementDate(startDate);
 					diastolicMeasurement.setMeasurementDateTime(startDate);
-//					diastolicMeasurement.setTime(timeFormat.format(startDate));
 				}
 			}
 		}
@@ -788,12 +721,8 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					visitOccurrence = visitOccurrenceService.findById(omopVisitOccurrenceId);
 				}
 				if (visitOccurrence == null) {
-					try {
-						throw new FHIRException(
-								"The Encounter (" + contextReference.getReference() + ") context couldn't be found.");
-					} catch (FHIRException e) {
-						e.printStackTrace();
-					}
+					throw new FHIRException(
+							"The Encounter (" + contextReference.getReference() + ") context couldn't be found.");
 				} else {
 					if (systolicMeasurement != null) {
 						systolicMeasurement.setVisitOccurrence(visitOccurrence);
@@ -892,14 +821,14 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		String orderParam = new String(); 
 		
 		if (theSort.getParamName().equals(Observation.SP_CODE)) {
-			orderParam = "observationConcept.conceptCode " + direction;
+			orderParam = "observationConcept_concept_code " + direction;
 		} else if (theSort.getParamName().equals(Observation.SP_DATE)) {
-			orderParam = "date " + direction;
+			orderParam = "observation_observation_date " + direction;
 		} else if (theSort.getParamName().equals(Observation.SP_PATIENT) 
 				|| theSort.getParamName().equals(Observation.SP_SUBJECT)) {
-			orderParam = "fPerson.id " + direction;
+			orderParam = "fPerson_person_id " + direction;
 		} else {
-			orderParam = "id " + direction;
+			orderParam = "observation_observation_id " + direction;
 		}
 
 		String orderParams = orderParam;
@@ -923,7 +852,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			// OK, we have BP systolic & diastolic. Handle this separately.
 			// If successful, we will end and return.
 
-			return HandleBloodPressure(omopId, fhirResource);
+			return handleBloodPressure(omopId, fhirResource);
 		}
 
 		Measurement measurement = null;
@@ -935,11 +864,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			measurement = measurementService.findById(omopId);
 			if (measurement == null) {
 				// We have no observation to update.
-				try {
-					throw new FHIRException("We have no matching FHIR Observation (Observation) to update.");
-				} catch (FHIRException e) {
-					e.printStackTrace();
-				}
+				throw new FHIRException("We have no matching FHIR Observation (Observation) to update.");
 			}
 		}
 
@@ -1057,86 +982,80 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		/* Set the value of the observation */
 		Type valueType = fhirResource.getValue();
 		List<Coding> codings;
-		try {
-			if (valueType instanceof Quantity) {
-				measurement.setValueAsNumber(((Quantity) valueType).getValue().doubleValue());
-				measurement.setValueSourceValue(String.valueOf(((Quantity) valueType).getValue()));
+		if (valueType instanceof Quantity) {
+			measurement.setValueAsNumber(((Quantity) valueType).getValue().doubleValue());
+			measurement.setValueSourceValue(String.valueOf(((Quantity) valueType).getValue()));
 
-				// For unit, OMOP need unit concept
-				String unitCode = ((Quantity) valueType).getCode();
-				String unitSystem = ((Quantity) valueType).getSystem();
+			// For unit, OMOP need unit concept
+			String unitCode = ((Quantity) valueType).getCode();
+			String unitSystem = ((Quantity) valueType).getSystem();
 
-				String omopVocabulary = null;
-				concept = null;
-				if (unitCode != null && !unitCode.isEmpty()) {
-					if (unitSystem == null || unitSystem.isEmpty()) {
-						// If system is empty, then we check UCUM for the unit.
-						omopVocabulary = OmopCodeableConceptMapping.UCUM.getOmopVocabulary();
-					} else {
-//						omopVocabulary = OmopCodeableConceptMapping.omopVocabularyforFhirUri(unitSystem);
-						omopVocabulary = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(unitSystem);
-					}
-					concept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabulary,
-							unitCode);
+			String omopVocabulary = null;
+			concept = null;
+			if (unitCode != null && !unitCode.isEmpty()) {
+				if (unitSystem == null || unitSystem.isEmpty()) {
+					// If system is empty, then we check UCUM for the unit.
+					omopVocabulary = OmopCodeableConceptMapping.UCUM.getOmopVocabulary();
+				} else {
+					omopVocabulary = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(unitSystem);
 				}
-
-				// Save the unit in the unit source column to save the source
-				// value.
-				String unitString = ((Quantity) valueType).getUnit();
-				measurement.setUnitSourceValue(unitString);
-
-				if (concept != null) {
-					// If we found the concept for unit, use it. Otherwise,
-					// leave it empty.
-					// We still have this in the unit source column.
-					measurement.setUnitConcept(concept);
-				}
-
-			} else if (valueType instanceof CodeableConcept) {
-				// We have coeable concept value. Get System and Value.
-				// FHIR allows one value[x].
-				codings = ((CodeableConcept) valueType).getCoding();
-				concept = null;
-				for (Coding coding : codings) {
-					String fhirSystem = coding.getSystem();
-					String fhirCode = coding.getCode();
-
-					if (fhirSystem == null || fhirSystem.isEmpty() || fhirCode == null || fhirCode.isEmpty()) {
-						continue;
-					}
-
-//					String omopVocabulary = OmopCodeableConceptMapping.omopVocabularyforFhirUri(fhirSystem);
-					String omopVocabulary = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(fhirSystem);
-					concept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabulary,
-							fhirCode);
-
-					if (concept == null) {
-						throw new FHIRException(
-								"We couldn't map the codeable concept value - " + fhirSystem + ":" + fhirCode);
-					}
-					break;
-				}
-				if (concept == null) {
-					throw new FHIRException("We couldn't find a concept to map the codeable concept value.");
-				}
-
-				measurement.setValueAsConcept(concept);
-			} else if (valueType instanceof StringType) {
-				String valueString = ((StringType) valueType).getValue();
-				// Measurement table in OMOPv5 does not have a column for string value.
-				// If the value is what we can recognize as a concept code, we will use it.
-				if ("none detected".equalsIgnoreCase(valueString)) {
-					measurement.setValueAsConcept(conceptService.findById(45878003L));
-				} else if ("not detected".equalsIgnoreCase(valueString)) {
-					measurement.setValueAsConcept(conceptService.findById(45880296L));
-				} else if ("detected".equalsIgnoreCase(valueString)) {
-					measurement.setValueAsConcept(conceptService.findById(45877985L));
-				}
-
-				measurement.setValueSourceValue(valueString);
+				concept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabulary,
+						unitCode);
 			}
-		} catch (FHIRException e) {
-			e.printStackTrace();
+
+			// Save the unit in the unit source column to save the source
+			// value.
+			String unitString = ((Quantity) valueType).getUnit();
+			measurement.setUnitSourceValue(unitString);
+
+			if (concept != null) {
+				// If we found the concept for unit, use it. Otherwise,
+				// leave it empty.
+				// We still have this in the unit source column.
+				measurement.setUnitConcept(concept);
+			}
+
+		} else if (valueType instanceof CodeableConcept) {
+			// We have coeable concept value. Get System and Value.
+			// FHIR allows one value[x].
+			codings = ((CodeableConcept) valueType).getCoding();
+			concept = null;
+			for (Coding coding : codings) {
+				String fhirSystem = coding.getSystem();
+				String fhirCode = coding.getCode();
+
+				if (fhirSystem == null || fhirSystem.isEmpty() || fhirCode == null || fhirCode.isEmpty()) {
+					continue;
+				}
+
+				String omopVocabulary = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(fhirSystem);
+				concept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabulary,
+						fhirCode);
+
+				if (concept == null) {
+					throw new FHIRException(
+							"We couldn't map the codeable concept value - " + fhirSystem + ":" + fhirCode);
+				}
+				break;
+			}
+			if (concept == null) {
+				throw new FHIRException("We couldn't find a concept to map the codeable concept value.");
+			}
+
+			measurement.setValueAsConcept(concept);
+		} else if (valueType instanceof StringType) {
+			String valueString = ((StringType) valueType).getValue();
+			// Measurement table in OMOPv5 does not have a column for string value.
+			// If the value is what we can recognize as a concept code, we will use it.
+			if ("none detected".equalsIgnoreCase(valueString)) {
+				measurement.setValueAsConcept(conceptService.findById(45878003L));
+			} else if ("not detected".equalsIgnoreCase(valueString)) {
+				measurement.setValueAsConcept(conceptService.findById(45880296L));
+			} else if ("detected".equalsIgnoreCase(valueString)) {
+				measurement.setValueAsConcept(conceptService.findById(45877985L));
+			}
+
+			measurement.setValueSourceValue(valueString);
 		}
 
 		// Get low and high range if available. This is only applicable to
@@ -1191,52 +1110,27 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			}
 		}
 
-		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 		if (fhirResource.getEffective() instanceof DateTimeType) {
 			Date date = ((DateTimeType) fhirResource.getEffective()).getValue();
 			measurement.setMeasurementDate(date);
 			measurement.setMeasurementDateTime(date);
-//			measurement.setTime(timeFormat.format(date));
 		} else if (fhirResource.getEffective() instanceof Period) {
 			Date startDate = ((Period) fhirResource.getEffective()).getStart();
 			if (startDate != null) {
 				measurement.setMeasurementDate(startDate);
 				measurement.setMeasurementDateTime(startDate);
-//				measurement.setTime(timeFormat.format(startDate));
 			}
+		} else {
+			// datetime is required field.
+			measurement.setMeasurementDateTime(new Date(0));			
 		}
+
 		/* Set visit occurrence */
 		Reference contextReference = fhirResource.getEncounter();
 		VisitOccurrence visitOccurrence = fhirContext2OmopVisitOccurrence(visitOccurrenceService, contextReference);
 		if (visitOccurrence != null) {
 			measurement.setVisitOccurrence(visitOccurrence);
 		}
-//		
-//		VisitOccurrence visitOccurrence = null;
-//		if (contextReference != null && !contextReference.isEmpty()) {
-//			if (contextReference.getReferenceElement().getResourceType().equals(EncounterResourceProvider.getType())) {
-//				// Encounter context.
-//				Long fhirEncounterId = contextReference.getReferenceElement().getIdPartAsLong();
-//				Long omopVisitOccurrenceId = IdMapping.getOMOPfromFHIR(fhirEncounterId,
-//						EncounterResourceProvider.getType());
-//				if (omopVisitOccurrenceId != null) {
-//					visitOccurrence = visitOccurrenceService.findById(omopVisitOccurrenceId);
-//				}
-//				if (visitOccurrence == null) {
-//					try {
-//						throw new FHIRException(
-//								"The Encounter (" + contextReference.getReference() + ") context couldn't be found.");
-//					} catch (FHIRException e) {
-//						e.printStackTrace();
-//					}
-//				} else {
-//					measurement.setVisitOccurrence(visitOccurrence);
-//				}
-//			} else {
-//				// Episode of Care context.
-//				// TODO: Do we have a mapping for the Episode of Care??
-//			}
-//		}
 
 		List<CodeableConcept> categories = fhirResource.getCategory();
 		Long typeConceptId = 0L;
@@ -1280,11 +1174,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			observation = observationService.findById(omopId);
 			if (observation == null) {
 				// We have no observation to update.
-				try {
-					throw new FHIRException("We have no matching FHIR Observation (Observation) to update.");
-				} catch (FHIRException e) {
-					e.printStackTrace();
-				}
+				throw new FHIRException("We have no matching FHIR Observation (Observation) to update.");
 			}
 		}
 
@@ -1328,7 +1218,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				// See if we can handle this coding.
 				try {
 					if (fhirSystemUri != null && !fhirSystemUri.isEmpty()) {
-//						OmopSystem = OmopCodeableConceptMapping.omopVocabularyforFhirUri(fhirSystemUri);
 						OmopSystem = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(fhirSystemUri);
 						if ("None".equals(OmopSystem) == false) {
 							// We can at least handle this. Save it
@@ -1372,9 +1261,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 //							+ OmopCodeableConceptMapping.fhirUriforOmopVocabulary(OmopSystem) + ":"
 //							+ codingSecondChoice.getCode());
 //				}
-		} else {
-			concept = null;
-		}
+		} 
 
 		if (concept == null) {
 			concept = conceptService.findById(0L);
@@ -1406,7 +1293,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					omopVocabulary = OmopCodeableConceptMapping.UCUM.getOmopVocabulary();
 				} else {
 					try {
-//						omopVocabulary = OmopCodeableConceptMapping.omopVocabularyforFhirUri(unitSystem);
 						omopVocabulary = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(unitSystem);
 					} catch (FHIRException e) {
 						e.printStackTrace();
@@ -1432,6 +1318,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			// FHIR allows one value[x].
 			codings = ((CodeableConcept) valueType).getCoding();
 			concept = null;
+			String stringValue = "No Value(s)";
 			for (Coding coding : codings) {
 				String fhirSystem = coding.getSystem();
 				String fhirCode = coding.getCode();
@@ -1440,34 +1327,25 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					continue;
 				}
 
-				try {
-//					String omopVocabulary = OmopCodeableConceptMapping.omopVocabularyforFhirUri(fhirSystem);
-					String omopVocabulary = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(fhirSystem);
-					concept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabulary,
-							fhirCode);
+				stringValue = fhirSystem + " " + fhirCode + " " + coding.getDisplay();
+				String omopVocabulary = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(fhirSystem);
+				concept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabulary,
+						fhirCode);
 
-					if (concept == null) {
-						throw new FHIRException(
-								"We couldn't map the codeable concept value - " + fhirSystem + ":" + fhirCode);
-					}
-				} catch (FHIRException e) {
-					e.printStackTrace();
+				if (concept == null) {
+					logger.debug("We couldn't map the codeable concept value - " + fhirSystem + ":" + fhirCode);
+				} else {
+					break;
 				}
-
-				break;
 			}
 			if (concept == null) {
-				try {
-					throw new FHIRException("We couldn't find a concept to map the codeable concept value.");
-				} catch (FHIRException e) {
-					e.printStackTrace();
-				}
+				observation.setValueAsString(stringValue);
+				logger.warn("We couldn't find a concept to map the codeable concept value.");
+			} else {
+				observation.setValueAsConcept(concept);
 			}
-
-			observation.setValueAsConcept(concept);
 		}
 
-//		SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 		if (fhirResource.getEffective() instanceof DateTimeType) {
 			Date date = ((DateTimeType) fhirResource.getEffective()).getValue();
 			observation.setObservationDate(date);
@@ -1478,7 +1356,10 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				observation.setObservationDate(startDate);
 				observation.setObservationDateTime(startDate);
 			}
+		} else {
+			observation.setObservationDate(new Date(0)); 
 		}
+
 		/* Set visit occurrence */
 		Reference contextReference = fhirResource.getEncounter();
 		VisitOccurrence visitOccurrence = null;
@@ -1492,12 +1373,8 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					visitOccurrence = visitOccurrenceService.findById(omopVisitOccurrenceId);
 				}
 				if (visitOccurrence == null) {
-					try {
-						throw new FHIRException(
-								"The Encounter (" + contextReference.getReference() + ") context couldn't be found.");
-					} catch (FHIRException e) {
-						e.printStackTrace();
-					}
+					throw new FHIRException(
+							"The Encounter (" + contextReference.getReference() + ") context couldn't be found.");
 				} else {
 					observation.setVisitOccurrence(visitOccurrence);
 				}
@@ -1536,12 +1413,9 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		return observation;
 	}
 
-	private boolean is_measurement_by_valuetype(Observation fhirResource) {
+	private boolean isMeasurementByValuetype(Observation fhirResource) {
 		Type value = fhirResource.getValue();
-		if (value instanceof Quantity)
-			return true;
-
-		return false;
+		return (value instanceof Quantity);
 	}
 
 	public Map<String, Object> constructOmopMeasurementObservation(Long omopId, Observation fhirResource) {
@@ -1565,7 +1439,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			}
 
 			List<Concept> conceptForCodes = conceptService.searchByColumnString("conceptCode", code);
-			if (conceptForCodes.size() <= 0) {
+			if (conceptForCodes.isEmpty()) {
 				// we have no matching code. Put no matching code.
 				conceptForCodes.add(conceptService.findById(0L));
 			}
@@ -1573,19 +1447,18 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			for (Concept conceptForCode : conceptForCodes) {
 				String domain = conceptForCode.getDomainId();
 				String systemName = conceptForCode.getVocabularyId();
-				try {
 //					List<Identifier> identifiers = fhirResource.getIdentifier();
 //					String identifier_value = null;
 //					if ((domain.equalsIgnoreCase("measurement")
 //							&& systemName.equalsIgnoreCase(OmopCodeableConceptMapping.omopVocabularyforFhirUri(system)))
 //							|| is_measurement_by_valuetype(fhirResource)) {
 
-					if ((domain.equalsIgnoreCase("measurement") && systemName
-							.equalsIgnoreCase(fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system)))
-							|| is_measurement_by_valuetype(fhirResource)) {
+				if ((domain.equalsIgnoreCase("measurement") && systemName
+						.equalsIgnoreCase(fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system)))
+						|| isMeasurementByValuetype(fhirResource)) {
 
-						// TODO: Omop does not have a place holder to track the source of measurement
-						// data.
+					// TODO: Omop does not have a place holder to track the source of measurement
+					// data.
 //						for (Identifier identifier : identifiers) {
 //							identifier_value = identifier.getValue();
 //							if (identifier_value != null) {
@@ -1601,19 +1474,19 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 //							}
 //						}
 
-						measurements = constructOmopMeasurement(omopId, fhirResource, system, code);
-						if (measurements != null && measurements.size() > 0) {
-							retVal.put("type", "Measurement");
-							retVal.put("entity", measurements);
-							return retVal;
-						}
+					measurements = constructOmopMeasurement(omopId, fhirResource, system, code);
+					if (measurements != null && !measurements.isEmpty()) {
+						retVal.put("type", "Measurement");
+						retVal.put("entity", measurements);
+						return retVal;
+					}
 //					} else if (domain.equalsIgnoreCase("observation") && systemName
 //							.equalsIgnoreCase(OmopCodeableConceptMapping.omopVocabularyforFhirUri(system))) {
-					} else if (domain.equalsIgnoreCase("observation") && systemName
-							.equalsIgnoreCase(fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system))) {
+				} else if (domain.equalsIgnoreCase("observation") && systemName
+						.equalsIgnoreCase(fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system))) {
 
-						// TODO: Omop does not have a place holder to track the source of observation
-						// data.
+					// TODO: Omop does not have a place holder to track the source of observation
+					// data.
 //						for (Identifier identifier : identifiers) {
 //							identifier_value = identifier.getValue();
 //							if (identifier_value != null) {
@@ -1629,15 +1502,12 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 //							}
 //						}
 
-						observation = constructOmopObservation(omopId, fhirResource);
-						if (observation != null) {
-							retVal.put("type", "Observation");
-							retVal.put("entity", observation);
-							return retVal;
-						}
+					observation = constructOmopObservation(omopId, fhirResource);
+					if (observation != null) {
+						retVal.put("type", "Observation");
+						retVal.put("entity", observation);
+						return retVal;
 					}
-				} catch (FHIRException e) {
-					e.printStackTrace();
 				}
 			}
 		}
@@ -1742,7 +1612,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				List<String> includes = new ArrayList<String>();
 
 				searchWithParams(0, 0, paramList, resources, includes, null);
-				if (resources.size() > 0) {
+				if (!resources.isEmpty()) {
 					IBaseResource res = resources.get(0);
 					fhirIdLong = res.getIdElement().getIdPartAsLong();
 					omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, ObservationResourceProvider.getType());
@@ -1942,7 +1812,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 						// there is no further action required.
 						List<FactRelationship> factRelationships = factRelationshipService.searchFactRelationship(
 								domainConceptId1, factId1, domainConceptId2, factId2, relationshipId);
-						if (factRelationships.size() > 0) {
+						if (!factRelationships.isEmpty()) {
 							found = true;
 						}
 
@@ -1951,7 +1821,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					}
 				}
 			}
-			if (found == false) {
+			if (!found) {
 				Note methodNote = new Note();
 				methodNote.setNoteDate(noteDate);
 				methodNote.setFPerson(noteFPerson);
@@ -2069,7 +1939,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				sort);
 
 		long gettingObses = System.currentTimeMillis()-start;
-		System.out.println("gettingObses: at "+Long.toString(gettingObses)+" duration: "+Long.toString(gettingObses));
+		logger.debug("gettingObses: at "+Long.toString(gettingObses)+" duration: "+Long.toString(gettingObses));
 
 		for (FObservationView fObservationView : fObservationViews) {
 			Long omopId = fObservationView.getId();
@@ -2138,7 +2008,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			String omopVocabulary = null;
 			if (system != null && !system.isEmpty()) {
 				try {
-//					omopVocabulary = OmopCodeableConceptMapping.omopVocabularyforFhirUri(system);
 					omopVocabulary = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system);
 				} catch (FHIRException e) {
 					e.printStackTrace();

@@ -86,7 +86,7 @@ public class AllergyIntoleranceResourceProvider implements IResourceProvider {
 
 	private Integer getTotalSize(List<ParameterWrapper> paramList) {
 		final Long totalSize;
-		if (paramList.size() == 0) {
+		if (paramList.isEmpty()) {
 			totalSize = getMyMapper().getSize();
 		} else {
 			totalSize = getMyMapper().getSize(paramList);
@@ -140,7 +140,7 @@ public class AllergyIntoleranceResourceProvider implements IResourceProvider {
 	 */
 	@Read()
 	public AllergyIntolerance getResourceById(@IdParam IdType theId) {
-		AllergyIntolerance retVal = (AllergyIntolerance) myMapper.toFHIR(theId);
+		AllergyIntolerance retVal = myMapper.toFHIR(theId);
 		if (retVal == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -237,7 +237,7 @@ public class AllergyIntoleranceResourceProvider implements IResourceProvider {
 	 */
 	@Read()
 	public AllergyIntolerance readAllergyIntolerance(@IdParam IdType theId) {
-		AllergyIntolerance retval = (AllergyIntolerance) myMapper.toFHIR(theId);
+		AllergyIntolerance retval = myMapper.toFHIR(theId);
 		if (retval == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -290,7 +290,7 @@ public class AllergyIntoleranceResourceProvider implements IResourceProvider {
 			// _Include
 			List<String> includes = new ArrayList<String>();
 
-			if (paramList.size() == 0) {
+			if (paramList.isEmpty()) {
 				myMapper.searchWithoutParams(fromIndex, toIndex, retv, includes, null);
 			} else {
 				myMapper.searchWithParams(fromIndex, toIndex, paramList, retv, includes, null);

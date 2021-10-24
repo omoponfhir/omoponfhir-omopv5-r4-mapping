@@ -312,7 +312,6 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 			try {
 				throw new FHIRException("FHIR Resource does not contain a Subject.");
 			} catch (FHIRException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -364,7 +363,6 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 			visitConcept.setId(omopConceptCode);
 			visitOccurrence.setVisitConcept(visitConcept);
 		} catch (FHIRException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

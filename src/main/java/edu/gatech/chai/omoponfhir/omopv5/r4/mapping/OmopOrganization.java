@@ -222,12 +222,7 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 		if (omopId != null) {
 			careSite  = getMyOmopService().findById(omopId);
 			if (careSite == null) {
-				try {
-					throw new FHIRException(myOrganization.getId() + " does not exist");
-				} catch (FHIRException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				throw new FHIRException(myOrganization.getId() + " does not exist");
 			}
 			location = careSite.getLocation();
 		} else {
@@ -252,7 +247,7 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 		List<CodeableConcept> orgTypes = myOrganization.getType();
 		for (CodeableConcept orgType: orgTypes) {
 			List<Coding> typeCodings = orgType.getCoding();
-			if (typeCodings.size() > 0) {
+			if (!typeCodings.isEmpty()) {
 				String typeCode = typeCodings.get(0).getCode();
 				Long placeOfServiceId;
 				try {

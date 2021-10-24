@@ -59,7 +59,7 @@ import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
  */
 public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizationView, FImmunizationViewService> {
 
-	final static Logger logger = LoggerFactory.getLogger(OmopImmunization.class);
+	static final Logger logger = LoggerFactory.getLogger(OmopImmunization.class);
 
 	private VisitOccurrenceService visitOccurrenceService;
 	private DrugExposureService drugExposureService;

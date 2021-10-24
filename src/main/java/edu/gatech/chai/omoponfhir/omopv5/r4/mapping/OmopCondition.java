@@ -49,8 +49,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurrence, ConditionOccurrenceService>
-		implements IResourceMapping<Condition, ConditionOccurrence> {
+public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurrence, ConditionOccurrenceService> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OmopCondition.class);
 
@@ -79,11 +78,15 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 	private void initialize(WebApplicationContext context) {
 		// Get bean for other services that we need for mapping.
-//		conditionOccurrenceService = context.getBean(ConditionOccurrenceService.class);
-		fPersonService = context.getBean(FPersonService.class);
-		providerService = context.getBean(ProviderService.class);
-		conceptService = context.getBean(ConceptService.class);
-		visitOccurrenceService = context.getBean(VisitOccurrenceService.class);
+		if (context != null) {
+	//		conditionOccurrenceService = context.getBean(ConditionOccurrenceService.class);
+			fPersonService = context.getBean(FPersonService.class);
+			providerService = context.getBean(ProviderService.class);
+			conceptService = context.getBean(ConceptService.class);
+			visitOccurrenceService = context.getBean(VisitOccurrenceService.class);
+		} else {
+			logger.error("context must be NOT null");
+		}
 	}
 
 	public static OmopCondition getInstance() {
@@ -458,18 +461,13 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 				try {
 					throw new FHIRException("Could not get Person class.");
 				} catch (FHIRException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 			conditionOccurrence.setFPerson(fPerson);
 		} else {
 			// throw an error
-			try {
-				throw new FHIRException("FHIR Resource does not contain a Subject.");
-			} catch (FHIRException e) {
-				e.printStackTrace();
-			}
+			throw new FHIRException("FHIR Resource does not contain a Subject.");
 		}
 
 		// get the Provider
@@ -512,17 +510,22 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		
 		// get the start and end date. We are expecting both to be of type DateTimeType
 		Type onSet = fhirResource.getOnset();
-		if (onSet != null && onSet instanceof DateTimeType) {
-			conditionOccurrence.setConditionStartDate(((DateTimeType) fhirResource.getOnset()).toCalendar().getTime());
-		} if (onSet != null && onSet instanceof Period) {
+		if (onSet instanceof DateTimeType) {
+			Date start = ((DateTimeType) fhirResource.getOnset()).toCalendar().getTime();
+			conditionOccurrence.setConditionStartDate(start);
+			conditionOccurrence.setConditionStartDateTime(start);
+		} else if (onSet instanceof Period) {
 			Period period = (Period)onSet;
 			Date start = period.getStart();
 			Date end = period.getEnd();
-			if (start != null) conditionOccurrence.setConditionStartDate(start);
+			if (start != null) { 
+				conditionOccurrence.setConditionStartDate(start);
+				conditionOccurrence.setConditionStartDateTime(start);
+			}
 			if (end != null) conditionOccurrence.setConditionEndDate(end);
 		} 
 
-		if (fhirResource.getAbatement() != null && fhirResource.getAbatement() instanceof DateTimeType) {
+		if (fhirResource.getAbatement() instanceof DateTimeType) {
 			conditionOccurrence.setConditionEndDate(((DateTimeType) fhirResource.getAbatement()).toCalendar().getTime());
 		} else {
 			// leave alone, end date not required
@@ -560,6 +563,19 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		VisitOccurrence visitOccurrence = fhirContext2OmopVisitOccurrence(visitOccurrenceService, contextReference);
 		if (visitOccurrence != null) {
 			conditionOccurrence.setVisitOccurrence(visitOccurrence);
+		}
+		
+		// non-null handler
+		if (conditionOccurrence.getConditionConcept() == null) {
+			conditionOccurrence.setConditionConcept(new Concept(0L));
+		}
+
+		if (conditionOccurrence.getConditionTypeConcept() == null) {
+			conditionOccurrence.setConditionTypeConcept(new Concept(0L));
+		}
+
+		if (conditionOccurrence.getConditionSourceConcept() == null) {
+			conditionOccurrence.setConditionSourceConcept(new Concept(0L));
 		}
 		
 		return conditionOccurrence;

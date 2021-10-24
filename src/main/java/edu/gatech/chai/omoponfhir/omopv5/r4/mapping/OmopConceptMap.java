@@ -52,25 +52,21 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 	
 	@Override
 	public Long toDbase(ConceptMap fhirResource, IdType fhirId) throws FHIRException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ConceptMap constructFHIR(Long fhirId, ConceptRelationship entity) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ConceptRelationship constructOmop(Long omopId, ConceptMap fhirResource) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

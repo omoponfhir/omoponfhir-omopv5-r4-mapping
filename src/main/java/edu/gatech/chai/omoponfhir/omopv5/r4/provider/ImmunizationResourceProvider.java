@@ -1,9 +1,7 @@
 package edu.gatech.chai.omoponfhir.omopv5.r4.provider;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -55,7 +53,7 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 		myMapper = new OmopImmunization(myAppCtx);
 		
 		String pageSizeStr = myAppCtx.getServletContext().getInitParameter("preferredPageSize");
-		if (pageSizeStr != null && pageSizeStr.isEmpty() == false) {
+		if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
 			int pageSize = Integer.parseInt(pageSizeStr);
 			if (pageSize > 0) {
 				preferredPageSize = pageSize;
@@ -73,7 +71,7 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 
 	private Integer getTotalSize(List<ParameterWrapper> paramList) {
 		final Long totalSize;
-		if (paramList.size() == 0) {
+		if (paramList.isEmpty()) {
 			totalSize = getMyMapper().getSize();
 		} else {
 			totalSize = getMyMapper().getSize(paramList);
@@ -81,6 +79,7 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 
 		return totalSize.intValue();
 	}
+
 	private Integer getTotalSize(String queryString, List<String> parameterList, List<String> valueList) {
 		final Long totalSize = getMyMapper().getSize(queryString, parameterList, valueList);
 			
@@ -146,7 +145,7 @@ public class ImmunizationResourceProvider implements IResourceProvider {
 
 	@Read()
 	public Immunization readImmunization(@IdParam IdType theId) {
-		Immunization retval = (Immunization) getMyMapper().toFHIR(theId);
+		Immunization retval = getMyMapper().toFHIR(theId);
 		if (retval == null) {
 			throw new ResourceNotFoundException(theId);
 		}

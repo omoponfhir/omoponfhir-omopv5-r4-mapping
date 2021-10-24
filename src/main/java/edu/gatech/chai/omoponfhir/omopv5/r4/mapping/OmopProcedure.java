@@ -56,8 +56,7 @@ import edu.gatech.chai.omopv5.model.entity.ProcedureOccurrence;
 import edu.gatech.chai.omopv5.model.entity.Provider;
 import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
 
-public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurrence, ProcedureOccurrenceService>
-		implements IResourceMapping<Procedure, ProcedureOccurrence> {
+public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurrence, ProcedureOccurrenceService> {
 
 	private static OmopProcedure omopProcedure = new OmopProcedure();
 	private ConceptService conceptService;
@@ -423,7 +422,6 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 		}
 		
 		// Person mapping
-		try {
 		Reference patientReference = fhirResource.getSubject();
 		if (patientReference.getReferenceElement().getResourceType().equals(PatientResourceProvider.getType())) {
 			Long patientFhirId = patientReference.getReferenceElement().getIdPartAsLong();
@@ -459,10 +457,6 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 			}
 		} else {
 			throw new FHIRException("Context must be Encounter");
-		}
-
-		} catch (FHIRException e) {
-			e.printStackTrace();
 		}
 
 		// Provider mapping
@@ -507,20 +501,20 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 		
 		// Procedure Date mapping. Use start date for Period.
 		try {
-		Type performedType = fhirResource.getPerformed();
-		if (!performedType.isEmpty()) {
-			Date performedDate = null;
-			if (performedType instanceof DateTimeType) {
-				// PerformedDateTime
-				performedDate = performedType.castToDateTime(performedType).getValue();
-			} else {
-				// PerformedPeriod
-				performedDate = performedType.castToPeriod(performedType).getStart();
+			Type performedType = fhirResource.getPerformed();
+			if (!performedType.isEmpty()) {
+				Date performedDate = null;
+				if (performedType instanceof DateTimeType) {
+					// PerformedDateTime
+					performedDate = performedType.castToDateTime(performedType).getValue();
+				} else {
+					// PerformedPeriod
+					performedDate = performedType.castToPeriod(performedType).getStart();
+				}
+				
+				if (performedDate != null)
+					procedureOccurrence.setProcedureDate(performedDate);
 			}
-			
-			if (performedDate != null)
-				procedureOccurrence.setProcedureDate(performedDate);
-		}
 		} catch (FHIRException e) {
 			e.printStackTrace();
 		}

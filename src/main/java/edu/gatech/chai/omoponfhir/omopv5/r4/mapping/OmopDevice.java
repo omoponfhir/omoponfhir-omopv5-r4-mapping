@@ -40,8 +40,7 @@ import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.model.entity.Concept;
 import edu.gatech.chai.omopv5.model.entity.DeviceExposure;
 
-public class OmopDevice extends BaseOmopResource<Device, DeviceExposure, DeviceExposureService>
-		implements IResourceMapping<Device, DeviceExposure> {
+public class OmopDevice extends BaseOmopResource<Device, DeviceExposure, DeviceExposureService> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OmopDevice.class);
 	private static OmopDevice omopDevice = new OmopDevice();
@@ -164,7 +163,6 @@ public class OmopDevice extends BaseOmopResource<Device, DeviceExposure, DeviceE
 
 	@Override
 	public Long toDbase(Device fhirResource, IdType fhirId) throws FHIRException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

@@ -29,9 +29,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
-import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
@@ -79,8 +77,7 @@ import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
  * 38000182	Drug era - 30 days persistence window	 
  * 44777970	Randomized Drug	 
  */
-public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, DrugExposure, DrugExposureService>
-		implements IResourceMapping<MedicationRequest, DrugExposure> {
+public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, DrugExposure, DrugExposureService> {
 
 	public static Long MEDICATIONREQUEST_CONCEPT_TYPE_ID = 38000177L;
 	private static OmopMedicationRequest omopMedicationRequest = new OmopMedicationRequest();
@@ -537,7 +534,6 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 			try {
 				throw new FHIRException("Patient must exist.");
 			} catch (FHIRException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
 		
@@ -584,8 +580,8 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 					} else {
 						throw new FHIRException("Medication Reference must have the medication in the contained");
 					}
-				}			} catch (FHIRException e) {
-				// TODO Auto-generated catch block
+				}			
+			} catch (FHIRException e) {
 				e.printStackTrace();
 			}
 
@@ -593,18 +589,12 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 			try {
 				medicationCodeableConcept = fhirResource.getMedicationCodeableConcept();
 			} catch (FHIRException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		
 		if (medicationCodeableConcept == null || medicationCodeableConcept.isEmpty()) { 		
-			try {
-				throw new FHIRException("Medication[CodeableConcept or Reference] could not be mapped");
-			} catch (FHIRException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			throw new FHIRException("Medication[CodeableConcept or Reference] could not be mapped");
 		}
 
 		try {
@@ -615,7 +605,6 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 				drugExposure.setDrugConcept(omopConcept);
 			}
 		} catch (FHIRException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -644,7 +633,6 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 					try {
 						throw new FHIRException("Encounter/"+fhirEncounterIdLong+" is not valid.");
 					} catch (FHIRException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -696,7 +684,6 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 						drugExposure.setDoseUnitSourceValue(doseCode);
 					}
 				} catch (FHIRException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

@@ -55,8 +55,7 @@ import edu.gatech.chai.omopv5.model.entity.DeviceExposure;
 import edu.gatech.chai.omopv5.model.entity.FPerson;
 import edu.gatech.chai.omopv5.model.entity.Provider;
 
-public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatement, DeviceExposure, DeviceExposureService>
-		implements IResourceMapping<MyDeviceUseStatement, DeviceExposure> {
+public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatement, DeviceExposure, DeviceExposureService> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OmopDeviceUseStatement.class);
 	private static OmopDeviceUseStatement omopDeviceUseStatement = new OmopDeviceUseStatement();
@@ -321,13 +320,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 			Long omopProviderId = IdMapping.getOMOPfromFHIR(practitionerId, PractitionerResourceProvider.getType());
 			Provider provider = providerService.findById(omopProviderId);
 			if (provider == null) {
-				try {
-					throw new FHIRException("DeviceUseStatement.source(Practitioner) does not exist");
-				} catch (FHIRException e) {
-					e.printStackTrace();
-				}
-				
-				return null;
+				throw new FHIRException("DeviceUseStatement.source(Practitioner) does not exist");
 			}
 			
 			deviceExposure.setProvider(provider);

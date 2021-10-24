@@ -118,9 +118,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	 * constructResource: Overwrite this if you want to implement includes.
 	 */
 	public v constructResource(Long fhirId, t entity, List<String> includes) {
-		v fhirResource = constructFHIR(fhirId, entity);
-
-		return fhirResource;
+		return constructFHIR(fhirId, entity);
 	}
 
 	public FhirOmopVocabularyMapImpl getFhirOmopVocabularyMap() {
