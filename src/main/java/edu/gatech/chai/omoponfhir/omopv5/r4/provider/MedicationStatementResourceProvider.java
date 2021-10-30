@@ -105,7 +105,6 @@ public class MedicationStatementResourceProvider implements IResourceProvider {
 		try {
 			id = myMapper.toDbase(theMedicationStatement, null);
 		} catch (FHIRException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -114,7 +113,7 @@ public class MedicationStatementResourceProvider implements IResourceProvider {
 			CodeableConcept detailCode = new CodeableConcept();
 			detailCode.setText("Failed to create entity.");
 			outcome.addIssue().setSeverity(IssueSeverity.FATAL).setDetails(detailCode);
-			throw new UnprocessableEntityException(FhirContext.forDstu3(), outcome);
+			throw new UnprocessableEntityException(FhirContext.forR4(), outcome);
 		}
 
 		return new MethodOutcome(new IdDt(id));
@@ -272,7 +271,7 @@ public class MedicationStatementResourceProvider implements IResourceProvider {
 		CodeableConcept detailCode = new CodeableConcept();
 		detailCode.setText(msg);
 		outcome.addIssue().setSeverity(IssueSeverity.FATAL).setDetails(detailCode);
-		throw new UnprocessableEntityException(FhirContext.forDstu3(), outcome);
+		throw new UnprocessableEntityException(FhirContext.forR4(), outcome);
 	}
 
 	/**
@@ -291,7 +290,7 @@ public class MedicationStatementResourceProvider implements IResourceProvider {
 //			CodeableConcept detailCode = new CodeableConcept();
 //			detailCode.setText("No family name provided, Patient resources must have at least one family name.");
 //			outcome.addIssue().setSeverity(IssueSeverity.FATAL).setDetails(detailCode);
-//			throw new UnprocessableEntityException(FhirContext.forDstu3(), outcome);
+//			throw new UnprocessableEntityException(FhirContext.forR4(), outcome);
 //		}
 	}
 

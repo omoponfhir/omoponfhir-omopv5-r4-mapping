@@ -625,15 +625,15 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 			// Create
 			List<Identifier> identifiers = fhirResource.getIdentifier();
 			for (Identifier identifier : identifiers) {
-				if (identifier.isEmpty())
-					continue;
-				String identifierValue = identifier.getValue();
-				List<DrugExposure> results = getMyOmopService().searchByColumnString("drugSourceValue",
-						identifierValue);
-				if (!results.isEmpty()) {
-					drugExposure = results.get(0);
-					omopId = drugExposure.getId();
-					break;
+				if (!identifier.isEmpty()) {
+					String identifierValue = identifier.getValue();
+					List<DrugExposure> results = getMyOmopService().searchByColumnString("drugSourceValue",
+							identifierValue);
+					if (!results.isEmpty()) {
+						drugExposure = results.get(0);
+						// omopId = drugExposure.getId();
+						break;
+					}
 				}
 			}
 
@@ -773,11 +773,11 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 				}
 
 				if (endDate != null) {
-					drugExposure.setDrugExposureStartDate(startDate);
-					drugExposure.setDrugExposureStartDateTime(startDate);
-				} else {
 					drugExposure.setDrugExposureEndDate(endDate);
 					drugExposure.setDrugExposureEndDateTime(endDate);
+				} else {
+					drugExposure.setDrugExposureStartDate(startDate);
+					drugExposure.setDrugExposureStartDateTime(startDate);
 				}
 			}
 		}
