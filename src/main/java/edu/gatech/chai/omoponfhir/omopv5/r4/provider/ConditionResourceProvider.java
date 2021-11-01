@@ -24,6 +24,7 @@ import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.web.context.ContextLoaderListener;
@@ -173,8 +174,10 @@ public class ConditionResourceProvider implements IResourceProvider {
 	@Search()
 	public IBundleProvider findConditionByParams(
 			@OptionalParam(name = Condition.SP_CODE) TokenOrListParam theOrCodes,
-			@OptionalParam(name = Condition.SP_SUBJECT) ReferenceParam theSubjectId,
-			@OptionalParam(name = Condition.SP_PATIENT) ReferenceParam thePatientId,
+			// @OptionalParam(name = Condition.SP_SUBJECT) ReferenceParam theSubjectId,
+			// @OptionalParam(name = Condition.SP_PATIENT) ReferenceParam thePatientId,
+			@OptionalParam(name = Condition.SP_PATIENT, chainWhitelist={"", Patient.SP_NAME, Patient.SP_IDENTIFIER}) ReferenceParam thePatient,
+			@OptionalParam(name = Condition.SP_SUBJECT, chainWhitelist={"", Patient.SP_NAME, Patient.SP_IDENTIFIER}) ReferenceParam theSubject,
 			@OptionalParam(name = Condition.SP_RECORDED_DATE) DateRangeParam theRecordedDate) {
 		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 
@@ -188,15 +191,47 @@ public class ConditionResourceProvider implements IResourceProvider {
 			}
 		}
 
-		if (theSubjectId != null) {
-			if (theSubjectId.getResourceType().equals(PatientResourceProvider.getType())) {
-				thePatientId = theSubjectId;
+		// if (theSubjectId != null) {
+		// 	if (theSubjectId.getResourceType().equals(PatientResourceProvider.getType())) {
+		// 		thePatientId = theSubjectId;
+		// 	} else {
+		// 		ThrowFHIRExceptions.unprocessableEntityException("We only support Patient resource for subject");
+		// 	}
+		// }
+		// if (thePatientId != null) {
+		// 	paramList.addAll(myMapper.mapParameter(Condition.SP_PATIENT, thePatientId, false));
+		// }
+
+		// With OMOP, we only support subject to be patient.
+		// If the subject has only ID part, we assume that is patient.
+		if (theSubject != null) {
+			if (theSubject.getResourceType() != null && 
+					theSubject.getResourceType().equals(PatientResourceProvider.getType())) {
+				thePatient = theSubject;
 			} else {
-				ThrowFHIRExceptions.unprocessableEntityException("We only support Patient resource for subject");
+				// If resource is null, we assume Patient.
+				if (theSubject.getResourceType() == null) {
+					thePatient = theSubject;
+				} else {
+					ThrowFHIRExceptions.unprocessableEntityException("subject search allows Only Patient Resource, but provided "+theSubject.getResourceType());
+				}
 			}
 		}
-		if (thePatientId != null) {
-			paramList.addAll(myMapper.mapParameter(Condition.SP_PATIENT, thePatientId, false));
+		
+		if (thePatient != null) {
+			String patientChain = thePatient.getChain();
+			if (patientChain != null) {
+				if (Patient.SP_NAME.equals(patientChain)) {
+					String thePatientName = thePatient.getValue();
+					paramList.addAll(getMyMapper().mapParameter ("Patient:"+Patient.SP_NAME, thePatientName, false));
+				} else if (Patient.SP_IDENTIFIER.equals(patientChain)) {
+					paramList.addAll(getMyMapper().mapParameter ("Patient:"+Patient.SP_IDENTIFIER, thePatient.getValue(), false));
+				} else if ("".equals(patientChain)) {
+					paramList.addAll(getMyMapper().mapParameter ("Patient:"+Patient.SP_RES_ID, thePatient.getValue(), false));
+				}
+			} else {
+				paramList.addAll(getMyMapper().mapParameter ("Patient:"+Patient.SP_RES_ID, thePatient.getIdPart(), false));
+			}
 		}
 
 		if (theRecordedDate != null) {

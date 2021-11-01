@@ -262,22 +262,31 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		case Condition.SP_ONSET_INFO:
 			// not supporting
 			break;
-		case Condition.SP_PATIENT:
-		case Condition.SP_SUBJECT:
-			ReferenceParam subjectReference = ((ReferenceParam) value);
-			Long fhirPatientId = subjectReference.getIdPartAsLong();
-			Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirPatientId, PatientResourceProvider.getType());
+		// case Condition.SP_PATIENT:
+		// case Condition.SP_SUBJECT:
+		// 	ReferenceParam subjectReference = ((ReferenceParam) value);
+		// 	Long fhirPatientId = subjectReference.getIdPartAsLong();
+		// 	Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirPatientId, PatientResourceProvider.getType());
 
-			String omopPersonIdString = String.valueOf(omopPersonId);
+		// 	String omopPersonIdString = String.valueOf(omopPersonId);
 
-			paramWrapper.setParameterType("Long");
-			paramWrapper.setParameters(Arrays.asList("fPerson.id"));
-			paramWrapper.setOperators(Arrays.asList("="));
-			paramWrapper.setValues(Arrays.asList(omopPersonIdString));
-			paramWrapper.setRelationship("or");
-			mapList.add(paramWrapper);
+		// 	paramWrapper.setParameterType("Long");
+		// 	paramWrapper.setParameters(Arrays.asList("fPerson.id"));
+		// 	paramWrapper.setOperators(Arrays.asList("="));
+		// 	paramWrapper.setValues(Arrays.asList(omopPersonIdString));
+		// 	paramWrapper.setRelationship("or");
+		// 	mapList.add(paramWrapper);
+		// 	break;
+		case "Patient:" + Patient.SP_RES_ID:
+			addParamlistForPatientIDName(parameter, (String) value, paramWrapper, mapList);
 			break;
-		case Procedure.SP_RES_ID:
+		case "Patient:" + Patient.SP_NAME:
+			addParamlistForPatientIDName(parameter, (String) value, paramWrapper, mapList);
+			break;
+		case "Patient:" + Patient.SP_IDENTIFIER:
+			addParamlistForPatientIDName(parameter, (String) value, paramWrapper, mapList);
+			break;
+		case Condition.SP_RES_ID:
 			String conditionId = ((TokenParam) value).getValue();
 			paramWrapper.setParameterType("Long");
 			paramWrapper.setParameters(Arrays.asList("id"));
