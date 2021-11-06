@@ -60,6 +60,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 	private FPersonService fPersonService;
 	private ProviderService providerService;
 	private ConceptService conceptService;
+	private VisitOccurrenceService visitOccurrenceService;
 
 	public OmopAllergyIntolerance(WebApplicationContext context) {
 		super(context, Observation.class, ObservationService.class,
@@ -81,6 +82,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 			fPersonService = context.getBean(FPersonService.class);
 			providerService = context.getBean(ProviderService.class);
 			conceptService = context.getBean(ConceptService.class);
+			visitOccurrenceService = context.getBean(VisitOccurrenceService.class);
 		} else {
 			logger.error("context must be NOT null");
 		}
@@ -437,6 +439,12 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 		if (onSetDateTime != null) {
 			observation.setObservationDate(onSetDateTime.getValue());
 		} 
+
+		Reference encounterReference = fhirResource.getEncounter();
+		VisitOccurrence visitOccurrence = fhirContext2OmopVisitOccurrence(visitOccurrenceService, encounterReference);
+		if (visitOccurrence != null) {
+			observation.setVisitOccurrence(visitOccurrence);
+		}
 
 		// set type concept - fixed value
 		observation.setObservationTypeConcept(new Concept(38000280L));

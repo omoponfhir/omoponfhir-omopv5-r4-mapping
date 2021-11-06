@@ -630,35 +630,10 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 					if (visitOccurrence != null)
 						drugExposure.setVisitOccurrence(visitOccurrence);
 				} else {
-					try {
-						throw new FHIRException("Encounter/"+fhirEncounterIdLong+" is not valid.");
-					} catch (FHIRException e) {
-						e.printStackTrace();
-					}
+					throw new FHIRException("Encounter/"+fhirEncounterIdLong+" is not valid.");
 				}
 			}
 		}		
-
-		// dosageInstruction
-//		List<Dosage> dosageInstructions = fhirResource.getDosageInstruction();
-//		for (Dosage dosageInstruction: dosageInstructions) {
-//			SimpleQuantity doseQty;
-//			try {
-//				doseQty = dosageInstruction.getDoseSimpleQuantity();
-//				if (doseQty.isEmpty()) continue;
-//				drugExposure.setEffectiveDrugDose(doseQty.getValue().doubleValue());
-//				String doseCode = doseQty.getCode();
-//				String doseSystem = doseQty.getSystem();
-//				String vocabId = OmopCodeableConceptMapping.omopVocabularyforFhirUri(doseSystem);
-//				Concept unitConcept = 
-//						CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, vocabId, doseCode);
-//				drugExposure.setDoseUnitConcept(unitConcept);
-//				break;
-//			} catch (FHIRException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
 		
 		// dispense request 
 		MedicationRequestDispenseRequestComponent dispenseRequest = fhirResource.getDispenseRequest();

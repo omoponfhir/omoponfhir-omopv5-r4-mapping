@@ -44,6 +44,7 @@ import org.hl7.fhir.r4.model.Observation.ObservationReferenceRangeComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
@@ -58,7 +59,9 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.DateUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
+import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ConditionResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
+import edu.gatech.chai.omoponfhir.omopv5.r4.provider.MedicationStatementResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ObservationResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvider;
@@ -81,7 +84,7 @@ import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
 
 public class OmopObservation extends BaseOmopResource<Observation, FObservationView, FObservationViewService> {
 
-	final static Logger logger = LoggerFactory.getLogger(OmopObservation.class);
+	static final Logger logger = LoggerFactory.getLogger(OmopObservation.class);
 	private static OmopObservation omopObservation = new OmopObservation();
 
 	public static final long SYSTOLIC_CONCEPT_ID = 3004249L;
@@ -890,83 +893,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 		// Get code system information.
 		CodeableConcept code = fhirResource.getCode();
-//
-//		// code should NOT be null as this is required field.
-//		// And, validation should check this.
-//		List<Coding> codings = code.getCoding();
-//		Coding codingFound = null;
-//		Coding codingSecondChoice = null;
-//		String omopSystem = null;
-//		String valueSourceString = null;
-//		for (Coding coding : codings) {
-//			String fhirSystemUri = coding.getSystem();
-//			// We prefer LOINC code. So, if we found one, we break out from
-//			// this loop
-//			if (code.getText() != null && !code.getText().isEmpty()) {
-//				valueSourceString = code.getText();
-//			} else {
-//				valueSourceString = coding.getSystem() + " " + coding.getCode() + " " + coding.getDisplay();
-//				valueSourceString = valueSourceString.trim();
-//			}
-//
-//			if (fhirSystemUri != null && fhirSystemUri.equals(OmopCodeableConceptMapping.LOINC.getFhirUri())) {
-//				// Found the code we want.
-//				codingFound = coding;
-//				break;
-//			} else {
-//				// See if we can handle this coding.
-//				try {
-//					if (fhirSystemUri != null && !fhirSystemUri.isEmpty()) {
-////						omopSystem = OmopCodeableConceptMapping.omopVocabularyforFhirUri(fhirSystemUri);
-//						omopSystem = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(fhirSystemUri);
-//
-//						if ("None".equals(omopSystem) == false) {
-//							// We can at least handle this. Save it
-//							// We may find another one we can handle. Let it replace.
-//							// 2nd choice is just 2nd choice.
-//							codingSecondChoice = coding;
-//						}
-//					}
-//				} catch (FHIRException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
-//
-//		// if (codingFound == null && codingSecondChoice == null) {
-//		// try {
-//		// throw new FHIRException("We couldn't support the code");
-//		// } catch (FHIRException e) {
-//		// e.printStackTrace();
-//		// }
-//		// }
-//
-//		Concept concept = null;
-//		if (codingFound != null) {
-//			// Find the concept id for this coding.
-//			concept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService,
-//					OmopCodeableConceptMapping.LOINC.getOmopVocabulary(), codingFound.getCode());
-////				if (concept == null) {
-////					throw new FHIRException("We couldn't map the code - "
-////							+ OmopCodeableConceptMapping.LOINC.getFhirUri() + ":" + codingFound.getCode());
-////				}
-//		} else if (codingSecondChoice != null) {
-//			// This is not our first choice. But, found one that we can
-//			// map.
-//			concept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopSystem,
-//					codingSecondChoice.getCode());
-////				if (concept == null) {
-////					throw new FHIRException("We couldn't map the code - "
-////							+ OmopCodeableConceptMapping.fhirUriforOmopVocabulary(omopSystem) + ":"
-////							+ codingSecondChoice.getCode());
-////				}
-//		} else {
-//			concept = null;
-//		}
-//
-//		if (concept == null) {
-//			concept = conceptService.findById(0L);
-//		}
 		String valueSourceString = null;
 		Concept concept = fhirCode2OmopConcept(conceptService, code, valueSourceString);
 		measurement.setMeasurementConcept(concept);
@@ -1344,6 +1270,17 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			} else {
 				observation.setValueAsConcept(concept);
 			}
+		} else if (valueType instanceof StringType) {
+			String valueString = ((StringType)valueType).asStringValue();
+			String[] valueStringData = valueString.split("\\^");
+			if (valueStringData.length > 1) {
+				String omopVocId = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(valueStringData[0]);
+				if (!"None".equals(omopVocId)) {
+					valueString = valueString.replace(valueStringData[0], omopVocId);
+				}
+			}
+
+			observation.setValueAsString(valueString);
 		}
 
 		if (fhirResource.getEffective() instanceof DateTimeType) {
@@ -1521,7 +1458,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 	public void validation(Observation fhirResource, IdType fhirId) throws FHIRException {
 		Reference subjectReference = fhirResource.getSubject();
-		if (subjectReference == null) {
+		if (subjectReference == null || subjectReference.isEmpty()) {
 			throw new FHIRException("We requres subject to contain a Patient");
 		}
 		if (!subjectReference.getReferenceElement().getResourceType()
@@ -1630,6 +1567,28 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		List<Measurement> measurements = null;
 		edu.gatech.chai.omopv5.model.entity.Observation observation = null;
 
+		Long typeConceptId = 0L;
+		
+		List<CodeableConcept> categories = fhirResource.getCategory();
+		for (CodeableConcept category : categories) {
+			List<Coding> codings = category.getCoding();
+			for (Coding coding : codings) {
+				// check if we can get type from the category
+				String fhirSystem = coding.getSystem();
+				String fhirCode = coding.getCode();
+				if (fhirSystem != null && !fhirSystem.isEmpty() && fhirCode != null && !fhirCode.isEmpty()) {
+					try {
+						typeConceptId = OmopConceptMapping.omopForObservationCategoryCode(fhirCode);
+					} catch (FHIRException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+		Concept typeConcept = new Concept();
+		typeConcept.setId(typeConceptId);
+
 		Map<String, Object> entityMap = constructOmopMeasurementObservation(omopId, fhirResource);
 		Long retId = null;
 
@@ -1643,6 +1602,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			Long retvalDiastolic = null;
 			for (Measurement m : measurements) {
 				if (m != null) {
+					m.setMeasurementTypeConcept(typeConcept);
 					if (m.getId() != null) {
 						retId = measurementService.update(m).getId();
 					} else {
@@ -1698,86 +1658,40 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					if (methodCodingDisplay != null && !methodCodingDisplay.isEmpty()) {
 						createFactRelationship(date, fPerson, methodCodingDisplay, domainConceptId, 26L, 44818800L,
 								retId, null);
-//						Note methodNote = new Note();
-//						methodNote.setDate(date);
-//						methodNote.setFPerson(fPerson);
-//						methodNote.setNoteText(methodCodingDisplay);
-//						methodNote.setType(new Concept(44814645L));
-//						Note note = noteService.create(methodNote);
-//
-//						// Create relationship.
-//						FactRelationship factRelationship = new FactRelationship();
-//						factRelationship.setDomainConcept1(domainConceptId);
-//						factRelationship.setFactId1(retId);
-//						factRelationship.setDomainConcept2(26L);
-//						factRelationship.setFactId2(note.getId());
-//						factRelationship.setRelationshipConcept(new Concept(44818800L));
-//						factRelationshipService.create(factRelationship);
 					}
 				} else {
 					// Create relationship.
 					createFactRelationship(null, null, null, domainConceptId, 58L, 44818800L, retId,
 							methodConcept.getId());
-//					FactRelationship factRelationship = new FactRelationship();
-//					factRelationship.setDomainConcept1(domainConceptId);
-//					factRelationship.setFactId1(retId);
-//					factRelationship.setDomainConcept2(58L);
-//					factRelationship.setFactId2(methodConcept.getId());
-//					factRelationship.setRelationshipConcept(new Concept(44818800L));
-//					factRelationshipService.create(factRelationship);
 				}
 			}
 		} else {
 			if (methodString != null && !methodString.isEmpty()) {
 				createFactRelationship(date, fPerson, methodString, domainConceptId, 26L, 44818800L, retId, null);
-
-//				Note methodNote = new Note();
-//				methodNote.setDate(date);
-//				methodNote.setFPerson(fPerson);
-//				methodNote.setNoteText(methodString);
-//				methodNote.setType(new Concept(44814645L));
-//				Note note = noteService.create(methodNote);
-//
-//				// Create relationship.
-//				FactRelationship factRelationship = new FactRelationship();
-//				factRelationship.setDomainConcept1(domainConceptId);
-//				factRelationship.setFactId1(retId);
-//				factRelationship.setDomainConcept2(26L);
-//				factRelationship.setFactId2(note.getId());
-//				factRelationship.setRelationshipConcept(new Concept(44818800L));
-//				factRelationshipService.create(factRelationship);
 			}
+		}
+
+		// Check focus element. If we have the focus resources, we use factRelationship
+		// to store the relationship.
+		List<Reference> focusReferences = fhirResource.getFocus();
+		for (Reference focusReference : focusReferences) {
+			IIdType referenceElement = focusReference.getReferenceElement();
+			logger.debug("Target Focus Reference (" + focusReference.getReference() + "): " + referenceElement.getIdPart() + " " + referenceElement.getIdPartAsLong());
+			createFactRelationship(domainConceptId, retId, focusReference, 44818759L);
 		}
 
 		// Check comments. If exists, put them in note table. And create relationship
 		// entry.
 //		String comment = fhirResource.getNote();
-		List<Annotation> templist =fhirResource.getNote();
+		List<Annotation> templist = fhirResource.getNote();
 		for (Annotation comment: templist){
 			String commentText = comment.getText();
 			if (commentText != null && !commentText.isEmpty()) {
 				createFactRelationship(date, fPerson, commentText, domainConceptId, 26L, 44818721L, retId, null);
-//			Note methodNote = new Note();
-//			methodNote.setDate(date);
-//			methodNote.setFPerson(fPerson);
-//			methodNote.setNoteText(comment);
-//			methodNote.setType(new Concept(44814645L));
-//			Note note = noteService.create(methodNote);
-//
-//			// Create relationship.
-//			FactRelationship factRelationship = new FactRelationship();
-//			factRelationship.setDomainConcept1(domainConceptId);
-//			factRelationship.setFactId1(retId);
-//			factRelationship.setDomainConcept2(26L);
-//			factRelationship.setFactId2(note.getId());
-//			factRelationship.setRelationshipConcept(new Concept(44818721L));
-//			factRelationshipService.create(factRelationship);
 			}
 		}
 
-
-		Long retFhirId = IdMapping.getFHIRfromOMOP(retId, ObservationResourceProvider.getType());
-		return retFhirId;
+		return retId;
 	}
 
 	private void createFactRelationship(Date noteDate, FPerson noteFPerson, String noteText, Long domainConceptId1,
@@ -1827,12 +1741,20 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				methodNote.setFPerson(noteFPerson);
 				methodNote.setNoteText(noteText);
 				methodNote.setNoteTypeConcept(new Concept(44814645L));
+				methodNote.setNoteClassConcept(new Concept(32721L)); // LOINC Method
+				methodNote.setEncodingConcept(new Concept(0L));
+				methodNote.setLanguageConcept(new Concept(0L));
 
 				note = noteService.create(methodNote);
 			} else {
 				return;
 			}
-			factRelationship.setFactId2(note.getId());
+
+			if (note != null) {
+				factRelationship.setFactId2(note.getId());
+			} else {
+				return;
+			}
 		} else {
 			// This is relationship to concept. Thus, we don't need to create entry for
 			// concept.
@@ -1849,9 +1771,65 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 		factRelationship.setDomainConceptId1(domainConceptId1);
 		factRelationship.setFactId1(factId1);
-			factRelationship.setDomainConceptId2(domainConceptId2);
+		factRelationship.setDomainConceptId2(domainConceptId2);
 		factRelationship.setRelationshipConcept(new Concept(relationshipId));
 		factRelationshipService.create(factRelationship);
+	}
+
+	private void createFactRelationship(Long domainConceptId1, Long factId1, Reference targetReference, Long relationshipConceptId) {
+		// Check if targetReference is not null.
+		if (targetReference == null || targetReference.isEmpty()) {
+			logger.error("Observariont.focus has a null or empty reference");
+			return;
+		}
+
+		IIdType referenceIdType = targetReference.getReferenceElement();
+		// Fine target domain and id
+		if (referenceIdType == null) {
+			logger.error("Observation.focus.reference has no reference Id type. Reference Id type is required for linking.");
+			return;
+		}
+
+		String targetResourceType = referenceIdType.getResourceType();
+		Long factId2 = referenceIdType.getIdPartAsLong();
+
+		Long domainConceptId2;
+		if (MedicationStatementResourceProvider.getType().equals(targetResourceType)) {
+			domainConceptId2 = 13L;
+		} else if (ConditionResourceProvider.getType().equals(targetResourceType)) {
+			domainConceptId2 = 19L;
+		} else {
+			logger.error ("Not supported focus link resource. Please contact developer to add " + targetResourceType + " resource");
+			return;
+		}
+
+		// Create relationship.
+		FactRelationship factRelationship = new FactRelationship();
+
+		factRelationship.setDomainConceptId1(domainConceptId1);
+		factRelationship.setDomainConceptId2(domainConceptId2);
+		factRelationship.setFactId1(factId1);
+		factRelationship.setFactId2(factId2);
+		factRelationship.setRelationshipConcept(new Concept(relationshipConceptId));
+		
+		// see if this relationship exists.
+		ParameterWrapper factParam = new ParameterWrapper("Long", 
+			Arrays.asList("domainConceptId1", "domainConceptId2", "factId1", "factId2", "relationshipConcept.id"),
+			Arrays.asList("=", "=", "=", "=", "="), 
+			Arrays.asList(String.valueOf(domainConceptId1), 
+				String.valueOf(domainConceptId2), 
+				String.valueOf(factId1), 
+				String.valueOf(factId2), 
+				String.valueOf(relationshipConceptId)), 
+			"and");
+		
+		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
+		mapList.add(factParam);
+
+		List<FactRelationship> factSearchOut = factRelationshipService.searchWithParams(0, 0, mapList, null);
+		if (factSearchOut.isEmpty()) {
+			factRelationshipService.create(factRelationship);
+		}
 	}
 
 	// Blood Pressure is stored in the component. So, we store two values in
