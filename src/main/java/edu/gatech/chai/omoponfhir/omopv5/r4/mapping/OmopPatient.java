@@ -1184,6 +1184,8 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		// * note : DocumentReference
 		// * procedure_occurrence : Procecure
 		// * visit_occurrence: : Encounter
+		// * observation : AllergyIntolerance
+		// * drug_exposure & procedure : Immunization
 
 		ParameterWrapper paramWrapper = new ParameterWrapper();
 		String pId = String.valueOf(patientId);
@@ -1234,7 +1236,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		// measurement & observation : Observation
 		List<ParameterWrapper> fobservationMapList = new ArrayList<ParameterWrapper>();
 		fobservationMapList.add(paramWrapper);
-		dateParamWrapper = constructDateParameterWrapper(Arrays.asList("date"), startDate, endDate);
+		dateParamWrapper = constructDateParameterWrapper(Arrays.asList("observationDate"), startDate, endDate);
 		if (dateParamWrapper != null) {
 			fobservationMapList.add(dateParamWrapper);
 		}
@@ -1273,44 +1275,28 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 
 		OmopEncounter omopEncounterMapper = OmopEncounter.getInstance();
 		omopEncounterMapper.searchWithParams(0, 0, visitMapList, resources, new ArrayList<String>(), null);
+
+		// AllergyIntolerance  observationDate
+		List<ParameterWrapper> allergyMapList = new ArrayList<ParameterWrapper>();
+		allergyMapList.add(paramWrapper);
+		dateParamWrapper = constructDateParameterWrapper(Arrays.asList("observationDate"), startDate, endDate);
+		if (dateParamWrapper != null) {
+			allergyMapList.add(dateParamWrapper);
+		}
+
+		OmopAllergyIntolerance omopAllergyIntoleranceMapper = OmopAllergyIntolerance.getInstance();
+		omopAllergyIntoleranceMapper.searchWithParams(0, 0, allergyMapList, resources, new ArrayList<String>(), null);
+
+		// Immunization
+		List<ParameterWrapper> immunizationMapList = new ArrayList<ParameterWrapper>();
+		immunizationMapList.add(paramWrapper);
+		dateParamWrapper = constructDateParameterWrapper(Arrays.asList("immunizationDate"), startDate, endDate);
+		if (dateParamWrapper != null) {
+			immunizationMapList.add(dateParamWrapper);
+		}
+
+		OmopImmunization omopImmunizationMapper = OmopImmunization.getInstance();
+		omopImmunizationMapper.searchWithParams(0, 0, immunizationMapList, resources, new ArrayList<String>(), null);
+
 	}
-
-	// // Move below to Address
-	// public Location searchAndUpdate(Address address, Location location) {
-	// if (address == null)
-	// return null;
-	//
-	// List<StringType> addressLines = address.getLine();
-	// if (addressLines.size() > 0) {
-	// String line1 = addressLines.get(0).getValue();
-	// String line2 = null;
-	// if (address.getLine().size() > 1)
-	// line2 = address.getLine().get(1).getValue();
-	// String zipCode = address.getPostalCode();
-	// String city = address.getCity();
-	// String state = address.getState();
-	//
-	// Location existingLocation = locationService.searchByAddress(line1, line2,
-	// city, state, zipCode);
-	// if (existingLocation != null) {
-	// return existingLocation;
-	// } else {
-	// // We will return new Location. But, if Location is provided,
-	// // then we update the parameters here.
-	// if (location != null) {
-	// location.setAddress1(line1);
-	// if (line2 != null)
-	// location.setAddress2(line2);
-	// location.setZipCode(zipCode);
-	// location.setCity(city);
-	// location.setState(state);
-	// } else {
-	// return new Location(line1, line2, city, state, zipCode);
-	// }
-	// }
-	// }
-	//
-	// return null;
-	// }
-
 }

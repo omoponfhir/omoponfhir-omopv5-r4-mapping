@@ -446,10 +446,9 @@ public class PatientResourceProvider implements IResourceProvider {
 		}
 	}
 
-	class MyBundleProvider extends OmopFhirBundleProvider implements IBundleProvider {
+	class MyBundleProvider extends OmopFhirBundleProvider {
 		Set<Include> theIncludes;
 		Set<Include> theReverseIncludes;
-//		String orderParams = null;
 
 		public MyBundleProvider(List<ParameterWrapper> paramList, Set<Include> theIncludes,
 				Set<Include> theReverseIncludes) {
@@ -459,14 +458,6 @@ public class PatientResourceProvider implements IResourceProvider {
 			this.theReverseIncludes = theReverseIncludes;
 		}
 
-//		public String getOrderParams() {
-//			return this.orderParams;
-//		}
-//		
-//		public void setOrderParams(String orderParams) {
-//			this.orderParams = orderParams;
-//		}
-//		
 		@Override
 		public List<IBaseResource> getResources(int fromIndex, int toIndex) {
 			List<IBaseResource> retv = new ArrayList<IBaseResource>();

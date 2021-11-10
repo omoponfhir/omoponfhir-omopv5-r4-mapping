@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Immunization.ImmunizationPerformerComponent;
 import org.hl7.fhir.r4.model.Immunization.ImmunizationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -61,6 +62,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 
 	static final Logger logger = LoggerFactory.getLogger(OmopImmunization.class);
 
+	private static OmopImmunization omopImmunization = new OmopImmunization();
 	private VisitOccurrenceService visitOccurrenceService;
 	private DrugExposureService drugExposureService;
 	private ConceptService conceptService;
@@ -102,11 +104,23 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		getSize();
 	}
 
+	public OmopImmunization() {
+		super(ContextLoaderListener.getCurrentWebApplicationContext(), FImmunizationView.class,
+		FImmunizationViewService.class, ImmunizationResourceProvider.getType());
+		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
+	}
+
 	private void initialize(WebApplicationContext context) {
-		visitOccurrenceService = context.getBean(VisitOccurrenceService.class);
-		conceptService = context.getBean(ConceptService.class);
-		providerService = context.getBean(ProviderService.class);
-		fPersonService = context.getBean(FPersonService.class);
+		if (context != null) {
+			visitOccurrenceService = context.getBean(VisitOccurrenceService.class);
+			conceptService = context.getBean(ConceptService.class);
+			providerService = context.getBean(ProviderService.class);
+			fPersonService = context.getBean(FPersonService.class);
+		}
+	}
+
+	public static OmopImmunization getInstance() {
+		return OmopImmunization.omopImmunization;
 	}
 
 	@Override
