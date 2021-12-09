@@ -155,8 +155,8 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			// see if we can get the unit from source column.
 			unitSource = fObservationView.getUnitSourceValue();
 			if (unitSource != null && !unitSource.isEmpty()) {
-				unitUnit = unitSource.replace("'", "''");
-				unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, OmopCodeableConceptMapping.UCUM.getOmopVocabulary(), unitUnit);
+				unitUnit = unitSource;
+				unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, OmopCodeableConceptMapping.UCUM.getOmopVocabulary(), unitSource.replace("'", "''"));
 			}
 		}
 		
