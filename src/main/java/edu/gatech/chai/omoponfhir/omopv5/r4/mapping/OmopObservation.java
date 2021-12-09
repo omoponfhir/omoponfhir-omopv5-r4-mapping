@@ -566,7 +566,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				// source
 				// value.
 				String unitString = ((Quantity) systolicValue).getUnit();
-				systolicMeasurement.setUnitSourceValue(unitString);
+				systolicMeasurement.setUnitSourceValue(unitString.replace("'", "''"));
 
 				String unitSystem = ((Quantity) systolicValue).getSystem();
 				String unitCode = ((Quantity) systolicValue).getCode();
@@ -598,7 +598,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				// source
 				// value.
 				String unitString = ((Quantity) diastolicValue).getUnit();
-				diastolicMeasurement.setUnitSourceValue(unitString);
+				diastolicMeasurement.setUnitSourceValue(unitString.replace("'", "''"));
 
 				String unitSystem = ((Quantity) diastolicValue).getSystem();
 				String unitCode = ((Quantity) diastolicValue).getCode();
@@ -932,7 +932,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			// Save the unit in the unit source column to save the source
 			// value.
 			String unitString = ((Quantity) valueType).getUnit();
-			measurement.setUnitSourceValue(unitString);
+			measurement.setUnitSourceValue(unitString.replace("'", "''"));
 
 			if (concept != null) {
 				// If we found the concept for unit, use it. Otherwise,
@@ -1230,7 +1230,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 			// Save the unit in the unit source column to save the source value.
 			String unitString = ((Quantity) valueType).getUnit();
-			observation.setUnitSourceValue(unitString);
+			observation.setUnitSourceValue(unitString.replace("'", "''"));
 
 			if (concept != null) {
 				// If we found the concept for unit, use it. Otherwise, leave it
@@ -1527,7 +1527,8 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				DateParam dateParam = new DateParam();
 				dateParam.setPrefix(ParamPrefixEnum.EQUAL);
 				dateParam.setValue(date);
-				paramList.addAll(mapParameter(Observation.SP_DATE, dateParam, false));
+				DateRangeParam dateRangeParam = new DateRangeParam(dateParam);
+				paramList.addAll(mapParameter(Observation.SP_DATE, dateRangeParam, false));
 
 				if (concept == null) {
 					ParameterWrapper pw = new ParameterWrapper();
