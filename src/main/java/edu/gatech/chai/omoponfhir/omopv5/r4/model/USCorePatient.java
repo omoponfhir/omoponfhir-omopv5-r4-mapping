@@ -21,6 +21,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.BackboneElement;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -108,17 +109,22 @@ public class USCorePatient extends Patient {
 			this.myCategory = myCategory;
 		}
 
-		/*
-		 * ***************************** Boilerplate methods- Hopefully these will be
-		 * removed or made optional in a future version of HAPI but for now they need to
-		 * be added to all block types. These two methods follow a simple pattern where
-		 * a utility method from ElementUtil is called and all fields are passed in.
-		 *****************************/
+		@Description(shortDefinition = "Plain text representation of the race concept(s)")
+		@Extension(url = "text", isModifier = false, definedLocally = true)
+		@Child(name = "text", min = 1, max = 1)
+		private StringType myText;
 
-//		@Override
-//		public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-//			return ElementUtil.allPopulatedChildElements(theType, myCategory);
-//		}
+		public StringType getText() {
+			if (myText == null) {
+				myText = new StringType();
+			}
+			
+			return myText;
+		}
+
+		public void setText(StringType myText) {
+			this.myText = myText;
+		}
 
 		@Override
 		public boolean isEmpty() {
@@ -129,7 +135,8 @@ public class USCorePatient extends Patient {
 		public Race copy() {
 			Race copy = new Race();
 			copy.myCategory = this.myCategory;
-			
+			copy.myText = this.myText;
+
 			return copy;
 		}
 
@@ -151,7 +158,7 @@ public class USCorePatient extends Patient {
 		 */
 		@Description(shortDefinition = "The 2 ethnicity category codes according to the OMB Standards")
 		@Extension(url = "ombCategory", isModifier = false, definedLocally = true)
-		@Child(name = "category", min = 0, max = 5)
+		@Child(name = "category", min = 0, max = 1)
 		private List<Coding> myCategory;
 
 		public List<Coding> getCategory() {
@@ -166,17 +173,22 @@ public class USCorePatient extends Patient {
 			this.myCategory = myCategory;
 		}
 
-		/*
-		 * ***************************** Boilerplate methods- Hopefully these will be
-		 * removed or made optional in a future version of HAPI but for now they need to
-		 * be added to all block types. These two methods follow a simple pattern where
-		 * a utility method from ElementUtil is called and all fields are passed in.
-		 *****************************/
+		@Description(shortDefinition = "Plain text representation of the ethnicity concept(s)")
+		@Extension(url = "text", isModifier = false, definedLocally = true)
+		@Child(name = "text", min = 1, max = 1)
+		private StringType myText;
 
-//		@Override
-//		public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-//			return ElementUtil.allPopulatedChildElements(theType, myCategory);
-//		}
+		public StringType getText() {
+			if (myText == null) {
+				myText = new StringType();
+			}
+			
+			return myText;
+		}
+
+		public void setText(StringType myText) {
+			this.myText = myText;
+		}
 
 		@Override
 		public boolean isEmpty() {
@@ -187,6 +199,7 @@ public class USCorePatient extends Patient {
 		public Ethnicity copy() {
 			Ethnicity copy = new Ethnicity();
 			copy.myCategory = this.myCategory;
+			copy.myText = this.myText;
 			
 			return copy;
 		}

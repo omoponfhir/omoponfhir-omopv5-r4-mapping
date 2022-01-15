@@ -37,6 +37,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.PatientLinkComponent;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Address.AddressUse;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.codesystems.V3MaritalStatus;
@@ -401,6 +402,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		if (raceCoding != null) {
 			Race myRace = patient.getRace();
 			myRace.getCategory().add(raceCoding);
+			myRace.setText(new StringType(raceCoding.getDisplay()));
 			patient.setRace(myRace);
 		}
 
@@ -422,6 +424,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		if (ethnicityCoding != null) {
 			Ethnicity myEthnicity = patient.getEthnicity();
 			myEthnicity.getCategory().add(ethnicityCoding);
+			myEthnicity.setText(new StringType(ethnicityCoding.getDisplay()));
 			patient.setEthnicity(myEthnicity);
 		}
 
