@@ -33,6 +33,7 @@ import org.springframework.web.context.WebApplicationContext;
 import ca.uhn.fhir.rest.api.SortSpec;
 import edu.gatech.chai.omoponfhir.local.dao.FhirOmopCodeMapImpl;
 import edu.gatech.chai.omoponfhir.local.dao.FhirOmopVocabularyMapImpl;
+import edu.gatech.chai.omoponfhir.local.dao.TwoLetterStateMapImpl;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
@@ -51,6 +52,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	
 	protected FhirOmopVocabularyMapImpl fhirOmopVocabularyMap;
 	protected FhirOmopCodeMapImpl fhirOmopCodeMap;
+	protected TwoLetterStateMapImpl twoLetterStateMap;
 	
 	private p myOmopService;
 	private Class<t> myEntityClass;
@@ -63,10 +65,12 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	public BaseOmopResource(WebApplicationContext context, Class<t> entityClass, Class<p> serviceClass,
 			String fhirResourceType) {
 		myOmopService = context.getBean(serviceClass);
+		
 		myEntityClass = entityClass;
 		myFhirResourceType = fhirResourceType;
 		fhirOmopVocabularyMap = new FhirOmopVocabularyMapImpl();
 		fhirOmopCodeMap = new FhirOmopCodeMapImpl();
+		twoLetterStateMap = new TwoLetterStateMapImpl();
 	}
 
 	public String getMyFhirResourceType() {

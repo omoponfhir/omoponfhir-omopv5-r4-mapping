@@ -1008,6 +1008,20 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		Location retLocation = null;
 		if (addresses != null && !addresses.isEmpty()) {
 			Address address = addresses.get(0);
+			// We should check the state.
+			String state = address.getState();
+			if (state.length() != 2) {
+				String twoState = twoLetterStateMap.getTwoLetter(state);
+				if (twoState == null || twoState.isEmpty()) {
+					if (state.length() < 2) {
+						address.setState(state.substring(0, 1));
+					} else {
+						address.setState(state.substring(0, 2));
+					}
+				} else {
+					address.setState(twoState);
+				}
+			}
 			retLocation = AddressUtil.searchAndUpdate(locationService, address, null);
 			if (retLocation != null) {
 				fperson.setLocation(retLocation);
