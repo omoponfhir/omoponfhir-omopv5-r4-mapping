@@ -249,9 +249,7 @@ public class SystemTransactionProvider {
 						} else if (method == HTTPVerb.GET) {
 							// TODO: getList.add(new ParameterWrapper());
 							// create parameter here.
-						} else {
-							continue;
-						}
+						} 
 					}
 				}
 

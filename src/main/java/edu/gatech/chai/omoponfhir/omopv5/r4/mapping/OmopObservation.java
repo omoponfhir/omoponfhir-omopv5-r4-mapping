@@ -1087,7 +1087,6 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		retVal.add(measurement);
 
 		return retVal;
-
 	}
 
 	public edu.gatech.chai.omopv5.model.entity.Observation constructOmopObservation(Long omopId,
@@ -1132,8 +1131,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			if (code.getText() != null && !code.getText().isEmpty()) {
 				valueSourceString = code.getText();
 			} else {
-				valueSourceString = coding.getSystem() + " " + coding.getCode() + " " + coding.getDisplay();
-				valueSourceString = valueSourceString.trim();
+				valueSourceString = codingInString(coding, 50);
 			}
 
 			if (fhirSystemUri.equals(OmopCodeableConceptMapping.LOINC.getFhirUri())) {
@@ -1384,32 +1382,10 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			for (Concept conceptForCode : conceptForCodes) {
 				String domain = conceptForCode.getDomainId();
 				String systemName = conceptForCode.getVocabularyId();
-//					List<Identifier> identifiers = fhirResource.getIdentifier();
-//					String identifier_value = null;
-//					if ((domain.equalsIgnoreCase("measurement")
-//							&& systemName.equalsIgnoreCase(OmopCodeableConceptMapping.omopVocabularyforFhirUri(system)))
-//							|| is_measurement_by_valuetype(fhirResource)) {
-
+				logger.debug("My Domain is " + domain);
 				if ((domain.equalsIgnoreCase("measurement") && systemName
 						.equalsIgnoreCase(fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system)))
 						|| isMeasurementByValuetype(fhirResource)) {
-
-					// TODO: Omop does not have a place holder to track the source of measurement
-					// data.
-//						for (Identifier identifier : identifiers) {
-//							identifier_value = identifier.getValue();
-//							if (identifier_value != null) {
-//								List<Measurement> results = measurementService.searchByColumnString("sourceValue",
-//										identifier_value);
-//								if (results.size() > 0) {
-//									// We do not CREATE. Instead, we update
-//									// this.
-//									// set the measurement.
-//									omopId = results.get(0).getId();
-//									break;
-//								}
-//							}
-//						}
 
 					measurements = constructOmopMeasurement(omopId, fhirResource, system, code);
 					if (measurements != null && !measurements.isEmpty()) {

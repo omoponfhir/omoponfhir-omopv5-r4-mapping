@@ -27,8 +27,11 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -48,6 +51,7 @@ import edu.gatech.chai.omopv5.model.entity.FPerson;
 import edu.gatech.chai.omopv5.model.entity.Measurement;
 
 public class OmopTransaction {
+	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OmopTransaction.class);
 
 	private static OmopTransaction omopTransaction = new OmopTransaction();
 	private TransactionService myService;
@@ -158,24 +162,54 @@ public class OmopTransaction {
 
 				Long fhirId = OmopPatient.getInstance().toDbase(ExtensionUtil.usCorePatientFromResource(resource),
 						null);
-//				OmopPatient patientMappingInstance = new OmopPatient(myContext);
-//				FPerson fPerson = patientMappingInstance.constructOmop(null, (Patient) resource);
-//				FPerson retFPerson = fPersonService.create(fPerson);
-//				Long fhirId = IdMapping.getFHIRfromOMOP(retFPerson.getIdAsLong(), PatientResourceProvider.getType());
 				patientMap.put(originalId, fhirId);
-				System.out.println("Adding patient info to patientMap " + originalId + "->" + fhirId);
+				logger.debug("Adding patient info to patientMap " + originalId + "->" + fhirId);
 				addResponseEntry(responseEntries, "201 Created", "Patient/" + fhirId);
+			}
+		}
+
+		for (Resource resource : postList) {			
+			if (resource instanceof MedicationStatement) {
+				logger.debug("Trying to add medication statement: " + resource.getId());
+				MedicationStatement medicationStatement = (MedicationStatement) resource;
+				Reference subject = medicationStatement.getSubject();
+				IdType refIdType = linkToPatient(subject, patientMap);
+				if (refIdType == null) {
+					continue;
+				}
+				medicationStatement.setSubject(new Reference(refIdType));
+
+				Long fhirId = OmopMedicationStatement.getInstance().toDbase(medicationStatement, null);
+				if (fhirId == null || fhirId == 0L) {
+					addResponseEntry(responseEntries, "400 Bad Request", null);
+				} else {
+					addResponseEntry(responseEntries, "201 Created", "MedicationStatement/" + fhirId);
+				}
+			}
+		}
+
+		// Process Condition
+		for (Resource resource : postList) {
+			if (resource instanceof Condition) {
+				Condition condition = (Condition) resource;
+				Reference subject = condition.getSubject();
+				IdType refIdType = linkToPatient(subject, patientMap);
+				if (refIdType == null)
+					continue;
+				condition.setSubject(new Reference(refIdType));
+
+				Long fhirId = OmopCondition.getInstance().toDbase(condition, null);
+				if (fhirId == null || fhirId == 0L) {
+					addResponseEntry(responseEntries, "400 Bad Request", null);
+				} else {
+					addResponseEntry(responseEntries, "201 Created", "Condition/" + fhirId);
+				}
 			}
 		}
 
 		// Now process the rest.
 		for (Resource resource : postList) {
-			if (resource.getResourceType() == ResourceType.Patient) {
-				// already done.
-				continue;
-			}
-
-			if (resource.getResourceType() == ResourceType.Observation) {
+			if (resource instanceof Observation) {
 				Observation observation = (Observation) resource;
 				Reference subject = observation.getSubject();
 				IdType refIdType = linkToPatient(subject, patientMap);
@@ -188,8 +222,25 @@ public class OmopTransaction {
 					addResponseEntry(responseEntries, "400 Bad Request", null);
 				else
 					addResponseEntry(responseEntries, "201 Created", "Observation/" + fhirId);
+			} 
+		}
 
-			}
+		for (Resource resource : postList) {
+			if (resource instanceof Observation) {
+				Observation observation = (Observation) resource;
+				Reference subject = observation.getSubject();
+				IdType refIdType = linkToPatient(subject, patientMap);
+				if (refIdType == null) {
+					continue;
+				}
+				observation.setSubject(new Reference(refIdType));
+
+				Long fhirId = OmopObservation.getInstance().toDbase(observation, null);
+				if (fhirId == null)
+					addResponseEntry(responseEntries, "400 Bad Request", null);
+				else
+					addResponseEntry(responseEntries, "201 Created", "Observation/" + fhirId);
+			} 
 		}
 
 		for (Resource resource : putList) {
