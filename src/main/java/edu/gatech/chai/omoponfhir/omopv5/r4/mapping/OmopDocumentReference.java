@@ -417,6 +417,11 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 		
 		note.setNoteText(note_text);
 		
+		// default for non-null fields
+		note.setNoteClassConcept(new Concept(0L));
+		note.setEncodingConcept(new Concept(0L));
+		note.setLanguageConcept(new Concept(0L));
+		
 		return note;
 	}
 	
