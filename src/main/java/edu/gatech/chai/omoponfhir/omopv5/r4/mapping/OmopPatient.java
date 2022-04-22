@@ -769,8 +769,13 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 				operatorList.add("like");
 				paramWrapper.setOperators(operatorList);
 
-				valueList.add("%" + searchString);
+				valueList.add("%^" + searchString);
 				paramWrapper.setValues(valueList);
+
+				// for the case where we only have a value in the personSourceValue
+				paramWrapper.addParameter("personSourceValue");
+				paramWrapper.addOperator("=");
+				paramWrapper.addValue(searchString);
 			} else {
 				operatorList.add("=");
 				paramWrapper.setOperators(operatorList);
