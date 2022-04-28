@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Ratio;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SimpleQuantity;
 import org.hl7.fhir.r4.model.StringType;
@@ -273,7 +274,9 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				observation.setComponent(components);
 			}
 		} else {
-			if (fObservationView.getValueAsNumber() != null) {
+			if (fObservationView.getValueAsNumber() != null 
+				&& (fObservationView.getValueAsString() == null 
+				&& fObservationView.getValueAsConcept() == null)) {
 				Quantity quantity = new Quantity(fObservationView.getValueAsNumber().doubleValue());
 				if (unitSystemUri != null || unitCode != null || unitUnit != null) {
 					quantity.setUnit(unitUnit);
@@ -294,7 +297,25 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 //				}
 				observation.setValue(quantity);
 			} else if (fObservationView.getValueAsString() != null) {
-				observation.setValue(new StringType(fObservationView.getValueAsString()));
+				// Check if this is ratio.
+				String valueString = fObservationView.getValueAsString();
+				String[] valueStrings = valueString.split(":");
+				if (valueStrings.length == 2) {
+					try {
+						double numerator = Double.parseDouble(valueStrings[0]);
+						double denominator = Double.parseDouble(valueStrings[1]);
+
+						Ratio ratio = new Ratio();
+						ratio.setNumerator(new Quantity(numerator));
+						ratio.setDenominator(new Quantity(denominator));
+
+						observation.setValue(ratio);
+					} catch (NumberFormatException nfe) {
+						observation.setValue(new StringType(valueString));
+					}
+				} else {
+					observation.setValue(new StringType(valueString));
+				}
 			} else if (fObservationView.getValueAsConcept() != null
 					&& fObservationView.getValueAsConcept().getId() != 0L) {
 				// vocabulary is a required attribute for concept, then it's
@@ -932,7 +953,9 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			// Save the unit in the unit source column to save the source
 			// value.
 			String unitString = ((Quantity) valueType).getUnit();
-			measurement.setUnitSourceValue(unitString.replace("'", "''"));
+			if (unitString != null && !unitString.isEmpty()) {
+				measurement.setUnitSourceValue(unitString.replace("'", "''"));
+			}
 
 			if (concept != null) {
 				// If we found the concept for unit, use it. Otherwise,
@@ -1279,6 +1302,16 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			}
 
 			observation.setValueAsString(valueString);
+		} else if (valueType instanceof Ratio) {
+			Ratio ratio = (Ratio) valueType;
+			Quantity numberator = ratio.getNumerator();
+			Quantity denominator = ratio.getDenominator();
+			if (numberator == null || denominator == null) {
+				throw new FHIRException("For Ratio, both numerator and denominator must not be null.");
+			}
+			
+			String valueString = ((Ratio) valueType).getNumerator().getValue() + ":" + ((Ratio) valueType).getDenominator().getValue();
+			observation.setValueAsString(valueString);
 		}
 
 		if (fhirResource.getEffective() instanceof DateTimeType) {
@@ -1353,6 +1386,11 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		return (value instanceof Quantity);
 	}
 
+	private boolean isObservationByValueType(Observation fhirResource) {
+		Type value = fhirResource.getValue();
+		return (value instanceof Ratio);
+	}
+
 	public Map<String, Object> constructOmopMeasurementObservation(Long omopId, Observation fhirResource) {
 		// returns a map that contains either OMOP measurement entity classes or
 		// OMOP observation entity. The return map consists as follows,
@@ -1383,9 +1421,9 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				String domain = conceptForCode.getDomainId();
 				String systemName = conceptForCode.getVocabularyId();
 				logger.debug("My Domain is " + domain);
-				if ((domain.equalsIgnoreCase("measurement") && systemName
+				if (!isObservationByValueType(fhirResource) && ((domain.equalsIgnoreCase("measurement") && systemName
 						.equalsIgnoreCase(fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system)))
-						|| isMeasurementByValuetype(fhirResource)) {
+						|| isMeasurementByValuetype(fhirResource))) {
 
 					measurements = constructOmopMeasurement(omopId, fhirResource, system, code);
 					if (measurements != null && !measurements.isEmpty()) {
@@ -1395,8 +1433,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 					}
 //					} else if (domain.equalsIgnoreCase("observation") && systemName
 //							.equalsIgnoreCase(OmopCodeableConceptMapping.omopVocabularyforFhirUri(system))) {
-				} else if (domain.equalsIgnoreCase("observation") && systemName
-						.equalsIgnoreCase(fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system))) {
+				} else if (systemName.equalsIgnoreCase(fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system))) {
 
 					// TODO: Omop does not have a place holder to track the source of observation
 					// data.
@@ -1427,8 +1464,11 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 		// Error... we don't know how to handle this coding...
 		// TODO: add some exception or notification of the error here.
-		logger.error(
-				"we don't know how to handle this coding for this observation: " + fhirResource.getCode().toString());
+		String errMsg = "";
+		for (Coding coding : fhirResource.getCode().getCoding()) {
+			errMsg += "[" + coding.getSystem() + ", " + coding.getCode() + ", " + coding.getDisplay() + "] ";
+		}
+		logger.error("we don't know how to handle this coding for this observation with code = : " + errMsg);
 		return null;
 	}
 
