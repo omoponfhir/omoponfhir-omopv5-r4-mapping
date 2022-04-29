@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryResponseComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Observation;
@@ -43,6 +44,7 @@ import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
 import edu.gatech.chai.omopv5.dba.service.FPersonService;
 import edu.gatech.chai.omopv5.dba.service.MeasurementService;
+import edu.gatech.chai.omopv5.dba.service.NoteService;
 import edu.gatech.chai.omopv5.dba.service.ObservationService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.dba.service.TransactionService;
@@ -58,6 +60,7 @@ public class OmopTransaction {
 	private FPersonService fPersonService;
 	private ObservationService observationService;
 	private MeasurementService measurementService;
+	private NoteService noteService;
 	private WebApplicationContext myContext;
 
 	public OmopTransaction(WebApplicationContext context) {
@@ -75,6 +78,7 @@ public class OmopTransaction {
 		fPersonService = context.getBean(FPersonService.class);
 		observationService = context.getBean(ObservationService.class);
 		measurementService = context.getBean(MeasurementService.class);
+		noteService = context.getBean(NoteService.class);
 	}
 
 	public static OmopTransaction getInstance() {
@@ -168,6 +172,7 @@ public class OmopTransaction {
 			}
 		}
 
+		// do medication statement
 		for (Resource resource : postList) {			
 			if (resource instanceof MedicationStatement) {
 				logger.debug("Trying to add medication statement: " + resource.getId());
@@ -207,7 +212,7 @@ public class OmopTransaction {
 			}
 		}
 
-		// Now process the rest.
+		// process observation.
 		for (Resource resource : postList) {
 			if (resource instanceof Observation) {
 				Observation observation = (Observation) resource;
@@ -226,20 +231,20 @@ public class OmopTransaction {
 		}
 
 		for (Resource resource : postList) {
-			if (resource instanceof Observation) {
-				Observation observation = (Observation) resource;
-				Reference subject = observation.getSubject();
+			if (resource instanceof DocumentReference) {
+				DocumentReference documentReference = (DocumentReference) resource;
+				Reference subject = documentReference.getSubject();
 				IdType refIdType = linkToPatient(subject, patientMap);
 				if (refIdType == null) {
 					continue;
 				}
-				observation.setSubject(new Reference(refIdType));
+				documentReference.setSubject(new Reference(refIdType));
 
-				Long fhirId = OmopObservation.getInstance().toDbase(observation, null);
+				Long fhirId = OmopDocumentReference.getInstance().toDbase(documentReference, null);
 				if (fhirId == null)
 					addResponseEntry(responseEntries, "400 Bad Request", null);
 				else
-					addResponseEntry(responseEntries, "201 Created", "Observation/" + fhirId);
+					addResponseEntry(responseEntries, "201 Created", "DocumentReference/" + fhirId);
 			} 
 		}
 
@@ -325,6 +330,7 @@ public class OmopTransaction {
 				}
 
 				break;
+			case DocumentReference:
 			default:
 				break;
 			}
