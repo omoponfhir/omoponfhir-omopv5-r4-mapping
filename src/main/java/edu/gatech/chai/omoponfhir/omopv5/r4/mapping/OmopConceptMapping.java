@@ -31,7 +31,7 @@ public enum OmopConceptMapping {
 	FEMALE(AdministrativeGender.FEMALE.toCode(), 8532L),
 	UNKNOWN(AdministrativeGender.UNKNOWN.toCode(), 8551L),
 	ADMIN_OTHER(AdministrativeGender.OTHER.toCode(), 8521L),
-	ADMIN_NULL(AdministrativeGender.NULL.toCode(),8570L),
+	ADMIN_NULL(AdministrativeGender.NULL.toCode(),8551L),
 	
 	/**
 	 * OrganizationType Mapping
