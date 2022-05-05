@@ -442,7 +442,8 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 
 		// Visit Occurrence mapping
 		Reference encounterReference = fhirResource.getEncounter();
-		if (encounterReference.getReferenceElement().getResourceType().equals(EncounterResourceProvider.getType())) {
+		if (encounterReference != null && !encounterReference.isEmpty() 
+			&& encounterReference.getReferenceElement().getResourceType().equals(EncounterResourceProvider.getType())) {
 			Long encounterFhirId = encounterReference.getReferenceElement().getIdPartAsLong();
 			Long omopVisitOccurrenceId = IdMapping.getOMOPfromFHIR(encounterFhirId, EncounterResourceProvider.getType());
 			if (omopVisitOccurrenceId == null) {
