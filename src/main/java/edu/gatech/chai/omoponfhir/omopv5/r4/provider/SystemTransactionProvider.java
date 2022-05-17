@@ -286,7 +286,7 @@ public class SystemTransactionProvider {
 				retVal.setType(BundleType.TRANSACTIONRESPONSE);
 			} else {
 				ThrowFHIRExceptions
-						.unprocessableEntityException("Faied process the bundle, " + theBundle.getType().toString());
+						.unprocessableEntityException("Failed to process the bundle, " + theBundle.getType().toString());
 			}
 
 		} catch (FHIRException e) {
