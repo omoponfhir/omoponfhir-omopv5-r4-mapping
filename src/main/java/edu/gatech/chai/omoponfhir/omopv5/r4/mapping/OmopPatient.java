@@ -238,11 +238,11 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 			patient.addIdentifier(identifier);
 		}
 
-		if (patient.getIdentifier().isEmpty()) {
-			Identifier identifier = new Identifier();
-			identifier.setValue(fhirId.toString());
-			patient.addIdentifier(identifier);
-		}
+		// if (patient.getIdentifier().isEmpty()) {
+		// 	Identifier identifier = new Identifier();
+		// 	identifier.setValue(fhirId.toString());
+		// 	patient.addIdentifier(identifier);
+		// }
 
 		// Start mapping Person/FPerson table to Patient Resource.
 		Calendar calendar = Calendar.getInstance();
