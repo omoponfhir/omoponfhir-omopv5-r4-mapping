@@ -1196,7 +1196,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		return dateParamWrapper;
 	}
 
-	public void getEverthingfor(List<IBaseResource> resources, Long patientId, Date startDate, Date endDate) {
+	public void getEverythingfor(List<IBaseResource> resources, Long patientId, Date startDate, Date endDate) {
 		// OMOP Tables that references the patient are as follows.
 		// * condition_occurrence : Condition
 		// * death : death on FHIR (need to revisit) TODO
