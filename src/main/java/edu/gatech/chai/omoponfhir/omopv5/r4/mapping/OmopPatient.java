@@ -342,10 +342,10 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 			String[] contactInfo = fPerson.getContactPoint1().split(":");
 			if (contactInfo.length == 3) {
 				ContactPoint contactPoint = new ContactPoint();
-				if(!contactInfo[0].equalsIgnoreCase("null")){
+				if(!contactInfo[0].isBlank() && !contactInfo[0].equalsIgnoreCase("null")){
 					contactPoint.setSystem(ContactPoint.ContactPointSystem.valueOf(contactInfo[0].toUpperCase()));
 				}
-				if(!contactInfo[1].equalsIgnoreCase("null")){
+				if(!contactInfo[0].isBlank() && !contactInfo[1].equalsIgnoreCase("null")){
 					contactPoint.setUse(ContactPoint.ContactPointUse.valueOf(contactInfo[1].toUpperCase()));
 				}
 				contactPoint.setValue(contactInfo[2]);
