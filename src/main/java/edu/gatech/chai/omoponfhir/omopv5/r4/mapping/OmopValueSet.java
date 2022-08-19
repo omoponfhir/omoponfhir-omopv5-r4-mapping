@@ -18,11 +18,9 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.mapping;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Date;
 
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -36,12 +34,16 @@ import edu.gatech.chai.omopv5.dba.service.ConceptRelationshipService;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.dba.service.RelationshipService;
-import edu.gatech.chai.omopv5.model.entity.Concept;
 import edu.gatech.chai.omopv5.model.entity.ConceptRelationship;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author mfeng45 
+ * @version 1.0 
+ * This class will represent a ValueSet resource and implements FHIR operations 
+ */
 public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship, ConceptRelationshipService> {
     private static final Logger logger = LoggerFactory.getLogger(OmopValueSet.class);
 	private static OmopValueSet omopValueSet = new OmopValueSet();
@@ -76,10 +78,6 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 		return omopValueSet;
 	}
 
-    // @Override //constructs fhir with includes and revincludes 
-    // public ValueSet constructResource(Long fhirId, ConceptRelationship entity, List<String> includes) {
-    //     return null; 
-	// }
 
     @Override
     public ValueSet constructFHIR(Long fhirId, ConceptRelationship conceptRelationship) {
@@ -113,17 +111,6 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, CodeSystemResourceProvider.getType());
 		}
 
-        // ConceptRelationship conceptRelationship = new ConceptRelationship();
-        //concept_realtionship?? 
-
-		// Long omopRecordId = null;
-		// if (concept.getId() != null) {
-		// 	omopRecordId = conceptService.update(concept).getId();
-		// } else {
-		// 	omopRecordId = conceptService.create(concept).getId();
-		// }
-		// Long fhirRecordId = IdMapping.getFHIRfromOMOP(omopRecordId, CodeSystemResourceProvider.getType());
-		// return fhirRecordId;
         return null;
     }
 
@@ -177,7 +164,6 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
     
     @Override
     public ConceptRelationship constructOmop(Long omopId, ValueSet fhirResource) {
-        // TODO Auto-generated method stub
         return null;
     }
 

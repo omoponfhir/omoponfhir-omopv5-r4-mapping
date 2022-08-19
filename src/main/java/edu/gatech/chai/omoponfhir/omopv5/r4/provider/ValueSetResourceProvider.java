@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-//note: imports from Patient
 package edu.gatech.chai.omoponfhir.omopv5.r4.provider;
 
 
@@ -65,6 +64,11 @@ import edu.gatech.chai.omoponfhir.omopv5.r4.mapping.OmopValueSet;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ThrowFHIRExceptions;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 
+/**
+ * @author mfeng45 
+ * @version 1.0 
+ * This class will implement REST Operations for a ValueSet resource 
+ */
 public class ValueSetResourceProvider implements IResourceProvider {
 
 	private WebApplicationContext myAppCtx;
@@ -113,9 +117,9 @@ public class ValueSetResourceProvider implements IResourceProvider {
     }
 
 	/*
-	 * This method will add a new instance of a resource to the server 
+	 * TODO: This method will add a new instance of a resource to the server 
 	 */
-    @Create() //TODO
+    @Create()
     public MethodOutcome createValueSet(@ResourceParam ValueSet valueSet) {
         validateResource(valueSet); //TODO - determine if we need to validate the resource 
 
@@ -139,7 +143,7 @@ public class ValueSetResourceProvider implements IResourceProvider {
 
 	@Read()
     public ValueSet readValueSet(@IdParam IdType theId) {
-        ValueSet retVal = (ValueSet) getMyMapper().toFHIR(theId); //toFHIR is called for the read operation 
+        ValueSet retVal = (ValueSet) getMyMapper().toFHIR(theId); 
         if (retVal == null) {
             throw new ResourceNotFoundException(theId);
         }
@@ -175,8 +179,6 @@ public class ValueSetResourceProvider implements IResourceProvider {
 			@OptionalParam(name = ValueSet.SP_CONTEXT) TokenParam theContext,
 			@OptionalParam(name = ValueSet.SP_CONTEXT_QUANTITY) QuantityParam theContextQuantity,
 			@OptionalParam(name = ValueSet.SP_CONTEXT_TYPE) TokenParam theContextType,
-			// @OptionalParam(name = ValueSet.SP_CONTEXT_TYPE_QUANTITY) CompositeParam theContextTypeQuantity, //TODO fix the compsite type parameters 
-			// @OptionalParam(name = ValueSet.SP_CONTEXT_TYPE_VALUE) CompositeParam theContextTypeValue,
 			@OptionalParam(name = ValueSet.SP_DATE) DateParam theDate,
 			@OptionalParam(name = ValueSet.SP_DESCRIPTION) StringParam theDescription,
 			@OptionalParam(name = ValueSet.SP_EXPANSION) UriParam theExpansion,
@@ -279,14 +281,13 @@ public class ValueSetResourceProvider implements IResourceProvider {
 
     /*
 	 * $expand operation for a ValueSet 
-     * TODO - still need to add the other parameters 
+     * TODO
 	 */
     @Operation(name = "$expand", idempotent = true)
     public ValueSet ValueSetExpandOperation(
 		RequestDetails theRequestDetails, 
 		@IdParam IdType theValueSetId, 
 		@OperationParam(name = "url") UriType theUrl,
-		// @OperationParam(name = "valueSet") ValueSet theValueSet,  //Servers may choose to not accept value sets in this fashion 
 		@OperationParam(name = "valueSetVersion") StringType theValueSetVersion,
 		@OperationParam(name = "context") UriType theContext, 
 		@OperationParam(name = "contextDirection") CodeType theContextDirection, 
@@ -300,17 +301,8 @@ public class ValueSetResourceProvider implements IResourceProvider {
 			String url = null;
 			if (theUrl != null) url = theUrl.getValue();
 
-			// String valueSet = null;
-			// if (theValueSet != null) valueSet = theValueSet.getId(); //TODO decide if the server wants to accept Value sets in this way 
-
 			String valueSetVersion = null;
 			if (theValueSetVersion != null) valueSetVersion = theValueSetVersion.getValue();
-
-			// UriType context = null;
-			// if (theContext != null) context = theContext.getConceptSourceValue();
-
-			// CodeType contextDirection = null;
-			// if (theContextDirection != null) contextDirection = theContextDirection.getSystem();
 
 			String filter = null;
 			if (theFilter != null) filter = theFilter.getValue();
@@ -323,7 +315,7 @@ public class ValueSetResourceProvider implements IResourceProvider {
 
 
     // $validate-code operation 
-    //TODO - add other parameters and implementation 
+    //TODO
 	// @Operation(name = "$validate-code", idempotent = true)
     // public List<ParameterWrapper> ValueSetValidateCodeOperation (
     //     RequestDetails theRequestDetails, 
@@ -343,15 +335,15 @@ public class ValueSetResourceProvider implements IResourceProvider {
 	
 
 	
-	/*
-	 * 
+	/**
+	 * TODO: only add this if it is needed 
 	 * @param theValueSet The Code System to validate
 	 */
 	private void validateResource(ValueSet theValueSet) {
 		return;
 	}
 
-	//TODO
+
 	class MyBundleProvider extends OmopFhirBundleProvider {
 		Set<Include> theIncludes;
 		Set<Include> theReverseIncludes;
