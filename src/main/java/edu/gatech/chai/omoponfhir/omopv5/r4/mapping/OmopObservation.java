@@ -157,7 +157,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			unitSource = fObservationView.getUnitSourceValue();
 			if (unitSource != null && !unitSource.isEmpty()) {
 				unitUnit = unitSource;
-				unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, OmopCodeableConceptMapping.UCUM.getOmopVocabulary(), unitSource.replace("'", "''"));
+				unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, OmopCodeableConceptMapping.UCUM.getOmopVocabulary(), unitSource);
 			}
 		}
 		
@@ -587,7 +587,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				// source
 				// value.
 				String unitString = ((Quantity) systolicValue).getUnit();
-				systolicMeasurement.setUnitSourceValue(unitString.replace("'", "''"));
+				systolicMeasurement.setUnitSourceValue(unitString);
 
 				String unitSystem = ((Quantity) systolicValue).getSystem();
 				String unitCode = ((Quantity) systolicValue).getCode();
@@ -619,7 +619,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				// source
 				// value.
 				String unitString = ((Quantity) diastolicValue).getUnit();
-				diastolicMeasurement.setUnitSourceValue(unitString.replace("'", "''"));
+				diastolicMeasurement.setUnitSourceValue(unitString);
 
 				String unitSystem = ((Quantity) diastolicValue).getSystem();
 				String unitCode = ((Quantity) diastolicValue).getCode();
@@ -954,7 +954,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			// value.
 			String unitString = ((Quantity) valueType).getUnit();
 			if (unitString != null && !unitString.isEmpty()) {
-				measurement.setUnitSourceValue(unitString.replace("'", "''"));
+				measurement.setUnitSourceValue(unitString);
 			}
 
 			if (concept != null) {
@@ -1251,7 +1251,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 			// Save the unit in the unit source column to save the source value.
 			String unitString = ((Quantity) valueType).getUnit();
-			observation.setUnitSourceValue(unitString.replace("'", "''"));
+			observation.setUnitSourceValue(unitString);
 
 			if (concept != null) {
 				// If we found the concept for unit, use it. Otherwise, leave it

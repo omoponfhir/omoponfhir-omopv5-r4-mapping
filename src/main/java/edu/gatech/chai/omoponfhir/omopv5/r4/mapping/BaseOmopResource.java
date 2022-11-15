@@ -224,7 +224,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 			break;
 		case "Patient:" + Patient.SP_NAME:
 			String patientName = value.replace("\"", "");
-			patientName = patientName.replace("'", "");
+			// patientName = patientName.replace("'", "");
 			
 			paramWrapper.setParameterType("String");
 			paramWrapper.setParameters(Arrays.asList("fPerson.familyName", "fPerson.givenName1", "fPerson.givenName2",
@@ -236,7 +236,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 			break;
 		case "Patient:" + Patient.SP_IDENTIFIER:
 			String identifier = value.replace("\"", "");
-			identifier = identifier.replace("'", "");
+			// identifier = identifier.replace("'", "");
 
 			// Patient identifier should be token variable separated with |
 			String[] ids = identifier.split("\\|");

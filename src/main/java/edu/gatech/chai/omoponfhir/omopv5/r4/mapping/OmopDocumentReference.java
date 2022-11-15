@@ -154,49 +154,7 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 			break;
 		case DocumentReference.SP_DATE:
 			DateRangeParam dateRangeParam = ((DateRangeParam) value);
-			DateUtil.constructParameterWrapper(dateRangeParam, "noteDate", paramWrapper, mapList);
-			
-//			Date date = ((DateParam) value).getValue();
-//			ParamPrefixEnum prefix = ((DateParam) value).getPrefix();
-//			String inequality = "=";
-//			if (prefix.equals(ParamPrefixEnum.EQUAL)) inequality = "=";
-//			else if (prefix.equals(ParamPrefixEnum.LESSTHAN)) inequality = "<";
-//			else if (prefix.equals(ParamPrefixEnum.LESSTHAN_OR_EQUALS)) inequality = "<=";
-//			else if (prefix.equals(ParamPrefixEnum.GREATERTHAN)) inequality = ">";
-//			else if (prefix.equals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS)) inequality = ">=";
-//			else if (prefix.equals(ParamPrefixEnum.NOT_EQUAL)) inequality = "!=";
-//
-//			// get Date.
-//			SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-//			String time = timeFormat.format(date);
-//
-//			// get only date part.
-//			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//			Date dateWithoutTime = null;
-//			try {
-//				dateWithoutTime = sdf.parse(sdf.format(date));
-//			} catch (ParseException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//				break;
-//			}
-//
-//			System.out.println("TIME VALUE:"+String.valueOf(dateWithoutTime.getTime()));
-//			paramWrapper.setParameterType("Date");
-//			paramWrapper.setParameters(Arrays.asList("noteDate"));
-//			paramWrapper.setOperators(Arrays.asList(inequality));
-//			paramWrapper.setValues(Arrays.asList(String.valueOf(dateWithoutTime.getTime())));
-//			paramWrapper.setRelationship("and");
-//			mapList.add(paramWrapper);
-//			
-//			// Time
-//			ParameterWrapper paramWrapper_time = new ParameterWrapper();
-//			paramWrapper_time.setParameterType("String");
-//			paramWrapper_time.setParameters(Arrays.asList("noteDateTime"));
-//			paramWrapper_time.setOperators(Arrays.asList(inequality));
-//			paramWrapper_time.setValues(Arrays.asList(time));
-//			paramWrapper_time.setRelationship("and");
-//			mapList.add(paramWrapper_time);
+			DateUtil.constructParameterWrapper(dateRangeParam, "noteDate", paramWrapper, mapList);			
 			break;
 		case DocumentReference.SP_TYPE:
 			String system = ((TokenParam) value).getSystem();
@@ -237,11 +195,11 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 				paramWrapper.setOperators(Arrays.asList("="));
 				paramWrapper.setValues(Arrays.asList(code));
 			} else if (!"None".equals(omopVocabulary) && (code == null || code.isEmpty())) {
-				paramWrapper.setParameters(Arrays.asList("noteTypeConcept.vocabulary"));
+				paramWrapper.setParameters(Arrays.asList("noteTypeConcept.vocabularyId"));
 				paramWrapper.setOperators(Arrays.asList("="));
 				paramWrapper.setValues(Arrays.asList(omopVocabulary));				
 			} else {
-				paramWrapper.setParameters(Arrays.asList("noteTypeConcept.vocabulary", "noteTypeConcept.conceptCode"));
+				paramWrapper.setParameters(Arrays.asList("noteTypeConcept.vocabularyId", "noteTypeConcept.conceptCode"));
 				paramWrapper.setOperators(Arrays.asList("=","="));
 				paramWrapper.setValues(Arrays.asList(omopVocabulary, code));
 			}
