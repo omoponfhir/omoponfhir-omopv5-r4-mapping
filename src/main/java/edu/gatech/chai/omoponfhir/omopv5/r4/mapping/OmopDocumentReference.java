@@ -172,16 +172,18 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 					if ("LOINC".equals(omopVocabulary)) {
 						// Get concept id.
 						Concept loincConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabulary, code);
-						Long omopConceptId = OmopNoteTypeMapping.getOmopConceptIdFor(loincConcept.getId());
-						if (!omopConceptId.equals(0L)) {
-							// We found the mapping. Use this to compare with concept id.
-							paramWrapper.setParameterType("Long");
-							paramWrapper.setParameters(Arrays.asList("noteTypeConcept.id"));
-							paramWrapper.setOperators(Arrays.asList("="));
-							paramWrapper.setValues(Arrays.asList(String.valueOf(omopConceptId)));
-							paramWrapper.setRelationship("and");
-							mapList.add(paramWrapper);
-							break;
+						if (loincConcept != null) {
+							Long omopConceptId = OmopNoteTypeMapping.getOmopConceptIdFor(loincConcept.getId());
+							if (!omopConceptId.equals(0L)) {
+								// We found the mapping. Use this to compare with concept id.
+								paramWrapper.setParameterType("Long");
+								paramWrapper.setParameters(Arrays.asList("noteTypeConcept.id"));
+								paramWrapper.setOperators(Arrays.asList("="));
+								paramWrapper.setValues(Arrays.asList(String.valueOf(omopConceptId)));
+								paramWrapper.setRelationship("and");
+								mapList.add(paramWrapper);
+								break;
+							}
 						}
 					}
 				} catch (FHIRException e) {
