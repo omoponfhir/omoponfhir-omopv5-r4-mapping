@@ -184,6 +184,8 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 								mapList.add(paramWrapper);
 								break;
 							}
+						} else {
+							logger.warn("Provided LOINC code (" + code + ") could not be found from Concept table");
 						}
 					}
 				} catch (FHIRException e) {
