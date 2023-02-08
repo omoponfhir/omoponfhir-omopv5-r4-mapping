@@ -900,7 +900,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 	@Override
 	public String constructOrderParams(SortSpec theSort) {
 		if (theSort == null)
-			return null;
+			return "id ASC";
 
 //		String orderParams = new String();
 		String direction;

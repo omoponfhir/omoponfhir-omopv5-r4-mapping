@@ -353,7 +353,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 
 	public String constructOrderParams(SortSpec theSort) {
 		if (theSort == null)
-			return null;
+			return "id ASC";
 
 		String direction;
 
@@ -365,13 +365,13 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		String orderParam = new String();
 
 		if (theSort.getParamName().equals(Immunization.SP_VACCINE_CODE)) {
-			orderParam = "d.drugConcept.conceptCode " + direction;
+			orderParam = "immunizationConcept.conceptCode " + direction;
 		} else if (theSort.getParamName().equals(Immunization.SP_DATE)) {
-			orderParam = "d.drugExposureStartDate " + direction;
+			orderParam = "immunizationDate " + direction;
 		} else if (theSort.getParamName().equals(Immunization.SP_PATIENT)) {
-			orderParam = "d.person.id " + direction;
+			orderParam = "fPerson " + direction;
 		} else {
-			orderParam = "d.id " + direction;
+			orderParam = "id " + direction;
 		}
 
 		String orderParams = orderParam;

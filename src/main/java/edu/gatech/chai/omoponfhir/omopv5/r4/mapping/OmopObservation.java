@@ -835,7 +835,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 	
 	@Override
 	public String constructOrderParams(SortSpec theSort) {
-		if (theSort == null) return null;
+		if (theSort == null) return "id ASC";
 		
 		String direction;
 		
@@ -845,14 +845,14 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		String orderParam = new String(); 
 		
 		if (theSort.getParamName().equals(Observation.SP_CODE)) {
-			orderParam = "observationConcept_concept_code " + direction;
+			orderParam = "observationConcept.concept_code " + direction;
 		} else if (theSort.getParamName().equals(Observation.SP_DATE)) {
-			orderParam = "observation_observation_date " + direction;
+			orderParam = "observationDate " + direction;
 		} else if (theSort.getParamName().equals(Observation.SP_PATIENT) 
 				|| theSort.getParamName().equals(Observation.SP_SUBJECT)) {
-			orderParam = "fPerson_person_id " + direction;
+			orderParam = "fPerson " + direction;
 		} else {
-			orderParam = "observation_observation_id " + direction;
+			orderParam = "id " + direction;
 		}
 
 		String orderParams = orderParam;
