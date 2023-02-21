@@ -245,23 +245,35 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		// }
 
 		// Start mapping Person/FPerson table to Patient Resource.
-		Calendar calendar = Calendar.getInstance();
-		int yob, mob, dob;
-		if (fPerson.getYearOfBirth() != null && fPerson.getYearOfBirth() > 0)
-			yob = fPerson.getYearOfBirth();
-		else
-			yob = 1970;
-		if (fPerson.getMonthOfBirth() != null && fPerson.getMonthOfBirth() > 0)
-			mob = fPerson.getMonthOfBirth();
-		else
-			mob = 1;
-		if (fPerson.getDayOfBirth() != null && fPerson.getDayOfBirth() != 0)
-			dob = fPerson.getDayOfBirth();
-		else
-			dob = 1;
+		Date birthDateTime = fPerson.getBirthDateTime();
+		if (birthDateTime != null) {
+			patient.setBirthDate(birthDateTime);
+		} else {
+			Calendar calendar = Calendar.getInstance();
+			int yob, mob, dob;
+			if (fPerson.getYearOfBirth() != null && fPerson.getYearOfBirth() > 0)
+				yob = fPerson.getYearOfBirth();
+			else
+				yob = 1970;
 
-		calendar.set(yob, mob - 1, dob);
-		patient.setBirthDate(calendar.getTime());
+			if (fPerson.getMonthOfBirth() != null && fPerson.getMonthOfBirth() > 0)
+				mob = fPerson.getMonthOfBirth();
+			else
+				mob = 6;
+
+			if (fPerson.getDayOfBirth() != null && fPerson.getDayOfBirth() != 0) {
+				dob = fPerson.getDayOfBirth();
+			} else {
+				if (fPerson.getMonthOfBirth() == null || fPerson.getMonthOfBirth() == 0) {
+					dob = 15;
+				} else {
+					dob = 1;
+				}
+			}
+
+			calendar.set(yob, mob - 1, dob);
+			patient.setBirthDate(calendar.getTime());
+		}
 
 		if (fPerson.getLocation() != null && fPerson.getLocation().getId() != 0L) {
 			// WARNING check if mapping for lines are correct
