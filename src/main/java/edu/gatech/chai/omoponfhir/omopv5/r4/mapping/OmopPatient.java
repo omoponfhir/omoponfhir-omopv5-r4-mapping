@@ -247,15 +247,15 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		// Start mapping Person/FPerson table to Patient Resource.
 		Calendar calendar = Calendar.getInstance();
 		int yob, mob, dob;
-		if (fPerson.getYearOfBirth() != null)
+		if (fPerson.getYearOfBirth() != null && fPerson.getYearOfBirth() > 0)
 			yob = fPerson.getYearOfBirth();
 		else
-			yob = 1;
-		if (fPerson.getMonthOfBirth() != null)
+			yob = 1970;
+		if (fPerson.getMonthOfBirth() != null && fPerson.getMonthOfBirth() > 0)
 			mob = fPerson.getMonthOfBirth();
 		else
 			mob = 1;
-		if (fPerson.getDayOfBirth() != null)
+		if (fPerson.getDayOfBirth() != null && fPerson.getDayOfBirth() != 0)
 			dob = fPerson.getDayOfBirth();
 		else
 			dob = 1;

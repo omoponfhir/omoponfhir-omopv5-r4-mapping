@@ -16,7 +16,7 @@
 	<groupId>edu.gatech.chai</groupId>
 	<artifactId>omoponfhir-omopv5-r4-mapping</artifactId>
 	<packaging>jar</packaging>
-	<version>1.3.0</version>
+	<version>1.3.1</version>
 	<name>omoponfhir-omopv5-r4-mapping</name>
 	<description>OMOP on FHIR Mapping between OMOP version 5 and FHIR R4</description>
 	<url>http://maven.apache.org</url>
@@ -83,7 +83,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.3.3</version>
+			<version>42.5.4</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.gatech.chai</groupId>
