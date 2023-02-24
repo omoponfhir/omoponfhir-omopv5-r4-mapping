@@ -209,6 +209,12 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 
 		// Get medicationCodeableConcept
 		Concept drugConcept = entity.getDrugConcept();
+		if (drugConcept == null) {
+			// drug concept is required field. But, in case that this is null, we use 
+			// no matching code concept here to avoid an exception.
+			drugConcept = conceptService.findById(0L);
+		}
+
 		CodeableConcept medication;
 		try {
 			medication = CodeableConceptUtil.getCodeableConceptFromOmopConcept(drugConcept);
