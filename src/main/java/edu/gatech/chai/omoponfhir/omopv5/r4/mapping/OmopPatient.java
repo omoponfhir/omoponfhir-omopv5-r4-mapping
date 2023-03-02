@@ -99,7 +99,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopPatient() {

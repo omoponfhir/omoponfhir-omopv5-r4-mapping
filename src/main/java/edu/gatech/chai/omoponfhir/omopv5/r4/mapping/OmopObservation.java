@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -107,7 +109,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		initialize(context);
 
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopObservation() {
@@ -1928,13 +1930,13 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			List<IBaseResource> listResources, List<String> includes, String sort) {
 		paramList.add(exceptionParam4Search);
 
-		long start = System.currentTimeMillis();
+		// long start = System.currentTimeMillis();
 		
 		List<FObservationView> fObservationViews = getMyOmopService().searchWithParams(fromIndex, toIndex, paramList,
 				sort);
 
-		long gettingObses = System.currentTimeMillis()-start;
-		logger.debug("gettingObses: at "+Long.toString(gettingObses)+" duration: "+Long.toString(gettingObses));
+		// long gettingObses = System.currentTimeMillis()-start;
+		// logger.debug("gettingObses: at "+Long.toString(gettingObses)+" duration: "+Long.toString(gettingObses));
 
 		for (FObservationView fObservationView : fObservationViews) {
 			Long omopId = fObservationView.getId();

@@ -98,7 +98,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		initialize(context);
 
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopMedicationStatement() {

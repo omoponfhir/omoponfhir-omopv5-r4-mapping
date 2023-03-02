@@ -67,7 +67,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 				AllergyIntoleranceResourceProvider.getType());
 		initialize(context);
 		
-		getSize();
+		getSize(true);
 	}
 
 	public OmopAllergyIntolerance() {

@@ -101,7 +101,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 
 		// String sizeSql = "select count(distinct d) from " + _from + " where " + _where;
 		// getSize(sizeSql, null, null);
-		getSize();
+		getSize(true);
 	}
 
 	public OmopImmunization() {

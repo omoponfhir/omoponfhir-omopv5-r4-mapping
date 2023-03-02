@@ -58,7 +58,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 	
 	public OmopPractitioner() {

@@ -55,7 +55,7 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopOrganization() {

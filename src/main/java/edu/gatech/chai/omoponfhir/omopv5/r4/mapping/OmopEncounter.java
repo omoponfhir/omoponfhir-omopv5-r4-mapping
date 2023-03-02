@@ -76,7 +76,7 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	private void initialize(WebApplicationContext context) {

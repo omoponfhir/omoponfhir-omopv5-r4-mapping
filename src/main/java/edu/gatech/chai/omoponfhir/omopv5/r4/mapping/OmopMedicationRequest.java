@@ -91,7 +91,7 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 		initialize(context);
 
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 	
 	public OmopMedicationRequest() {

@@ -88,7 +88,7 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	private void initialize(WebApplicationContext context) {

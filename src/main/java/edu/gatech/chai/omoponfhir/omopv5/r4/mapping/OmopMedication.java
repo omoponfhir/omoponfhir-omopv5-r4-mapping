@@ -46,7 +46,7 @@ public class OmopMedication extends BaseOmopResource<Medication, Concept, Concep
 		initialize(context);
 
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopMedication() {

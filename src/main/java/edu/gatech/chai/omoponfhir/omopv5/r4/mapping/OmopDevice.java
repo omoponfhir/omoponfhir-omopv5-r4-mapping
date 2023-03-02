@@ -52,7 +52,7 @@ public class OmopDevice extends BaseOmopResource<Device, DeviceExposure, DeviceE
 		initialize(context);
 
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 	
 	public OmopDevice() {
