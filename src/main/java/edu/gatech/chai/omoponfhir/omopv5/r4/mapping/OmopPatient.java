@@ -957,7 +957,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		List<Identifier> identifiers = patient.getIdentifier();
 		boolean first = true;
 		for (Identifier identifier : identifiers) {
-			if (!identifier.getValue().isEmpty()) {
+			if (identifier.getValue() != null && !identifier.getValue().isEmpty()) {
 				String personSourceValueTemp = getPersonSourceValue(identifier);
 				if (first) {
 					personSourceValue = personSourceValueTemp;
