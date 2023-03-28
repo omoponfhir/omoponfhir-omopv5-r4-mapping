@@ -162,7 +162,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 				mapList.add(paramWrapper);
 				break;
 
-				case Immunization.SP_VACCINE_CODE:
+			case Immunization.SP_VACCINE_CODE:
 				String system = ((TokenParam) value).getSystem();
 				String code = ((TokenParam) value).getValue();
 	//			System.out.println("\n\n\n\n\nSystem:"+system+"\n\ncode:"+code+"\n\n\n\n\n");
