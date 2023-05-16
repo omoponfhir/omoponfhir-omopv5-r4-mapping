@@ -69,7 +69,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 	
 	public OmopDeviceUseStatement() {

@@ -18,6 +18,7 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.mapping;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		initialize(context);
 
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopMedicationStatement() {
@@ -208,6 +209,12 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 
 		// Get medicationCodeableConcept
 		Concept drugConcept = entity.getDrugConcept();
+		if (drugConcept == null) {
+			// drug concept is required field. But, in case that this is null, we use 
+			// no matching code concept here to avoid an exception.
+			drugConcept = conceptService.findById(0L);
+		}
+
 		CodeableConcept medication;
 		try {
 			medication = CodeableConceptUtil.getCodeableConceptFromOmopConcept(drugConcept);
@@ -248,19 +255,57 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		// }
 
 		// Get effectivePeriod
-		Period period = new Period();
 		Date startDate = entity.getDrugExposureStartDate();
-		if (startDate != null) {
-			period.setStart(startDate);
-		}
-
+		Date startDateTime = entity.getDrugExposureEndDateTime();
 		Date endDate = entity.getDrugExposureEndDate();
-		if (endDate != null) {
-			period.setEnd(endDate);
-		}
+		Date endDateTime = entity.getDrugExposureEndDateTime();
 
-		if (!period.isEmpty()) {
-			medicationStatement.setEffective(period);
+		// startDate is required. Thus, if startDate is null, we 
+		// just put 0, which is Jan 1970.
+		Calendar calendar = Calendar.getInstance();
+		if (startDate != null) {
+			// First make one date including time if available.
+			if (startDateTime != null) {
+				calendar.setTime(startDateTime);
+				int hour24 = calendar.get(Calendar.HOUR_OF_DAY);
+				int min = calendar.get(Calendar.MINUTE);
+				int sec = calendar.get(Calendar.SECOND);
+
+				calendar.setTime(startDate);
+				calendar.set(Calendar.HOUR_OF_DAY, hour24);
+				calendar.set(Calendar.MINUTE, min);
+				calendar.set(Calendar.SECOND, sec);
+
+				startDate = calendar.getTime();
+			}
+
+			if (endDate != null && endDateTime != null) {
+				calendar.setTime(endDateTime);
+				int hour24 = calendar.get(Calendar.HOUR_OF_DAY);
+				int min = calendar.get(Calendar.MINUTE);
+				int sec = calendar.get(Calendar.SECOND);
+
+				calendar.setTime(endDate);
+				calendar.set(Calendar.HOUR_OF_DAY, hour24);
+				calendar.set(Calendar.MINUTE, min);
+				calendar.set(Calendar.SECOND, sec);
+
+				endDate = calendar.getTime();
+			}
+
+			if (endDate == null || (startDate == endDate)) {
+				// This is single datatime
+				medicationStatement.setEffective(new DateTimeType(startDate));
+			} else {
+				Period period = new Period();
+
+				period.setStart(startDate);
+				period.setEnd(endDate);
+				
+				medicationStatement.setEffective(period);
+			}
+		} else {
+			medicationStatement.setEffective(new DateTimeType(new Date(0L)));
 		}
 
 		// Get drug dose

@@ -67,7 +67,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 				AllergyIntoleranceResourceProvider.getType());
 		initialize(context);
 		
-		getSize();
+		getSize(true);
 	}
 
 	public OmopAllergyIntolerance() {
@@ -94,7 +94,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 
 	@Override
 	public String constructOrderParams(SortSpec theSort) {
-		if (theSort == null) return null;
+		if (theSort == null) return "id ASC";
 
 		String direction;
 
@@ -104,13 +104,13 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 		String orderParam = new String();
 
 		if (theSort.getParamName().equals(AllergyIntolerance.SP_CODE)) {
-			orderParam = "observationConcept_concept_code " + direction;
+			orderParam = "observationConcept.concept_code " + direction;
 		} else if (theSort.getParamName().equals(AllergyIntolerance.SP_DATE)) {
 			orderParam = "observationDate " + direction;
 		} else if (theSort.getParamName().equals(AllergyIntolerance.SP_PATIENT)) {
-			orderParam = "fPerson_person_id " + direction;
+			orderParam = "fPerson.person_id " + direction;
 		} else {
-			orderParam = "observation_observation_id " + direction;
+			orderParam = "id " + direction;
 		}
 
 		String orderParams = orderParam;

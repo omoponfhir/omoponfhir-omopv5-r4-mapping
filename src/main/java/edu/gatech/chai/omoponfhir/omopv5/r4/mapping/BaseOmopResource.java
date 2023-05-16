@@ -100,6 +100,10 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 		return myOmopService.removeById(myId);
 	}
 
+	public Long getSize(boolean cacheOnly) {
+		return myOmopService.getSize(true);
+	}
+
 	public Long getSize() {
 		Long size = myOmopService.getSize();
 		
@@ -108,8 +112,16 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 		return size;
 	}
 
+	public Long getSize(List<ParameterWrapper> mapList, boolean cacheOnly) {
+		return myOmopService.getSize(mapList, cacheOnly);
+	}
+
 	public Long getSize(List<ParameterWrapper> mapList) {
 		return myOmopService.getSize(mapList);
+	}
+
+	public Long getSize(String queryString, List<String> parameterList, List<String> valueList, boolean cacheOnly) {
+		return myOmopService.getSize(queryString, parameterList, valueList, cacheOnly);
 	}
 
 	public Long getSize(String queryString, List<String> parameterList, List<String> valueList) {
@@ -224,7 +236,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 			break;
 		case "Patient:" + Patient.SP_NAME:
 			String patientName = value.replace("\"", "");
-			patientName = patientName.replace("'", "");
+			// patientName = patientName.replace("'", "");
 			
 			paramWrapper.setParameterType("String");
 			paramWrapper.setParameters(Arrays.asList("fPerson.familyName", "fPerson.givenName1", "fPerson.givenName2",
@@ -236,7 +248,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 			break;
 		case "Patient:" + Patient.SP_IDENTIFIER:
 			String identifier = value.replace("\"", "");
-			identifier = identifier.replace("'", "");
+			// identifier = identifier.replace("'", "");
 
 			// Patient identifier should be token variable separated with |
 			String[] ids = identifier.split("\\|");
@@ -274,6 +286,8 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	
 	public String constructOrderParams(SortSpec theSort) {
 		String direction;
+		
+		if (theSort == null) return "id ASC";
 		
 		if (theSort.getOrder() != null) direction = theSort.getOrder().toString();
 		else direction = "ASC";

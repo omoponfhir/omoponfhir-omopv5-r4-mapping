@@ -55,7 +55,7 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopOrganization() {
@@ -116,17 +116,18 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 		if (fhirId != null) {
 			omopId = IdMapping.getOMOPfromFHIR(fhirId.getIdPartAsLong(), OrganizationResourceProvider.getType());
 		} else {
-			// See if we have this already. If so, we throw error.
 			// Get the identifier to store the source information.
 			// If we found a matching one, replace this with the careSite.
 			List<Identifier> identifiers = organization.getIdentifier();
-			CareSite existingCareSite = null;
-			String careSiteSourceValue = null;
 			for (Identifier identifier: identifiers) {
-				if (identifier.getValue().isEmpty() == false) {
-					careSiteSourceValue = identifier.getValue();
+				if (identifier.getValue() != null && !identifier.getValue().isEmpty()) {
+					String careSiteSourceValue = identifier.getValue();
 					
-					existingCareSite = getMyOmopService().searchByColumnString("careSiteSourceValue", careSiteSourceValue).get(0);
+					CareSite existingCareSite = null;
+					List<CareSite> sites = getMyOmopService().searchByColumnString("careSiteSourceValue", careSiteSourceValue);
+					if (sites != null && sites.size() > 0) {
+						existingCareSite = getMyOmopService().searchByColumnString("careSiteSourceValue", careSiteSourceValue).get(0);
+					}
 					if (existingCareSite != null) {
 						omopId = existingCareSite.getId();
 						break;

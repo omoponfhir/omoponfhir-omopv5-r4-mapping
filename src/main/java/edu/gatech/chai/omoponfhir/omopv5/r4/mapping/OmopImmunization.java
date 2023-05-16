@@ -101,7 +101,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 
 		// String sizeSql = "select count(distinct d) from " + _from + " where " + _where;
 		// getSize(sizeSql, null, null);
-		getSize();
+		getSize(true);
 	}
 
 	public OmopImmunization() {
@@ -162,7 +162,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 				mapList.add(paramWrapper);
 				break;
 
-				case Immunization.SP_VACCINE_CODE:
+			case Immunization.SP_VACCINE_CODE:
 				String system = ((TokenParam) value).getSystem();
 				String code = ((TokenParam) value).getValue();
 	//			System.out.println("\n\n\n\n\nSystem:"+system+"\n\ncode:"+code+"\n\n\n\n\n");
@@ -353,7 +353,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 
 	public String constructOrderParams(SortSpec theSort) {
 		if (theSort == null)
-			return null;
+			return "id ASC";
 
 		String direction;
 
@@ -365,13 +365,13 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		String orderParam = new String();
 
 		if (theSort.getParamName().equals(Immunization.SP_VACCINE_CODE)) {
-			orderParam = "d.drugConcept.conceptCode " + direction;
+			orderParam = "immunizationConcept.conceptCode " + direction;
 		} else if (theSort.getParamName().equals(Immunization.SP_DATE)) {
-			orderParam = "d.drugExposureStartDate " + direction;
+			orderParam = "immunizationDate " + direction;
 		} else if (theSort.getParamName().equals(Immunization.SP_PATIENT)) {
-			orderParam = "d.person.id " + direction;
+			orderParam = "fPerson " + direction;
 		} else {
-			orderParam = "d.id " + direction;
+			orderParam = "id " + direction;
 		}
 
 		String orderParams = orderParam;

@@ -71,7 +71,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopProcedure() {

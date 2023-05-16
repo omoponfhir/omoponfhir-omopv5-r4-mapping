@@ -99,7 +99,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopPatient() {
@@ -245,23 +245,35 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		// }
 
 		// Start mapping Person/FPerson table to Patient Resource.
-		Calendar calendar = Calendar.getInstance();
-		int yob, mob, dob;
-		if (fPerson.getYearOfBirth() != null)
-			yob = fPerson.getYearOfBirth();
-		else
-			yob = 1;
-		if (fPerson.getMonthOfBirth() != null)
-			mob = fPerson.getMonthOfBirth();
-		else
-			mob = 1;
-		if (fPerson.getDayOfBirth() != null)
-			dob = fPerson.getDayOfBirth();
-		else
-			dob = 1;
+		Date birthDateTime = fPerson.getBirthDateTime();
+		if (birthDateTime != null) {
+			patient.setBirthDate(birthDateTime);
+		} else {
+			Calendar calendar = Calendar.getInstance();
+			int yob, mob, dob;
+			if (fPerson.getYearOfBirth() != null && fPerson.getYearOfBirth() > 0)
+				yob = fPerson.getYearOfBirth();
+			else
+				yob = 1970;
 
-		calendar.set(yob, mob - 1, dob);
-		patient.setBirthDate(calendar.getTime());
+			if (fPerson.getMonthOfBirth() != null && fPerson.getMonthOfBirth() > 0)
+				mob = fPerson.getMonthOfBirth();
+			else
+				mob = 6;
+
+			if (fPerson.getDayOfBirth() != null && fPerson.getDayOfBirth() != 0) {
+				dob = fPerson.getDayOfBirth();
+			} else {
+				if (fPerson.getMonthOfBirth() == null || fPerson.getMonthOfBirth() == 0) {
+					dob = 15;
+				} else {
+					dob = 1;
+				}
+			}
+
+			calendar.set(yob, mob - 1, dob);
+			patient.setBirthDate(calendar.getTime());
+		}
 
 		if (fPerson.getLocation() != null && fPerson.getLocation().getId() != 0L) {
 			// WARNING check if mapping for lines are correct
@@ -342,10 +354,10 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 			String[] contactInfo = fPerson.getContactPoint1().split(":");
 			if (contactInfo.length == 3) {
 				ContactPoint contactPoint = new ContactPoint();
-				if(!contactInfo[0].equalsIgnoreCase("null")){
+				if(!contactInfo[0].isBlank() && !contactInfo[0].equalsIgnoreCase("null")){
 					contactPoint.setSystem(ContactPoint.ContactPointSystem.valueOf(contactInfo[0].toUpperCase()));
 				}
-				if(!contactInfo[1].equalsIgnoreCase("null")){
+				if(!contactInfo[0].isBlank() && !contactInfo[1].equalsIgnoreCase("null")){
 					contactPoint.setUse(ContactPoint.ContactPointUse.valueOf(contactInfo[1].toUpperCase()));
 				}
 				contactPoint.setValue(contactInfo[2]);
@@ -900,7 +912,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 	@Override
 	public String constructOrderParams(SortSpec theSort) {
 		if (theSort == null)
-			return null;
+			return "id ASC";
 
 //		String orderParams = new String();
 		String direction;
@@ -945,7 +957,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		List<Identifier> identifiers = patient.getIdentifier();
 		boolean first = true;
 		for (Identifier identifier : identifiers) {
-			if (!identifier.getValue().isEmpty()) {
+			if (identifier.getValue() != null && !identifier.getValue().isEmpty()) {
 				String personSourceValueTemp = getPersonSourceValue(identifier);
 				if (first) {
 					personSourceValue = personSourceValueTemp;

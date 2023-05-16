@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -107,7 +109,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		initialize(context);
 
 		// Get count and put it in the counts.
-		getSize();
+		getSize(true);
 	}
 
 	public OmopObservation() {
@@ -157,7 +159,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			unitSource = fObservationView.getUnitSourceValue();
 			if (unitSource != null && !unitSource.isEmpty()) {
 				unitUnit = unitSource;
-				unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, OmopCodeableConceptMapping.UCUM.getOmopVocabulary(), unitSource.replace("'", "''"));
+				unitConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, OmopCodeableConceptMapping.UCUM.getOmopVocabulary(), unitSource);
 			}
 		}
 		
@@ -587,7 +589,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				// source
 				// value.
 				String unitString = ((Quantity) systolicValue).getUnit();
-				systolicMeasurement.setUnitSourceValue(unitString.replace("'", "''"));
+				systolicMeasurement.setUnitSourceValue(unitString);
 
 				String unitSystem = ((Quantity) systolicValue).getSystem();
 				String unitCode = ((Quantity) systolicValue).getCode();
@@ -619,7 +621,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				// source
 				// value.
 				String unitString = ((Quantity) diastolicValue).getUnit();
-				diastolicMeasurement.setUnitSourceValue(unitString.replace("'", "''"));
+				diastolicMeasurement.setUnitSourceValue(unitString);
 
 				String unitSystem = ((Quantity) diastolicValue).getSystem();
 				String unitCode = ((Quantity) diastolicValue).getCode();
@@ -835,7 +837,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 	
 	@Override
 	public String constructOrderParams(SortSpec theSort) {
-		if (theSort == null) return null;
+		if (theSort == null) return "id ASC";
 		
 		String direction;
 		
@@ -845,14 +847,14 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		String orderParam = new String(); 
 		
 		if (theSort.getParamName().equals(Observation.SP_CODE)) {
-			orderParam = "observationConcept_concept_code " + direction;
+			orderParam = "observationConcept.concept_code " + direction;
 		} else if (theSort.getParamName().equals(Observation.SP_DATE)) {
-			orderParam = "observation_observation_date " + direction;
+			orderParam = "observationDate " + direction;
 		} else if (theSort.getParamName().equals(Observation.SP_PATIENT) 
 				|| theSort.getParamName().equals(Observation.SP_SUBJECT)) {
-			orderParam = "fPerson_person_id " + direction;
+			orderParam = "fPerson " + direction;
 		} else {
-			orderParam = "observation_observation_id " + direction;
+			orderParam = "id " + direction;
 		}
 
 		String orderParams = orderParam;
@@ -954,7 +956,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			// value.
 			String unitString = ((Quantity) valueType).getUnit();
 			if (unitString != null && !unitString.isEmpty()) {
-				measurement.setUnitSourceValue(unitString.replace("'", "''"));
+				measurement.setUnitSourceValue(unitString);
 			}
 
 			if (concept != null) {
@@ -1251,7 +1253,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 			// Save the unit in the unit source column to save the source value.
 			String unitString = ((Quantity) valueType).getUnit();
-			observation.setUnitSourceValue(unitString.replace("'", "''"));
+			observation.setUnitSourceValue(unitString);
 
 			if (concept != null) {
 				// If we found the concept for unit, use it. Otherwise, leave it
@@ -1928,13 +1930,13 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 			List<IBaseResource> listResources, List<String> includes, String sort) {
 		paramList.add(exceptionParam4Search);
 
-		long start = System.currentTimeMillis();
+		// long start = System.currentTimeMillis();
 		
 		List<FObservationView> fObservationViews = getMyOmopService().searchWithParams(fromIndex, toIndex, paramList,
 				sort);
 
-		long gettingObses = System.currentTimeMillis()-start;
-		logger.debug("gettingObses: at "+Long.toString(gettingObses)+" duration: "+Long.toString(gettingObses));
+		// long gettingObses = System.currentTimeMillis()-start;
+		// logger.debug("gettingObses: at "+Long.toString(gettingObses)+" duration: "+Long.toString(gettingObses));
 
 		for (FObservationView fObservationView : fObservationViews) {
 			Long omopId = fObservationView.getId();
