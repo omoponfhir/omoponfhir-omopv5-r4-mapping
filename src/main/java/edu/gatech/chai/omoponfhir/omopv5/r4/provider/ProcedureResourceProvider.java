@@ -174,8 +174,8 @@ public class ProcedureResourceProvider implements IResourceProvider {
 
 	@Search()
 	public IBundleProvider findProcedureById(
-			@RequiredParam(name = Procedure.SP_RES_ID) TokenParam theProcedureId, @IncludeParam(allow = {
-					"Procedure:patient", "Procedure:performer", "Procedure:context" }) final Set<Include> theIncludes) {
+			@RequiredParam(name = Procedure.SP_RES_ID) TokenParam theProcedureId, 
+			@IncludeParam(allow = {"Procedure:patient", "Procedure:performer", "Procedure:context" }) final Set<Include> theIncludes) {
 		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 
 		if (theProcedureId != null) {

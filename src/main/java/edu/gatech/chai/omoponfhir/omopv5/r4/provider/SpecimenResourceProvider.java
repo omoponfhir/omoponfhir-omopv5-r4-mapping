@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Specimen;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -50,24 +50,23 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import edu.gatech.chai.omoponfhir.omopv5.r4.mapping.OmopObservation;
+import edu.gatech.chai.omoponfhir.omopv5.r4.mapping.OmopSpecimen;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ThrowFHIRExceptions;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 
-public class ObservationResourceProvider implements IResourceProvider {
+public class SpecimenResourceProvider implements IResourceProvider {
 
 	private WebApplicationContext myAppCtx;
-	private OmopObservation myMapper;
+	private OmopSpecimen myMapper;
 	private int preferredPageSize = 30;
 
-	public ObservationResourceProvider() {
+	public SpecimenResourceProvider() {
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
-		myMapper = new OmopObservation(myAppCtx);
+		myMapper = new OmopSpecimen(myAppCtx);
 		
 		String pageSizeStr = myAppCtx.getServletContext().getInitParameter("preferredPageSize");
 		if (pageSizeStr != null && !pageSizeStr.isEmpty()) {
@@ -79,10 +78,10 @@ public class ObservationResourceProvider implements IResourceProvider {
 	}
 	
 	public static String getType() {
-		return "Observation";
+		return "Specimen";
 	}
 
-	public OmopObservation getMyMapper() {
+	public OmopSpecimen getMyMapper() {
 		return myMapper;
 	}
 	
@@ -103,12 +102,12 @@ public class ObservationResourceProvider implements IResourceProvider {
 	 * new instance of a resource to the server.
 	 */
 	@Create()
-	public MethodOutcome createObservation(@ResourceParam Observation theObservation) {
-		validateResource(theObservation);
+	public MethodOutcome createSpecimen(@ResourceParam Specimen theSpecimen) {
+		validateResource(theSpecimen);
 		
 		Long id = null;
 		try {
-			id = getMyMapper().toDbase(theObservation, null);
+			id = getMyMapper().toDbase(theSpecimen, null);
 		} catch (FHIRException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -121,6 +120,7 @@ public class ObservationResourceProvider implements IResourceProvider {
 			outcome.addIssue().setSeverity(IssueSeverity.FATAL).setDetails(detailCode);
 			throw new UnprocessableEntityException(FhirContext.forDstu3(), outcome);
 		}
+
 		return new MethodOutcome(new IdDt(id));
 	}
 
@@ -132,14 +132,11 @@ public class ObservationResourceProvider implements IResourceProvider {
 	}
 
 	@Search()
-	public IBundleProvider findObservationsById(
-			@RequiredParam(name=Observation.SP_RES_ID) TokenParam theObservationId,
+	public IBundleProvider findSpecimenssById(
+			@RequiredParam(name=Specimen.SP_RES_ID) TokenParam theSpecimenId,
 			@Sort SortSpec theSort,
 
-			@IncludeParam(allow={"Observation:based-on", "Observation:context", 
-					"Observation:device", "Observation:encounter", "Observation:patient", 
-					"Observation:performer", "Observation:related-target", 
-					"Observation:specimen", "Observation:subject"})
+			@IncludeParam(allow={"Specimen:subject"})
 			final Set<Include> theIncludes,
 			
 			@IncludeParam(reverse=true)
@@ -147,8 +144,8 @@ public class ObservationResourceProvider implements IResourceProvider {
 			) {
 		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper> ();
 
-		if (theObservationId != null) {
-			paramList.addAll(getMyMapper().mapParameter (Observation.SP_RES_ID, theObservationId, false));
+		if (theSpecimenId != null) {
+			paramList.addAll(getMyMapper().mapParameter (Specimen.SP_RES_ID, theSpecimenId, false));
 		}
 
 		String orderParams = getMyMapper().constructOrderParams(theSort);
@@ -161,36 +158,22 @@ public class ObservationResourceProvider implements IResourceProvider {
 	}
 	
 	@Search()
-	public IBundleProvider findObservationsByParams(
-			@OptionalParam(name=Observation.SP_CODE) TokenOrListParam theOrCodes,
-			@OptionalParam(name=Observation.SP_DATE) DateRangeParam theRangeDate,
-			@OptionalParam(name=Observation.SP_PATIENT, chainWhitelist={"", Patient.SP_NAME, Patient.SP_IDENTIFIER}) ReferenceParam thePatient,
-			@OptionalParam(name=Observation.SP_SUBJECT, chainWhitelist={"", Patient.SP_NAME, Patient.SP_IDENTIFIER}) ReferenceParam theSubject,
+	public IBundleProvider findSpecimensByParams(
+			@OptionalParam(name=Specimen.SP_COLLECTED) DateRangeParam theRangeDate,
+			@OptionalParam(name=Specimen.SP_PATIENT, chainWhitelist={"", Patient.SP_NAME, Patient.SP_IDENTIFIER}) ReferenceParam thePatient,
+			@OptionalParam(name=Specimen.SP_SUBJECT, chainWhitelist={"", Patient.SP_NAME, Patient.SP_IDENTIFIER}) ReferenceParam theSubject,
 			@Sort SortSpec theSort,
 
-			@IncludeParam(allow={"Observation:based-on", "Observation:context", 
-					"Observation:device", "Observation:encounter", "Observation:patient", 
-					"Observation:performer", "Observation:related-target", 
-					"Observation:specimen", "Observation:subject"})
+			@IncludeParam(allow={"Specimen:subject"})
 			final Set<Include> theIncludes,
 			
 			@IncludeParam(reverse=true)
             final Set<Include> theReverseIncludes
 			) {		
 		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper> ();
-
-		if (theOrCodes != null) {
-			List<TokenParam> codes = theOrCodes.getValuesAsQueryTokens();
-			boolean orValue = true;
-			if (codes.size() <= 1)
-				orValue = false;
-			for (TokenParam code : codes) {
-				paramList.addAll(getMyMapper().mapParameter(Observation.SP_CODE, code, orValue));
-			}
-		}
 		
 		if (theRangeDate != null) {
-			paramList.addAll(getMyMapper().mapParameter(Observation.SP_DATE, theRangeDate, false));
+			paramList.addAll(getMyMapper().mapParameter(Specimen.SP_COLLECTED, theRangeDate, false));
 		}
 		
 		// With OMOP, we only support subject to be patient.
@@ -245,8 +228,8 @@ public class ObservationResourceProvider implements IResourceProvider {
 	 * @return Returns a resource matching this identifier, or null if none exists.
 	 */
 	@Read()
-	public Observation readObservation(@IdParam IdType theId) {
-		Observation retval = (Observation) getMyMapper().toFHIR(theId);
+	public Specimen readSpecimen(@IdParam IdType theId) {
+		Specimen retval = (Specimen) getMyMapper().toFHIR(theId);
 		if (retval == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -265,12 +248,12 @@ public class ObservationResourceProvider implements IResourceProvider {
 	 * @return This method returns a "MethodOutcome"
 	 */
 	@Update()
-	public MethodOutcome updateObservation(@IdParam IdType theId, @ResourceParam Observation theObservation) {
-		validateResource(theObservation);
+	public MethodOutcome updateSpecimen(@IdParam IdType theId, @ResourceParam Specimen theSpecimen) {
+		validateResource(theSpecimen);
 		
 		Long fhirId=null;
 		try {
-			fhirId = getMyMapper().toDbase(theObservation, theId);
+			fhirId = getMyMapper().toDbase(theSpecimen, theId);
 		} catch (FHIRException e) {
 			e.printStackTrace();
 		}
@@ -282,34 +265,29 @@ public class ObservationResourceProvider implements IResourceProvider {
 		return new MethodOutcome();
 	}
 	
-	// TODO: Add more validation code here.
-	private void validateResource(Observation theObservation) {
-		OperationOutcome outcome = new OperationOutcome();
-		CodeableConcept detailCode = new CodeableConcept();
-		if (theObservation.getCode().isEmpty()) {
-			detailCode.setText("No code is provided.");
-			outcome.addIssue().setSeverity(IssueSeverity.FATAL).setDetails(detailCode);
-			throw new UnprocessableEntityException(FhirContext.forDstu3(), outcome);
+	// TODO: Add validation code here.
+	private void validateResource(Specimen theSpecimen) {
+		if (theSpecimen.getSubject() == null || theSpecimen.getSubject().isEmpty()) {
+			throw new FHIRException("Specimen.subject is required in FHIR to OMOP mapping.");
 		}
-		
-		Reference subjectReference = theObservation.getSubject();
-		if (subjectReference == null || subjectReference.isEmpty()) {
-			detailCode.setText("Subject cannot be empty for OmopOnFHIR");
-			outcome.addIssue().setSeverity(IssueSeverity.FATAL).setDetails(detailCode);
-			throw new UnprocessableEntityException(FhirContext.forDstu3(), outcome);
+
+		if (!theSpecimen.getSubject().getReferenceElement().getResourceType().equalsIgnoreCase(PatientResourceProvider.getType())) {
+			throw new FHIRException("Specimen only supports " + PatientResourceProvider.getType()
+					+ " for subject. But provided [" + theSpecimen.getSubject().getReferenceElement().getResourceType() + "]");
 		}
-		
-		String subjectResource = subjectReference.getReferenceElement().getResourceType();
-		if (!subjectResource.contentEquals("Patient")) {
-			detailCode.setText("Subject ("+subjectResource+") must be Patient resource for OmopOnFHIR");
-			outcome.addIssue().setSeverity(IssueSeverity.FATAL).setDetails(detailCode);
-			throw new UnprocessableEntityException(FhirContext.forDstu3(), outcome);
+
+		if (theSpecimen.getCollection().isEmpty()) {
+			throw new FHIRException("Specimen.collection is required in FHIR to OMOP mapping.");
+		}
+
+		if (theSpecimen.getCollection().getCollected() == null || !(theSpecimen.getCollection().getCollected() instanceof DateTimeType)) {
+			throw new FHIRException("Specimen.collection.collectedDateTiem is required in FHIR to OMOP mapping.");
 		}
 	}
 
 	@Override
-	public Class<Observation> getResourceType() {
-		return Observation.class;
+	public Class<Specimen> getResourceType() {
+		return Specimen.class;
 	}
 
 	class MyBundleProvider extends OmopFhirBundleProvider {
@@ -329,41 +307,9 @@ public class ObservationResourceProvider implements IResourceProvider {
 			
 			// _Include
 			List<String> includes = new ArrayList<String>();
-			
-			if (theIncludes.contains(new Include("Observation:based-on"))) {
-				includes.add("Observation:based-on");
-			}
-			
-			if (theIncludes.contains(new Include("Observation:context"))) {
-				includes.add("Observation:context");
-			}
 
-			if (theIncludes.contains(new Include("Observation:device"))) {
-				includes.add("Observation:device");
-			}
-			
-			if (theIncludes.contains(new Include("Observation:encounter"))) {
-				includes.add("Observation:encounter");
-			}
-
-			if (theIncludes.contains(new Include("Observation:patient"))) {
-				includes.add("Observation:patient");
-			}
-
-			if (theIncludes.contains(new Include("Observation:performer"))) {
-				includes.add("Observation:performer");
-			}
-
-			if (theIncludes.contains(new Include("Observation:related-target"))) {
-				includes.add("Observation:related-target");
-			}
-
-			if (theIncludes.contains(new Include("Observation:specimen"))) {
-				includes.add("Observation:specimen");
-			}
-
-			if (theIncludes.contains(new Include("Observation:subject"))) {
-				includes.add("Observation:subject");
+			if (theIncludes.contains(new Include("Specimen:subject"))) {
+				includes.add("Specimen:subject");
 			}
 
 			if (paramList.size() == 0) {
