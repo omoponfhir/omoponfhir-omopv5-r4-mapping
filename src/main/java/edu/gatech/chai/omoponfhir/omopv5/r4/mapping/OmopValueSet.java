@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author mfeng45 
- * @version 1.0 
+ * @version 2.0 
  * This class will represent a ValueSet resource and implements FHIR operations 
  */
 public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship, ConceptRelationshipService> {
@@ -79,18 +79,18 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 	}
 
 
+    
+    /** 
+     * TODO: ConceptRelationshipService needs to implement a PK
+     * @param fhirId
+     * @param conceptRelationship
+     * @return ValueSet
+     */
     @Override
     public ValueSet constructFHIR(Long fhirId, ConceptRelationship conceptRelationship) {
         ValueSet valueSet = new ValueSet();
-        ConceptRelationship cr = conceptRelationship.getId();
-        valueSet.setId(new IdType(210000000000L));
-        
-        valueSet.setUrl("URl test");
-        valueSet.setName("name of the valueset");
-        valueSet.setTitle("title of the valueset");
-        valueSet.setStatus(PublicationStatus.ACTIVE);
-        valueSet.setDescription("description");
 
+        valueSet.setId(new IdType(fhirId));
         return valueSet;
     }
 
@@ -123,6 +123,7 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 	public Long removeByFhirId (IdType fhirId) throws FHIRException {
         return null;
     }
+
     @Override
     public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
         List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
@@ -135,8 +136,6 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
         }
         switch (parameter) {
         case ValueSet.SP_IDENTIFIER:
-            // String idValue = ((TokenParam) value).getValue();
-            // String idSystemValue = ((TokenParam) value).getSystem();
             paramWrapper.setParameterType("Integer");
             paramWrapper.setParameters(Arrays.asList("conceptId"));
             paramWrapper.setOperators(Arrays.asList("="));

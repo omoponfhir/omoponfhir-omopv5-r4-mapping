@@ -159,7 +159,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	public v toFHIR(IdType id) {
 		Long id_long_part = id.getIdPartAsLong();
 		Long myId = IdMapping.getOMOPfromFHIR(id_long_part, getMyFhirResourceType());
-
+		System.out.println("This is the id from baseOMOPResource " + id);
 		t entityClass = (t) getMyOmopService().findById(myId);
 		if (entityClass == null)
 			return null;

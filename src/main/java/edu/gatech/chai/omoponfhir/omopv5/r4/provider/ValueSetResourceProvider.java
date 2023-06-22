@@ -66,7 +66,7 @@ import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 
 /**
  * @author mfeng45 
- * @version 1.0 
+ * @version 2.0 
  * This class will implement REST Operations for a ValueSet resource 
  */
 public class ValueSetResourceProvider implements IResourceProvider {
@@ -88,10 +88,6 @@ public class ValueSetResourceProvider implements IResourceProvider {
 		}
 	}
 
-	/**
-	 * The getResourceType method comes from IResourceProvider, and must be
-	 * overridden to indicate what type of resource this provider supplies.
-	 */
 	@Override
 	public Class<ValueSet> getResourceType() {
 		return ValueSet.class;
@@ -279,11 +275,19 @@ public class ValueSetResourceProvider implements IResourceProvider {
     }
 
 
-    /*
-	 * $expand operation for a ValueSet 
-     * TODO
+    
+    
+	/** 
+	 * Used to create a simple collection of codes suitable for use for data entry or validation
+	 * @param url a canonical reference to a value set
+	 * @param valueSetVersion used to identify a specific version of the value set to be used when generating the expansion
+	 * @param context the context of the value set 
+	 * @param contextDirection if a context is provided, a context direction may also be provided
+	 * @param filter a text filter that is applied to restrict the codes that are returned
+	 * @param date is the date for which the expansion should be generated
+	 * @return ValueSet
 	 */
-    @Operation(name = "$expand", idempotent = true)
+	@Operation(name = "$expand", idempotent = true)
     public ValueSet ValueSetExpandOperation(
 		RequestDetails theRequestDetails, 
 		@IdParam IdType theValueSetId, 
@@ -309,6 +313,8 @@ public class ValueSetResourceProvider implements IResourceProvider {
 
 			Date date = null;
 			if (theDate != null) date = theDate.getValue();
+
+			// TODO: implement expand
 
         	return null;
 		}

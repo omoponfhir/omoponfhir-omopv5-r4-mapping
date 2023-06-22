@@ -169,28 +169,30 @@ public class PatientResourceProvider implements IResourceProvider {
 //	}
 
 	@Search()
-	public IBundleProvider findPatientsById(@RequiredParam(name=Patient.SP_RES_ID) TokenParam thePatientId,
-		@Sort SortSpec theSort,
+	public IBundleProvider findPatientsById(
+			@RequiredParam(name=Patient.SP_RES_ID) TokenParam thePatientId,
+			@Sort SortSpec theSort,
 
-		@IncludeParam(allow = { "Patient:general-practitioner", "Patient:organization",
+			@IncludeParam(allow = { "Patient:general-practitioner", "Patient:organization",
 			"Patient:link" }) final Set<Include> theIncludes,
-        @IncludeParam(allow = { "Encounter:subject",
+
+			@IncludeParam(allow = { "Encounter:subject",
 			"Observation:subject" }, reverse = true) final Set<Include> theReverseIncludes) {
 
-			List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper> ();
+		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper> ();
 
-			if (thePatientId != null) {
-				paramList.addAll(getMyMapper().mapParameter (Patient.SP_RES_ID, thePatientId, false));
-			}
+		if (thePatientId != null) {
+			paramList.addAll(getMyMapper().mapParameter (Patient.SP_RES_ID, thePatientId, false));
+		}
 
-			String orderParams = getMyMapper().constructOrderParams(theSort);
+		String orderParams = getMyMapper().constructOrderParams(theSort);
 
-			MyBundleProvider myBundleProvider = new MyBundleProvider(paramList, theIncludes, theReverseIncludes);
-			myBundleProvider.setTotalSize(getTotalSize(paramList));
-			myBundleProvider.setPreferredPageSize(preferredPageSize);
-			myBundleProvider.setOrderParams(orderParams);
-			return myBundleProvider;
-	    }
+		MyBundleProvider myBundleProvider = new MyBundleProvider(paramList, theIncludes, theReverseIncludes);
+		myBundleProvider.setTotalSize(getTotalSize(paramList));
+		myBundleProvider.setPreferredPageSize(preferredPageSize);
+		myBundleProvider.setOrderParams(orderParams);
+		return myBundleProvider;
+	}
 	
 	/**
 	 * The "@Search" annotation indicates that this method supports the search
@@ -371,11 +373,8 @@ public class PatientResourceProvider implements IResourceProvider {
 	 * $everything operation for a single patient.
 	 */
 	@Operation(name = "$everything", idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
-	public IBundleProvider patientEverythingOperation(
-		RequestDetails theRequestDetails, 
-		@IdParam IdType thePatientId, 
-		@OperationParam(name = "start") DateType theStart,
-		@OperationParam(name = "end") DateType theEnd) {
+	public IBundleProvider patientEverythingOperation(RequestDetails theRequestDetails, @IdParam IdType thePatientId, @OperationParam(name = "start") DateType theStart,
+			@OperationParam(name = "end") DateType theEnd) {
 
 		if (thePatientId == null) {
 			ThrowFHIRExceptions.unprocessableEntityException("Patient Id must be present");
@@ -393,7 +392,7 @@ public class PatientResourceProvider implements IResourceProvider {
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		resources.add(getMyMapper().toFHIR(thePatientId));
 
-		getMyMapper().getEverythingfor(resources, thePatientId.getIdPartAsLong(), startDate, endDate);
+		getMyMapper().getEverthingfor(resources, thePatientId.getIdPartAsLong(), startDate, endDate);
 		
 		final List<IBaseResource> retv = resources;
 		final Integer totalsize = retv.size();

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.IdType;
@@ -61,7 +62,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author mfeng45 
- * @version 1.0 
+ * @version 2.4 
  * This class will implement REST Operations for a CodeSystem resource 
  */
 public class CodeSystemResourceProvider implements IResourceProvider {
@@ -138,8 +139,10 @@ public class CodeSystemResourceProvider implements IResourceProvider {
      */
     @Delete()
     public void deleteCodeSystem(@IdParam IdType theId) {
-        if (getMyMapper().removeByFhirId(theId) <= 0) {
-            throw new ResourceNotFoundException(theId);
+        System.out.println("This is the deleteCodeSystem");
+        String FhirId = theId.getValue().substring(11); 
+        if (getMyMapper().removeByFhirId(new IdType (FhirId)) <= 0) {
+            throw new ResourceNotFoundException(FhirId);
         }
     }
 
@@ -151,13 +154,15 @@ public class CodeSystemResourceProvider implements IResourceProvider {
      */
     @Read()
     public CodeSystem readCodeSystem(@IdParam IdType theId) {
-        CodeSystem retVal = (CodeSystem) getMyMapper().toFHIR(theId);
+        String FhirId = theId.getValue().substring(11);
+        CodeSystem retVal = myMapper.toFHIR(new IdType(FhirId));
         if (retVal == null) {
-            throw new ResourceNotFoundException(theId);
+            throw new ResourceNotFoundException("The CodeSystem with id " + FhirId + " was not found.");
         }
+        System.out.println("The translated id in readCodeSystem is " + FhirId + " the retVal is " + retVal.getName());
         return retVal;
     }
-
+    
 
     /**
      * The search operation finds a resource by Id 
@@ -175,6 +180,7 @@ public class CodeSystemResourceProvider implements IResourceProvider {
             if (theCodeSystemId != null) {
                 paramList.addAll(getMyMapper().mapParameter(CodeSystem.SP_RES_ID, theCodeSystemId, false));
             }
+
             String orderParams = getMyMapper().constructOrderParams(theSort);
             MyBundleProvider myBundleProvider = new MyBundleProvider(paramList);
             myBundleProvider.setTotalSize(getTotalSize(paramList));
@@ -355,27 +361,35 @@ public class CodeSystemResourceProvider implements IResourceProvider {
         return retval;
     }
 
-	/**
-	 * TODO
-	 */
-    // @Operation(name = "$subsumes", idempotent = true)
-    // public ParameterWrapper codeSystemSubsumesOperation(
-    //  RequestDetails theRequestDetails, 
-    //  @OperationParam(name = "codeA") CodeType theCodeA,
-    //  @OperationParam(name = "codeB") CodeType theCodeB,
-    //  @OperationParam(name = "system") UriType theSystem, 
-    //  @OperationParam(name = "version") StringType theVersion,
-    //  @OperationParam(name = "codingA") Coding theCodingA, 
-    //  @OperationParam(name = "codingB") Coding theCodingB) {
-    //      return null; 
-    //  }
+	
+    
+    /** 
+     * The subsumes operation will test the relationship between code A and code B given the semantics of subsumption in the underlying CodeSystem
+     * @param codeA the "A" code that is to be tested. If a code is provided, a system must be provided
+     * @param codeB the "B" code that is to be tested. If a code is provided, a system must be provided
+     * @param theSystem the code system in which subsumption testing is to be performed 
+     * @return Parameters that represents the subsumption relationship between code A and code B
+     */
+    @Operation(name = "$subsumes", idempotent = true)
+    public Parameters codeSystemSubsumesOperation(
+     RequestDetails theRequestDetails, 
+     @OperationParam(name = "codeA") CodeType theCodeA,
+     @OperationParam(name = "codeB") CodeType theCodeB,
+     @OperationParam(name = "system") UriType theSystem) {
+        String codeA = "default";
+        String codeB = "default"; 
+        String system = "default";  
+        if (theCodeA != null)
+            {codeA = "CodeSystem/" + theCodeA.getValueAsString();}
+        if (theCodeB != null)
+            {codeB = "CodeSystem/" + theCodeB.getValueAsString();}
+        if (theSystem != null)
+            {system = theSystem.getValueAsString();}
 
-
-
-	/**
-	 * TODO
-	 */
-    // @Operation(name = "$find-matches", idempotent = true)
+        Parameters retval = new Parameters();
+        retval = myMapper.subsumes(codeA, codeB, system);
+        return retval;
+     }
 
  
     /**

@@ -18,6 +18,8 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.mapping;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.BooleanType;
@@ -42,20 +44,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.api.SortSpec;
 import edu.gatech.chai.omoponfhir.omopv5.r4.provider.CodeSystemResourceProvider;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.dba.service.VocabularyService;
 import edu.gatech.chai.omopv5.model.entity.Concept;
+import edu.gatech.chai.omopv5.model.entity.ConceptRelationship;
+import edu.gatech.chai.omopv5.dba.service.ConceptRelationshipService;
+import edu.gatech.chai.omopv5.model.entity.ConceptRelationshipPK;
 import edu.gatech.chai.omopv5.model.entity.Vocabulary;
 
 /**
  * @author mfeng45 
- * @version 1.0 
- * This class will represent a CodeSystem resource and implements FHIR operations 
+ * @version 2.4
+ * This class will represent a CodeSystem resource and implement FHIR operations 
  */
 public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, VocabularyService> {
 
@@ -63,12 +68,12 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
     private static OmopCodeSystem omopCodeSystem = new OmopCodeSystem();
     private VocabularyService vocabularyService;
     private ConceptService conceptService;
+    private ConceptRelationshipService conceptRelationshipService; 
+
 
     public OmopCodeSystem(WebApplicationContext context) {
         super(context, Vocabulary.class, VocabularyService.class, CodeSystemResourceProvider.getType());
         initialize(context);
-
-        getSize();
     }
 
     public OmopCodeSystem() {
@@ -81,10 +86,10 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         if (context != null) {
             vocabularyService = context.getBean(VocabularyService.class);
             conceptService = context.getBean(ConceptService.class);
+            conceptRelationshipService = context.getBean(ConceptRelationshipService.class);
         } else {
             logger.error("context must NOT be null");
         }
-        getSize();
     }
 
     public static OmopCodeSystem getInstance() {
@@ -99,51 +104,47 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
      * @return Codesystem that represents information from a vocabulary and concept entry and other concepts that belong in the specific CodeSystem
      */
     @Override
-    public CodeSystem constructFHIR(Long fhirId, Vocabulary vocabulary) { //important for entries in bundles 
+    public CodeSystem constructFHIR(Long fhirId, Vocabulary vocabulary) {
+        
         CodeSystem codeSystem = new CodeSystem();
         Concept codeSystemConcept = vocabulary.getVocabularyConcept();
-        
-        //TODO: maps to the correct id
-        codeSystem.setId(new IdType(fhirId));
+
+        // TODO: Implement getFHIRfromOMOP method in IdMapping.java so that we don't reveal the native OMOP ID  
+        // codeSystem.setId(new IdType(fhirId));
+        codeSystem.setId(new IdType(codeSystemConcept.getIdAsLong()));
         
         Calendar calendar = Calendar.getInstance();
-        if (codeSystemConcept.getValidStartDate() != null) {
-            calendar.setTime(codeSystemConcept.getValidStartDate());
-            codeSystem.setDate(calendar.getTime());
-        }
-        
         Meta metaData = new Meta();
-        String version;
-        if (vocabulary.getVocabularyVersion() != null) {
-            version = vocabulary.getVocabularyVersion();
-            metaData.setVersionId(version);
-        } else {
-            metaData.setVersionId("1");
+        Date date = codeSystemConcept.getValidStartDate();
+        if (date != null) {
+            calendar.setTime(date);
+            codeSystem.setDate(calendar.getTime());
+            metaData.setLastUpdated(calendar.getTime());
+            codeSystem.setMeta(metaData);
         }
-        metaData.setLastUpdated(calendar.getTime());
-        codeSystem.setMeta(metaData);
 
-        String uri;
+        //TODO: version is not compatible with FHIR -- ex. (OMOP CDM) LOINC 2.52 --> (FHIR) 2.52 
+        // String version;
+        // if (vocabulary.getVocabularyVersion() != null) {
+        //     version = vocabulary.getVocabularyVersion();
+        //     metaData.setVersionId(date.toString());   
+        // } 
+        
+        String url;
         if (vocabulary.getVocabularyReference() != null) {
-            uri = vocabulary.getVocabularyReference();
-            codeSystem.setUrl(uri);
-        } else {
-            codeSystem.setUrl("none");
+            url = vocabulary.getVocabularyReference();
+            codeSystem.setUrl(url);
         }
 
         String name;
         if (vocabulary.getId() != null) {
             name = vocabulary.getId();
             codeSystem.setName(name);
-        } else {
-            codeSystem.setName("none");
         }
 
         String title = vocabulary.getVocabularyName();
         if (title != null && !(title.isEmpty())) {
             codeSystem.setTitle(title);
-        } else {
-            codeSystem.setTitle("none");
         }
         
         //static values for status and content-mode 
@@ -153,7 +154,7 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         CodeSystemContentMode contentMode = CodeSystem.CodeSystemContentMode.COMPLETE;
         codeSystem.setContent(contentMode);
         
-        //to contain all of the codes in the codeSystem
+        //Linking the codes in the codeSystem
         List<ConceptDefinitionComponent> theConcept = new ArrayList<ConceptDefinitionComponent>();
 
         List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
@@ -173,11 +174,19 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
     }
 
     
+    
+    
+    /** 
+     * From FHIR to OMOP
+     * @param codeSystem is the CodeSystem to be mapped to OMOP
+     * @param fhirId Associated FHIR ID 
+     * @return Returns resource ID in Long 
+     */
     @Override
-    public Long toDbase(CodeSystem codeSystem, IdType fhirId) throws FHIRException { //for read operation 
+    public Long toDbase(CodeSystem codeSystem, IdType fhirId) throws FHIRException { 
         Long omopId = null;
         Long retval;
-
+        logger.debug("toDbase, the codesystem name is " + codeSystem.getName() + ". The fhirId is " + fhirId);
         if (fhirId != null) {
             // update
             omopId = fhirId.getIdPartAsLong();
@@ -187,7 +196,6 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
                 return null;
             }
         }
-
         Vocabulary vocabulary = constructOmop(omopId, codeSystem);
 
         if (vocabulary.getId() != null) {
@@ -224,11 +232,10 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
                 super.searchWithoutParams(fromIndex, toIndex, listResources, includes, sort);
     }
 
-
     @Override
     public void searchWithParams(int fromIndex, int toIndex, List<ParameterWrapper> mapList, List<IBaseResource> listResources, 
         List<String> includes, String sort) {
-            super.searchWithParams(fromIndex, toIndex, mapList, listResources, includes, sort);
+            super.searchWithParams(fromIndex, toIndex, mapList, listResources, includes, sort);   
     }
 
     /**
@@ -256,7 +263,7 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         }
         switch (parameter) {
             case CodeSystem.SP_RES_ID:
-                String id = ((TokenParam) value).getValue();
+                String id = ((String) value).substring(11);
                 paramWrapper.setParameterType("Long");
                 paramWrapper.setParameters(Arrays.asList("id"));
                 paramWrapper.setOperators(Arrays.asList("="));
@@ -337,9 +344,9 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
                 break;
             case CodeSystem.SP_CONTENT_MODE:
                 paramWrapper.setParameterType("String");
-                paramWrapper.setParameters(Arrays.asList("invalidReason")); //TODO: find where to set the parameter 
+                paramWrapper.setParameters(Arrays.asList("invalidReason")); 
                 paramWrapper.setOperators(Arrays.asList("like"));
-                paramWrapper.setValues(Arrays.asList("null"));
+                paramWrapper.setValues(Arrays.asList("active"));
                 paramWrapper.setRelationship("or");
                 mapList.add(paramWrapper);
                 break;
@@ -357,21 +364,20 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
      */
     @Override
     public Vocabulary constructOmop(Long omopId, CodeSystem codeSystem) {
-        //things to update: Concept, Vocabulary 
-
         Concept concept;
         Vocabulary vocabulary; 
+    
+        vocabulary = new Vocabulary();
+        concept = new Concept();
 
         if (omopId != null) {
-            vocabulary = getMyOmopService().findById(omopId);
-            // concept = conceptService.findById(id);
+            concept = conceptService.findById(omopId);
+            vocabulary = getMyOmopService().findById(concept.getVocabularyId());
         } else {
             vocabulary = new Vocabulary();
+            concept = new Concept();
         }
 
-        // if (concept == null) {
-        //     concept = new Concept();
-        // }
         // //set id 
         // Long id = 2100000000L;
         // concept.setId(id);
@@ -402,7 +408,8 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         // Calendar endDateCalendar = Calendar.getInstance();
         // endDateCalendar.set(2099, 12, 31);
         // concept.setValidEndDate(endDateCalendar.getTime());
-        return null;
+
+        return vocabulary;
 
     }
     
@@ -448,41 +455,41 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         displayParameter.setName("display");
 
         //there should only be one vocabulary that matches the details in the request 
+        //if default, disregard 
         for (Concept c: conceptIds) {
-            System.out.println("These are all the different concepts: " + c.getConceptName());
             if (c.getConceptCode().equals(code)) {
                 correctDisplay = c.getConceptName();
-                if (c.getConceptName().equals(display)) {
+                if (display.equals("default") || c.getConceptName().equals(display)) {
                     result = true;
                 }
             }
             displayParameter.setValue(new StringType(correctDisplay)); 
         }
+
         //HTTP 400 Bad Request if the CodeSystem defined in the request does not exist
         if (conceptIds.size() == 0) {
-            logger.error("$validate-code: trying to validate a code in which the CodeSystem does not exist.");
             OperationOutcome outcome = new OperationOutcome();
+            outcome.setId("exception");
             CodeableConcept detailCode = new CodeableConcept();
             detailCode.setText("The CodeSystem " + id.substring(11) + " does not exist");
-            outcome.addIssue().setSeverity(IssueSeverity.ERROR).setDetails(detailCode).setCode(IssueType.INVALID).setId("exception");
+            outcome.addIssue().setSeverity(IssueSeverity.ERROR).setDetails(detailCode).setCode(IssueType.INVALID);
             throw new InvalidRequestException("This is an invalid request", outcome);
         }
+
         //HTTP 400 Bad Request if the code defined in the request does not exist in the CodeSystem
         else if (correctDisplay.isEmpty()) {
-            logger.error("$validate-code: trying to validate a code that does not exist in the CodeSystem");
             OperationOutcome outcome = new OperationOutcome();
+            outcome.setId("exception");
             CodeableConcept detailCode = new CodeableConcept();
             detailCode.setText("The code " + code + " is not found");
-            outcome.addIssue().setSeverity(IssueSeverity.ERROR).setDetails(detailCode).setCode(IssueType.NOTFOUND).setId("exception");
+            outcome.addIssue().setSeverity(IssueSeverity.ERROR).setDetails(detailCode).setCode(IssueType.NOTFOUND);
             throw new InvalidRequestException("This is an invalid request", outcome);
         }
-
         
-
-        retVal.addParameter(displayParameter);
         ParametersParameterComponent resultParameter = new ParametersParameterComponent();
         resultParameter.setName("result");
         resultParameter.setValue(new BooleanType(result));
+        
         retVal.addParameter(resultParameter);
 
         //Error details, if result = false. If this is provided when result = true, the message carries hints and warnings
@@ -490,17 +497,15 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         messageParameter.setName("message");
         if (!result) {
             messageParameter.setValue(new StringType("The display " + display + " is incorrect"));
-        } else {
-            messageParameter.setValue(new StringType("The display " + display + " is correct for the " + id.substring(11) + " CodeSystem")); //todo - add appropriate hints and warnings 
+            retVal.addParameter(messageParameter);
         }
-        retVal.addParameter(messageParameter);
-        
+
+        retVal.addParameter(displayParameter);
         return retVal;
     }
 
     /**
      * FHIR operation $lookup on CodeSystem
-     * TODO: add OperationOutcomes for bad requests (look at validate-code to see how this is done)
      * Given a code/system, or a Coding, get additional details about the concept, including definition, 
      * status, designations, and properties. One of the products of this operation is a full decomposition 
      * of a code from a structured terminology
@@ -511,12 +516,10 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
      * @return Parameters that represent information from the underlying codeSystem definitions through out parameters determined by the in parameters 
      */
     public Parameters lookUp(String code, String system) {
-        System.out.println("The code is " + code);
-        System.out.println("The system is " + system);
 
         //setting the out parameters for the response   
         Parameters responseParameter = new Parameters();
-                
+                        
         ParametersParameterComponent nameParameter = new ParametersParameterComponent();
         nameParameter.setName("name");
         ParametersParameterComponent versionParameter = new ParametersParameterComponent();
@@ -525,6 +528,7 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         displayParameter.setName("display");
         ParametersParameterComponent abstractParameter = new ParametersParameterComponent();
         abstractParameter.setName("abstract");
+
         List<ParametersParameterComponent> listOfDesignation = new ArrayList<>();
         ParametersParameterComponent designationValueParameter = new ParametersParameterComponent();
         ParametersParameterComponent designationParameter = new ParametersParameterComponent();
@@ -533,18 +537,18 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
     
         List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
 
-        params.addAll(mapParameter (CodeSystem.SP_URL, system, false));
+        params.addAll(mapParameter (CodeSystem.SP_URL, system, true));
         List<Vocabulary> vocabulary = vocabularyService.searchWithParams(0, 100, params, null);
         for (Vocabulary v: vocabulary) {
-            System.out.println("These are the vocabs: " + v.getId());
+            logger.debug("These are the listed vocabularies " + v.getId());
             List<ParameterWrapper> param = new ArrayList<ParameterWrapper>();
+
             //TODO: somehow map the system from OMOP (ex. from: "http://loinc.org/downloads/loinc" to: "http://loinc.org")
             param.addAll(mapParameter (CodeSystem.SP_NAME, v.getId(), false)); 
             
             //these are all the concepts in a CodeSystem
             List<Concept> conceptIds = conceptService.searchWithParams(0, 100, param, null);
             for (Concept c: conceptIds) {
-                System.out.println("These are the concepts: " + c.getConceptCode());
                 if (c.getConceptCode().equals(code) && v.getVocabularyReference().equals(system)) {
                     nameParameter.setValue(new StringType(v.getId()));
                     responseParameter.addParameter(nameParameter);
@@ -555,10 +559,10 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
                     displayParameter.setValue(new StringType(c.getConceptName()));
                     responseParameter.addParameter(displayParameter);
 
-                    if (c.getStandardConcept() != null && c.getStandardConcept().compareTo('S') == 0) {
-                        abstractParameter.setValue(new StringType("true"));
-                    } else {
+                    if (c.getStandardConcept() == null || c.getStandardConcept().compareTo('S') == 0) {
                         abstractParameter.setValue(new StringType("false"));
+                    } else {
+                        abstractParameter.setValue(new StringType("true"));
                     }
                     responseParameter.addParameter(abstractParameter);
 
@@ -567,8 +571,71 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
                     responseParameter.addParameter(designationParameter);
                 }
             }
+            if (responseParameter.isEmpty()) {
+                OperationOutcome outcome = new OperationOutcome();
+                outcome.setId("exception");
+                CodeableConcept detailCode = new CodeableConcept();
+                detailCode.setText("The code " + code + " was not found in the " + v.getId() + " CodeSystem");
+                outcome.addIssue().setSeverity(IssueSeverity.ERROR).setDetails(detailCode).setCode(IssueType.NOTFOUND);
+                throw new InvalidRequestException("This is an invalid request", outcome);
+            }
         }
+
+        //HTTP 400 Bad Request if the CodeSystem is undefined 
+        if (vocabulary.isEmpty()) {
+            OperationOutcome outcome = new OperationOutcome();
+            outcome.setId("exception");
+            CodeableConcept detailCode = new CodeableConcept();
+            detailCode.setText("There is no CodeSystem that matches the system " + system);
+            outcome.addIssue().setSeverity(IssueSeverity.ERROR).setDetails(detailCode).setCode(IssueType.INVALID);
+            throw new InvalidRequestException("This is an invalid request", outcome);
+        }
+
         return responseParameter;
     }
+
+    /**
+     * FHIR operation $subsumes on CodeSystem
+     * note: conceptRelationshipPK needs to be mapped 
+     * @param codeA represents concept_id_1 in the OMOP CDM 
+     * @param codeB represents concept_id_2 in the OMOP CDM 
+     * @param system The CodeSystem in which subsumption testing is to be performed 
+     *      Must be provided unless the operation is invoked on a code system instance
+     * @return 4 possible codes to be returned (equivalent, subsumes, subsumed-by, and not-subsumed)
+     */
+    public Parameters subsumes(String codeA, String codeB, String system) {
+        Parameters retVal = new Parameters();
+        ParametersParameterComponent outcomeParameter = new ParametersParameterComponent();
+        outcomeParameter.setName("outcome"); 
+
+        // ConceptRelationshipPK concpetRelationshippk = new ConceptRelationshipPK(40177103L, 725864L, "Concept replaces");
+		
+		// ConceptRelationshipPK conceptRealationships = conceptRelationshipService.findById(concpetRelationshippk);
+        // logger.debug("what is the concept relationship primary key " + conceptRealationships);
+        // for (ConceptRelationship cr: conceptRealationships) {
+            // outcomeParameter.setValue(new StringType(cr.getConceptId1()));
+            // logger.debug("codeA " + cr.getConceptId1() + " codeB " + cr.getConceptId2() + " relationship " + cr.getRelationshipId());
+        // }
+        return retVal; 
+        
+    }
+
+    
+    @Override
+    public CodeSystem toFHIR(IdType id) {
+        Long myId = id.getIdPartAsLong();
+        
+		Concept concept = conceptService.findById(myId);
+        String concept_name = concept.getConceptName();
+        
+        List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
+        params.addAll(mapParameter (CodeSystem.SP_TITLE, concept_name, false));
+
+        List<Vocabulary> vocab = getMyOmopService().searchWithParams(0, 10, params, null); //increase toIndex as needed
+        for (Vocabulary v: vocab) {
+		    return constructFHIR(myId, v);
+        }
+        throw new ResourceNotFoundException("The CodeSystem with id " + myId + " was not found.");
+	}
 
 }
