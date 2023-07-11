@@ -293,7 +293,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 				endDate = calendar.getTime();
 			}
 
-			if (endDate == null || (startDate == endDate)) {
+			if (endDate == null || (startDate.equals(endDate))) {
 				// This is single datatime
 				medicationStatement.setEffective(new DateTimeType(startDate));
 			} else {
