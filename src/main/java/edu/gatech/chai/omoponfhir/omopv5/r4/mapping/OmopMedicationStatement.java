@@ -319,7 +319,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		}
 
 		String unitString = entity.getDoseUnitSourceValue();
-		if (unitString != null && !unitString.isEmpty()) {
+		if (unitString != null && !unitString.isBlank()) {
 			try {
 				Concept unitConcept = CodeableConceptUtil.getOmopConceptWithOmopCode(conceptService, unitString);
 				if (unitConcept != null) {
@@ -804,9 +804,10 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		if (effective != null && !effective.isEmpty()) {
 			if (effective instanceof DateTimeType) {
 				// In OMOP on FHIR, we do Period. But,
-				// if DateTime is provided, we set start time.
+				// if DateTime is provided, we set start time and end time
 				Date date = ((DateTimeType) effective).getValue();
 				drugExposure.setDrugExposureStartDate(date);
+				drugExposure.setDrugExposureEndDate(date);
 			} else if (effective instanceof Period) {
 				Date startDate = ((Period) effective).getStart();
 				Date endDate = ((Period) effective).getEnd();
@@ -960,20 +961,16 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 			drugExposure.setDrugConcept(new Concept(0L));
 		}
 
-		if (drugExposure.getDrugExposureStartDateTime() == null) {
-			drugExposure.setDrugExposureStartDateTime(new Date());
+		if (drugExposure.getDrugExposureStartDate() == null) {
+			drugExposure.setDrugExposureStartDate(new Date());
 		}
 
-		if (drugExposure.getDrugExposureEndDateTime() == null) {
-			drugExposure.setDrugExposureEndDateTime(new Date());
+		if (drugExposure.getDrugExposureEndDate() == null) {
+			drugExposure.setDrugExposureEndDate(new Date());
 		}
 
 		if (drugExposure.getDrugTypeConcept() == null) {
 			drugExposure.setDrugTypeConcept(new Concept(0L));
-		}
-
-		if (drugExposure.getDrugSourceConcept() == null) {
-			drugExposure.setDrugSourceConcpet(new Concept(0L));
 		}
 
 		if (drugExposure.getRouteConcept() == null) {
