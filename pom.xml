@@ -16,7 +16,7 @@
 	<groupId>edu.gatech.chai</groupId>
 	<artifactId>omoponfhir-omopv5-r4-mapping</artifactId>
 	<packaging>jar</packaging>
-	<version>1.5.1</version>
+	<version>2.0.0</version>
 	<name>omoponfhir-omopv5-r4-mapping</name>
 	<description>OMOP on FHIR Mapping between OMOP version 5 and FHIR R4</description>
 	<url>http://maven.apache.org</url>

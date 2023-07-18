@@ -34,7 +34,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.OrganizationResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.AddressUtil;
 import edu.gatech.chai.omopv5.dba.service.CareSiteService;
 import edu.gatech.chai.omopv5.dba.service.LocationService;
@@ -51,7 +50,7 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 	private VocabularyService vocabularyService;
 
 	public OmopOrganization(WebApplicationContext context) {
-		super(context, CareSite.class, CareSiteService.class, OrganizationResourceProvider.getType());
+		super(context, CareSite.class, CareSiteService.class, OmopOrganization.FHIRTYPE);
 		initialize(context);
 		
 		// Get count and put it in the counts.
@@ -59,7 +58,7 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 	}
 
 	public OmopOrganization() {
-		super(ContextLoaderListener.getCurrentWebApplicationContext(), CareSite.class, CareSiteService.class, OrganizationResourceProvider.getType());
+		super(ContextLoaderListener.getCurrentWebApplicationContext(), CareSite.class, CareSiteService.class, OmopOrganization.FHIRTYPE);
 		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
 	}
 
@@ -74,6 +73,8 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 		return omopOrganization;
 	}
 	
+	public static String FHIRTYPE = "Organization";
+
 	@Override
 	public Organization constructFHIR(Long fhirId, CareSite careSite) {
 		Organization organization = new Organization();
@@ -114,7 +115,7 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 
 		Long omopId = null;
 		if (fhirId != null) {
-			omopId = IdMapping.getOMOPfromFHIR(fhirId.getIdPartAsLong(), OrganizationResourceProvider.getType());
+			omopId = IdMapping.getOMOPfromFHIR(fhirId.getIdPartAsLong(), OmopOrganization.FHIRTYPE);
 		} else {
 			// Get the identifier to store the source information.
 			// If we found a matching one, replace this with the careSite.
@@ -145,7 +146,7 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 			omopRecordId = getMyOmopService().create(careSite).getId();
 		}
 		
-		Long fhirRecordId = IdMapping.getFHIRfromOMOP(omopRecordId, OrganizationResourceProvider.getType());
+		Long fhirRecordId = IdMapping.getFHIRfromOMOP(omopRecordId, OmopOrganization.FHIRTYPE);
 		return fhirRecordId;
 	}
 
@@ -169,7 +170,7 @@ public class OmopOrganization extends BaseOmopResource<Organization, CareSite, C
 				if (partOfOrganization != null && partOfOrganization.isEmpty() == false) {
 					IIdType partOfOrgId = partOfOrganization.getReferenceElement();
 					Long partOfOrgFhirId = partOfOrgId.getIdPartAsLong();
-					Long omopId = IdMapping.getOMOPfromFHIR(partOfOrgFhirId, OrganizationResourceProvider.getType());
+					Long omopId = IdMapping.getOMOPfromFHIR(partOfOrgFhirId, OmopOrganization.FHIRTYPE);
 					CareSite partOfCareSite = getMyOmopService().findById(omopId);
 					Organization partOfOrgResource = constructFHIR(partOfOrgFhirId, partOfCareSite);
 					

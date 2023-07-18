@@ -40,7 +40,6 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
 import edu.gatech.chai.omoponfhir.omopv5.r4.model.USCorePatient;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
 import edu.gatech.chai.omopv5.dba.service.FPersonService;
 import edu.gatech.chai.omopv5.dba.service.MeasurementService;
@@ -360,13 +359,13 @@ public class OmopTransaction {
 						// Constructing FHIR to respond.
 						System.out.println("Created FPerson ID: " + entity.getIdAsLong());
 						fhirResource = OmopPatient.getInstance().constructFHIR(
-								IdMapping.getFHIRfromOMOP(entity.getIdAsLong(), PatientResourceProvider.getType()),
+								IdMapping.getFHIRfromOMOP(entity.getIdAsLong(), OmopPatient.FHIRTYPE),
 								(FPerson) entity);
 						bundleEntryComponent.setResource(fhirResource);
 						// It was success full, so we return 201 Created.
 						BundleEntryResponseComponent responseComponent = new BundleEntryResponseComponent(
 								new StringType("201 Created"));
-						responseComponent.setLocation(PatientResourceProvider.getType() + "/" + fhirResource.getId());
+						responseComponent.setLocation(OmopPatient.FHIRTYPE + "/" + fhirResource.getId());
 						bundleEntryComponent.setResponse(responseComponent);
 						retVal.add(bundleEntryComponent);
 					} else if (entityName.equals("Measurement")) {

@@ -34,7 +34,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.rest.param.TokenParam;
 import edu.gatech.chai.omoponfhir.omopv5.r4.model.MyDevice;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.DeviceResourceProvider;
 import edu.gatech.chai.omopv5.dba.service.DeviceExposureService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.model.entity.Concept;
@@ -48,7 +47,7 @@ public class OmopDevice extends BaseOmopResource<Device, DeviceExposure, DeviceE
 //	private ConceptService conceptService;
 
 	public OmopDevice(WebApplicationContext context) {
-		super(context, DeviceExposure.class, DeviceExposureService.class, DeviceResourceProvider.getType());
+		super(context, DeviceExposure.class, DeviceExposureService.class, OmopDevice.FHIRTYPE);
 		initialize(context);
 
 		// Get count and put it in the counts.
@@ -56,7 +55,7 @@ public class OmopDevice extends BaseOmopResource<Device, DeviceExposure, DeviceE
 	}
 	
 	public OmopDevice() {
-		super(ContextLoaderListener.getCurrentWebApplicationContext(), DeviceExposure.class, DeviceExposureService.class, DeviceResourceProvider.getType());
+		super(ContextLoaderListener.getCurrentWebApplicationContext(), DeviceExposure.class, DeviceExposureService.class, OmopDevice.FHIRTYPE);
 		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
 	}
 	
@@ -67,6 +66,8 @@ public class OmopDevice extends BaseOmopResource<Device, DeviceExposure, DeviceE
 	public static OmopDevice getInstance() {
 		return omopDevice;
 	}
+
+	public static String FHIRTYPE = "Device";
 	
 	@Override
 	public MyDevice constructFHIR(Long fhirId, DeviceExposure entity) {

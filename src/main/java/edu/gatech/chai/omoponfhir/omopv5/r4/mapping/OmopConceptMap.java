@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ConceptMapResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omopv5.dba.service.ConceptRelationshipService;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
@@ -33,12 +32,12 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 	private ConceptService conceptService;
 	
 	public OmopConceptMap(WebApplicationContext context) {
-		super(context, ConceptRelationship.class, ConceptRelationshipService.class, ConceptMapResourceProvider.getType());
+		super(context, ConceptRelationship.class, ConceptRelationshipService.class, OmopConceptMap.FHIRTYPE);
 		initialize(context);
 	}
 
 	public OmopConceptMap() {
-		super(ContextLoaderListener.getCurrentWebApplicationContext(), ConceptRelationship.class, ConceptRelationshipService.class, ConceptMapResourceProvider.getType());
+		super(ContextLoaderListener.getCurrentWebApplicationContext(), ConceptRelationship.class, ConceptRelationshipService.class, OmopConceptMap.FHIRTYPE);
 		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
 	}
 	
@@ -50,6 +49,8 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 		// getSize();
 	}
 	
+	public static String FHIRTYPE = "ConceptMap";
+
 	@Override
 	public Long toDbase(ConceptMap fhirResource, IdType fhirId) throws FHIRException {
 		return null;

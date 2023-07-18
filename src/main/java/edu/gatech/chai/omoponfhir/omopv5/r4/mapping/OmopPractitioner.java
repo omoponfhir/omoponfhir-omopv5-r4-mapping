@@ -35,7 +35,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.AddressUtil;
 import edu.gatech.chai.omopv5.dba.service.CareSiteService;
 import edu.gatech.chai.omopv5.dba.service.LocationService;
@@ -54,7 +53,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 	private LocationService locationService;	
 	
 	public OmopPractitioner(WebApplicationContext context) {
-		super(context, Provider.class, ProviderService.class, PractitionerResourceProvider.getType());
+		super(context, Provider.class, ProviderService.class, OmopPractitioner.FHIRTYPE);
 		initialize(context);
 		
 		// Get count and put it in the counts.
@@ -62,7 +61,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 	}
 	
 	public OmopPractitioner() {
-		super(ContextLoaderListener.getCurrentWebApplicationContext(), Provider.class, ProviderService.class, PractitionerResourceProvider.getType());
+		super(ContextLoaderListener.getCurrentWebApplicationContext(), Provider.class, ProviderService.class, OmopPractitioner.FHIRTYPE);
 		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
 	}
 	
@@ -77,25 +76,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 		return omopPractitioner;
 	}
 	
-//	@Override
-//	public Practitioner toFHIR(IdType id) {
-//		String practitioncerResourceName = ResourceType.Practitioner.getPath();
-//		Long id_long_part = id.getIdPartAsLong();
-//		Long omopId = IdMapping.getOMOPfromFHIR(id_long_part, practitioncerResourceName);
-//		
-//		Provider omopProvider = getMyOmopService().findById(omopId);
-//		if(omopProvider == null) return null;
-//		
-//		Long fhirId = IdMapping.getFHIRfromOMOP(id_long_part, practitioncerResourceName);
-//		
-//		return constructResource(fhirId, omopProvider, null);
-//	}
-	
-//	@Override
-//	public Practitioner constructResource(Long fhirId, Provider entity,List<String> includes) {
-//		Practitioner practitioner = constructFHIR(fhirId,entity); //Assuming default active state
-//		return practitioner;
-//	}
+	public static String FHIRTYPE = "Practitioner";
 	
 	@Override
 	public Practitioner constructFHIR(Long fhirId, Provider omopProvider) {
@@ -164,7 +145,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 		Long omopId = null;
 		if (fhirId != null) {
 			// Search for this ID.
-			omopId = IdMapping.getOMOPfromFHIR(fhirId.getIdPartAsLong(), PractitionerResourceProvider.getType());
+			omopId = IdMapping.getOMOPfromFHIR(fhirId.getIdPartAsLong(), OmopPractitioner.FHIRTYPE);
 		}
 
 		List<Identifier> identifiers = practitioner.getIdentifier();
@@ -194,7 +175,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 		} else {
 			omopRecordId = getMyOmopService().create(omopProvider).getId();
 		}
-		return IdMapping.getFHIRfromOMOP(omopRecordId, PractitionerResourceProvider.getType());
+		return IdMapping.getFHIRfromOMOP(omopRecordId, OmopPractitioner.FHIRTYPE);
 	}
 	
 //	@Override

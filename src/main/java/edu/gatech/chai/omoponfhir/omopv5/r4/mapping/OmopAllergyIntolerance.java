@@ -31,15 +31,11 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.AllergyIntoleranceResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.DateUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
 import edu.gatech.chai.omopv5.dba.service.*;
 import edu.gatech.chai.omopv5.model.entity.*;
-import edu.gatech.chai.omopv5.model.entity.Observation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +60,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 
 	public OmopAllergyIntolerance(WebApplicationContext context) {
 		super(context, Observation.class, ObservationService.class,
-				AllergyIntoleranceResourceProvider.getType());
+				OmopAllergyIntolerance.FHIRTYPE);
 		initialize(context);
 		
 		getSize(true);
@@ -72,7 +68,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 
 	public OmopAllergyIntolerance() {
 		super(ContextLoader.getCurrentWebApplicationContext(), Observation.class,
-				ObservationService.class, AllergyIntoleranceResourceProvider.getType());
+				ObservationService.class, OmopAllergyIntolerance.FHIRTYPE);
 		initialize(ContextLoader.getCurrentWebApplicationContext());
 	}
 
@@ -91,6 +87,8 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 	public static OmopAllergyIntolerance getInstance() {
 		return OmopAllergyIntolerance.omopAllergyIntolerance;
 	}
+
+	public static String FHIRTYPE = "AllergyIntolerance";
 
 	@Override
 	public String constructOrderParams(SortSpec theSort) {
@@ -130,7 +128,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 		FPerson fPerson = observation.getFPerson();
 		
 		// set the Patient
-		Reference subjectRef = new Reference(new IdType(PatientResourceProvider.getType(), fPerson.getId()));
+		Reference subjectRef = new Reference(new IdType(OmopPatient.FHIRTYPE, fPerson.getId()));
 		subjectRef.setDisplay(fPerson.getNameAsSingleString());
 		allergyIntolerance.setPatient(subjectRef);
 
@@ -142,7 +140,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 		// set the recorder
 		Provider provider = observation.getProvider();
 		if (provider != null && provider.getId() != 0L) {
-			Reference providerRef = new Reference(new IdType(PractitionerResourceProvider.getType(), provider.getId()));
+			Reference providerRef = new Reference(new IdType(OmopPractitioner.FHIRTYPE, provider.getId()));
 			allergyIntolerance.setRecorder(providerRef);
 		}
 		

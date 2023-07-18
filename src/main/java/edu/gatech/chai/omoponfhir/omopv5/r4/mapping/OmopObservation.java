@@ -62,12 +62,6 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.DateUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ConditionResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.MedicationStatementResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ObservationResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvider;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.FObservationViewService;
 import edu.gatech.chai.omopv5.dba.service.FactRelationshipService;
@@ -105,7 +99,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 	private FactRelationshipService factRelationshipService;
 
 	public OmopObservation(WebApplicationContext context) {
-		super(context, FObservationView.class, FObservationViewService.class, ObservationResourceProvider.getType());
+		super(context, FObservationView.class, FObservationViewService.class, OmopObservation.FHIRTYPE);
 		initialize(context);
 
 		// Get count and put it in the counts.
@@ -114,7 +108,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 	public OmopObservation() {
 		super(ContextLoaderListener.getCurrentWebApplicationContext(), FObservationView.class,
-				FObservationViewService.class, ObservationResourceProvider.getType());
+				FObservationViewService.class, OmopObservation.FHIRTYPE);
 		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
 	}
 
@@ -136,6 +130,8 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		return OmopObservation.omopObservation;
 	}
 
+	public static String FHIRTYPE = "Observation";
+	
 	@Override
 	public Observation constructFHIR(Long fhirId, FObservationView fObservationView) {
 		Observation observation = new Observation();
@@ -370,14 +366,14 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		
 		if (fObservationView.getFPerson() != null) {
 			Reference personRef = new Reference(
-					new IdType(PatientResourceProvider.getType(), fObservationView.getFPerson().getId()));
+					new IdType(OmopPatient.FHIRTYPE, fObservationView.getFPerson().getId()));
 			personRef.setDisplay(fObservationView.getFPerson().getNameAsSingleString());
 			observation.setSubject(personRef);
 		}
 		
 		if (fObservationView.getVisitOccurrence() != null)
 			observation.getEncounter().setReferenceElement(
-					new IdType(EncounterResourceProvider.getType(), fObservationView.getVisitOccurrence().getId()));
+					new IdType(OmopEncounter.FHIRTYPE, fObservationView.getVisitOccurrence().getId()));
 
 		if (fObservationView.getObservationTypeConcept() != null) {
 			if (fObservationView.getObservationTypeConcept().getId() == 44818701L
@@ -409,7 +405,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 		if (fObservationView.getProvider() != null) {
 			Reference performerRef = new Reference(
-					new IdType(PractitionerResourceProvider.getType(), fObservationView.getProvider().getId()));
+					new IdType(OmopPractitioner.FHIRTYPE, fObservationView.getProvider().getId()));
 			String providerName = fObservationView.getProvider().getProviderName();
 			if (providerName != null && !providerName.isEmpty())
 				performerRef.setDisplay(providerName);
@@ -513,7 +509,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		}
 
 		Long fhirSubjectId = fhirResource.getSubject().getReferenceElement().getIdPartAsLong();
-		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, PatientResourceProvider.getType());
+		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, OmopPatient.FHIRTYPE);
 		FPerson tPerson = new FPerson();
 		tPerson.setId(omopPersonId);
 
@@ -738,11 +734,11 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		Reference contextReference = fhirResource.getEncounter();
 		VisitOccurrence visitOccurrence = null;
 		if (contextReference != null && !contextReference.isEmpty()) {
-			if (contextReference.getReferenceElement().getResourceType().equals(EncounterResourceProvider.getType())) {
+			if (contextReference.getReferenceElement().getResourceType().equals(OmopEncounter.FHIRTYPE)) {
 				// Encounter context.
 				Long fhirEncounterId = contextReference.getReferenceElement().getIdPartAsLong();
 				Long omopVisitOccurrenceId = IdMapping.getOMOPfromFHIR(fhirEncounterId,
-						EncounterResourceProvider.getType());
+						OmopEncounter.FHIRTYPE);
 				if (omopVisitOccurrenceId != null) {
 					visitOccurrence = visitOccurrenceService.findById(omopVisitOccurrenceId);
 				}
@@ -903,7 +899,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 		try {
 			Long fhirSubjectId = Long.parseLong(idString);
-			Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, PatientResourceProvider.getType());
+			Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, OmopPatient.FHIRTYPE);
 
 			FPerson tPerson = new FPerson();
 			tPerson.setId(omopPersonId);
@@ -1135,7 +1131,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		}
 
 		Long fhirSubjectId = fhirResource.getSubject().getReferenceElement().getIdPartAsLong();
-		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, PatientResourceProvider.getType());
+		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, OmopPatient.FHIRTYPE);
 
 		FPerson tPerson = new FPerson();
 		tPerson.setId(omopPersonId);
@@ -1334,11 +1330,11 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		Reference contextReference = fhirResource.getEncounter();
 		VisitOccurrence visitOccurrence = null;
 		if (contextReference != null && !contextReference.isEmpty()) {
-			if (contextReference.getReferenceElement().getResourceType().equals(EncounterResourceProvider.getType())) {
+			if (contextReference.getReferenceElement().getResourceType().equals(OmopEncounter.FHIRTYPE)) {
 				// Encounter context.
 				Long fhirEncounterId = contextReference.getReferenceElement().getIdPartAsLong();
 				Long omopVisitOccurrenceId = IdMapping.getOMOPfromFHIR(fhirEncounterId,
-						EncounterResourceProvider.getType());
+						OmopEncounter.FHIRTYPE);
 				if (omopVisitOccurrenceId != null) {
 					visitOccurrence = visitOccurrenceService.findById(omopVisitOccurrenceId);
 				}
@@ -1479,14 +1475,13 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		if (subjectReference == null || subjectReference.isEmpty()) {
 			throw new FHIRException("We requres subject to contain a Patient");
 		}
-		if (!subjectReference.getReferenceElement().getResourceType()
-				.equalsIgnoreCase(PatientResourceProvider.getType())) {
-			throw new FHIRException("We only support " + PatientResourceProvider.getType()
+		if (!subjectReference.getReferenceElement().getResourceType().equalsIgnoreCase(OmopPatient.FHIRTYPE)) {
+			throw new FHIRException("We only support " + OmopPatient.FHIRTYPE
 					+ " for subject. But provided [" + subjectReference.getReferenceElement().getResourceType() + "]");
 		}
 
 		Long fhirSubjectId = subjectReference.getReferenceElement().getIdPartAsLong();
-		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, PatientResourceProvider.getType());
+		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, OmopPatient.FHIRTYPE);
 		if (omopPersonId == null) {
 			throw new FHIRException("We couldn't find the patient in the Subject");
 		}
@@ -1498,7 +1493,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		Long omopId = null;
 		if (fhirId != null) {
 			fhirIdLong = fhirId.getIdPartAsLong();
-			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, ObservationResourceProvider.getType());
+			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, OmopObservation.FHIRTYPE);
 			if (omopId < 0) {
 				// This is observation table data in OMOP.
 				omopId = -omopId; // convert to positive number;
@@ -1571,7 +1566,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 				if (!resources.isEmpty()) {
 					IBaseResource res = resources.get(0);
 					fhirIdLong = res.getIdElement().getIdPartAsLong();
-					omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, ObservationResourceProvider.getType());
+					omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, OmopObservation.FHIRTYPE);
 					if (omopId < 0) {
 						// This is observation table data in OMOP.
 						omopId = -omopId; // convert to positive number;
@@ -1813,9 +1808,9 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		Long factId2 = referenceIdType.getIdPartAsLong();
 
 		Long domainConceptId2;
-		if (MedicationStatementResourceProvider.getType().equals(targetResourceType)) {
+		if (OmopMedicationStatement.FHIRTYPE.equals(targetResourceType)) {
 			domainConceptId2 = 13L;
-		} else if (ConditionResourceProvider.getType().equals(targetResourceType)) {
+		} else if (OmopCondition.FHIRTYPE.equals(targetResourceType)) {
 			domainConceptId2 = 19L;
 		} else {
 			logger.error ("Not supported focus link resource. Please contact developer to add " + targetResourceType + " resource");
@@ -1866,7 +1861,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
 		
 		Long size = getSize(mapList);
-		ExtensionUtil.addResourceCount(ObservationResourceProvider.getType(), size);
+		ExtensionUtil.addResourceCount(OmopObservation.FHIRTYPE, size);
 		
 		return size;
 		// mapList.add(exceptionParam);
@@ -1940,7 +1935,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 
 		for (FObservationView fObservationView : fObservationViews) {
 			Long omopId = fObservationView.getId();
-			Long fhirId = IdMapping.getFHIRfromOMOP(omopId, ObservationResourceProvider.getType());
+			Long fhirId = IdMapping.getFHIRfromOMOP(omopId, OmopObservation.FHIRTYPE);
 			Observation fhirResource = constructResource(fhirId, fObservationView, includes);
 			if (fhirResource != null) {
 				listResources.add(fhirResource);
