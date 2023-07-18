@@ -71,6 +71,7 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 	}
 
 	public Parameters translateConcept(String code, String system, String targetUri, String targetSystem) {
+		System.out.println("code, system, targetURI, and targetSystem are " + code + " " + system + " " + targetUri + " " + targetSystem);
 		Parameters retVal = new Parameters();
 		
 		// Using the system/code and targetSystem, map the system/code.
