@@ -15,12 +15,9 @@
  *******************************************************************************/
 package edu.gatech.chai.omoponfhir.omopv5.r4.provider;
 
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.Date;
-
 
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.UriType;
@@ -35,11 +32,9 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -47,10 +42,8 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -149,20 +142,16 @@ public class ValueSetResourceProvider implements IResourceProvider {
 
     @Search()
     public IBundleProvider findValueSetById(
-        @RequiredParam(name = ValueSet.SP_RES_ID) TokenParam theValueSetId,
-        @Sort SortSpec theSort,
-
-        //TODO: check to see if correct support for reverse includes 
-		@IncludeParam(allow = { "CodeSystem:valueSet", "ConceptMap:valueSet"}, reverse = true) final Set<Include> theReverseIncludes) {
-            List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
+        @RequiredParam(name = ValueSet.SP_RES_ID) TokenParam theValueSetId) {
+        	
+			List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
             if (theValueSetId != null) {
                 paramList.addAll(getMyMapper().mapParameter(ValueSet.SP_RES_ID, theValueSetId, false));
             }
-            String orderParams = getMyMapper().constructOrderParams(theSort);
-            MyBundleProvider myBundleProvider = new MyBundleProvider(paramList, null, theReverseIncludes);
+
+            MyBundleProvider myBundleProvider = new MyBundleProvider(paramList);
 		    myBundleProvider.setTotalSize(getTotalSize(paramList));
 		    myBundleProvider.setPreferredPageSize(preferredPageSize);
-		    myBundleProvider.setOrderParams(orderParams);
 		    return myBundleProvider;
         }
     
@@ -185,12 +174,7 @@ public class ValueSetResourceProvider implements IResourceProvider {
             @OptionalParam(name = ValueSet.SP_STATUS) TokenParam theStatus,
             @OptionalParam(name = ValueSet.SP_TITLE) StringParam theTitle,
             @OptionalParam(name = ValueSet.SP_URL) UriParam theUrl,
-            @OptionalParam(name = ValueSet.SP_VERSION) TokenParam theVersion,
-
-			@Sort SortSpec theSort,
-
-            //TODO: check to see if correct support for reverse includes 
-		    @IncludeParam(allow = { "CodeSystem:valueSet", "ConceptMap:valueSet"}, reverse = true) final Set<Include> theReverseIncludes) {
+            @OptionalParam(name = ValueSet.SP_VERSION) TokenParam theVersion) {
 		
 		    List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 
@@ -243,16 +227,10 @@ public class ValueSetResourceProvider implements IResourceProvider {
 				paramList.addAll(getMyMapper().mapParameter(ValueSet.SP_VERSION, theVersion, false));
 			}
 
-
-			String orderParams = getMyMapper().constructOrderParams(theSort);
-			System.out.println("MYSORT!!! " + orderParams);
-
-			MyBundleProvider myBundleProvider = new MyBundleProvider(paramList, null, theReverseIncludes);
-			myBundleProvider.setTotalSize(getTotalSize(paramList));
-			myBundleProvider.setPreferredPageSize(preferredPageSize);
-			myBundleProvider.setOrderParams(orderParams);
-			return myBundleProvider;
-			
+			MyBundleProvider myBundleProvider = new MyBundleProvider(paramList);
+		    myBundleProvider.setTotalSize(getTotalSize(paramList));
+		    myBundleProvider.setPreferredPageSize(preferredPageSize);
+		    return myBundleProvider;	
 	}
 
 
@@ -351,14 +329,9 @@ public class ValueSetResourceProvider implements IResourceProvider {
 
 
 	class MyBundleProvider extends OmopFhirBundleProvider {
-		Set<Include> theIncludes;
-		Set<Include> theReverseIncludes;
-
-		public MyBundleProvider(List<ParameterWrapper> paramList, Set<Include> theIncludes, Set<Include> theReverseIncludes) {
+		public MyBundleProvider(List<ParameterWrapper> paramList) {
 			super(paramList);
 			setPreferredPageSize(preferredPageSize);
-			this.theIncludes = theIncludes;
-			this.theReverseIncludes = theReverseIncludes;
 		}
 
 		@Override
@@ -366,23 +339,10 @@ public class ValueSetResourceProvider implements IResourceProvider {
 			List<IBaseResource> retv = new ArrayList<IBaseResource>();
 			List<String> includes = new ArrayList<String>();
 
-			if (theReverseIncludes.contains(new Include("*"))) { //reverse includes 
-				includes.add("CodeSystem:valueSet");
-				includes.add("ConceptMap:valueSet");
-			} else {
-				if (theReverseIncludes.contains(new Include("CodeSystem:valueSet"))) {
-					includes.add("CodeSystem:valueSet");
-				}
-				if (theReverseIncludes.contains(new Include("ConceptMap:valueSet"))) {
-					includes.add("ConceptMap:valueSet");
-				}
-			}
-
-			System.out.println("SORT!!!!!! " + orderParams);
 			if (paramList.size() == 0) {
-				getMyMapper().searchWithoutParams(fromIndex, toIndex, retv, includes, orderParams);
+				getMyMapper().searchWithoutParams(fromIndex, toIndex, retv, includes, null);
 			} else {
-				getMyMapper().searchWithParams(fromIndex, toIndex, paramList, retv, includes, orderParams);
+				getMyMapper().searchWithParams(fromIndex, toIndex, paramList, retv, includes, null);
 			}
 
 			return retv;

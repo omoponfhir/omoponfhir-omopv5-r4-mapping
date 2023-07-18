@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.IdType;
@@ -172,22 +171,25 @@ public class CodeSystemResourceProvider implements IResourceProvider {
      */
     @Search()
     public IBundleProvider findCodeSystemById(
-        @RequiredParam(name = CodeSystem.SP_RES_ID) TokenParam theCodeSystemId,
-        @Sort SortSpec theSort) {
+            @RequiredParam(name = CodeSystem.SP_RES_ID) TokenParam theCodeSystemId,
+            @Sort SortSpec theSort,
 
-            List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
+            @IncludeParam(allow = {"CodeSystem:supplements"}) final Set<Include> theIncludes,
+            @IncludeParam(reverse=true) final Set<Include> theReverseIncludes) {
 
-            if (theCodeSystemId != null) {
-                paramList.addAll(getMyMapper().mapParameter(CodeSystem.SP_RES_ID, theCodeSystemId, false));
-            }
+        List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 
-            String orderParams = getMyMapper().constructOrderParams(theSort);
-            MyBundleProvider myBundleProvider = new MyBundleProvider(paramList);
-            myBundleProvider.setTotalSize(getTotalSize(paramList));
-            myBundleProvider.setPreferredPageSize(preferredPageSize);
-            myBundleProvider.setOrderParams(orderParams);
-            return myBundleProvider;
+        if (theCodeSystemId != null) {
+            paramList.addAll(getMyMapper().mapParameter(CodeSystem.SP_RES_ID, theCodeSystemId, false));
         }
+
+        String orderParams = getMyMapper().constructOrderParams(theSort);
+        MyBundleProvider myBundleProvider = new MyBundleProvider(paramList, theIncludes, theReverseIncludes);
+        myBundleProvider.setTotalSize(getTotalSize(paramList));
+        myBundleProvider.setPreferredPageSize(preferredPageSize);
+        myBundleProvider.setOrderParams(orderParams);
+        return myBundleProvider;
+    }
 
     
 
@@ -221,9 +223,9 @@ public class CodeSystemResourceProvider implements IResourceProvider {
         @OptionalParam(name = CodeSystem.SP_VERSION) TokenParam theVersion,
         @OptionalParam(name = CodeSystem.SP_CONTENT_MODE) TokenParam theContentMode,
         @Sort SortSpec theSort, 
-        @IncludeParam() final Set<Include> theIncludes,
+        @IncludeParam(allow = {"CodeSystem:supplements"}) final Set<Include> theIncludes,
         @IncludeParam(reverse=true) final Set<Include> theReverseIncludes){
-        
+
         List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
         if (theCode != null) {
             paramList.addAll(getMyMapper().mapParameter(CodeSystem.SP_CODE, theCode, false));
@@ -252,7 +254,8 @@ public class CodeSystemResourceProvider implements IResourceProvider {
 
         String orderParams = getMyMapper().constructOrderParams(theSort);
         System.out.println("MYSORT!!! " + orderParams);
-        MyBundleProvider myBundleProvider = new MyBundleProvider(paramList);
+
+        MyBundleProvider myBundleProvider = new MyBundleProvider(paramList, theIncludes, theReverseIncludes);
         myBundleProvider.setTotalSize(getTotalSize(paramList));
         myBundleProvider.setPreferredPageSize(preferredPageSize);
         myBundleProvider.setOrderParams(orderParams);
@@ -407,25 +410,33 @@ public class CodeSystemResourceProvider implements IResourceProvider {
     }
 
     class MyBundleProvider extends OmopFhirBundleProvider {
+        Set<Include> theIncludes; 
+        Set<Include> theReverseIncludes; 
 
-        public MyBundleProvider(List<ParameterWrapper> paramList) {
+        public MyBundleProvider(List<ParameterWrapper> paramList, Set<Include> theIncludes,
+                Set<Include> theReverseIncludes) {
             super(paramList);
             setPreferredPageSize(preferredPageSize);
+            this.theIncludes = theIncludes; 
+            this.theReverseIncludes = theReverseIncludes; 
         }
 
         @Override
         public List<IBaseResource> getResources(int fromIndex, int toIndex) {
             List<IBaseResource> retv = new ArrayList<IBaseResource>();
+            
             List<String> includes = new ArrayList<String>();
+            if (theIncludes.contains(new Include("CodeSystem:supplements"))) {
+				includes.add("CodeSystem:supplements");
+			}
 
             System.out.println("SORT!!!!!! " + orderParams);
             if (paramList.size() == 0) {
-                getMyMapper().searchWithoutParams(fromIndex, toIndex, retv, includes, null);
+                getMyMapper().searchWithoutParams(fromIndex, toIndex, retv, includes, orderParams);
             } else {
-                getMyMapper().searchWithParams(fromIndex, toIndex, paramList, retv, includes, null);
+                getMyMapper().searchWithParams(fromIndex, toIndex, paramList, retv, includes, orderParams);
             }
             return retv;
         }
-
     }
 }
