@@ -68,7 +68,8 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
     private static OmopCodeSystem omopCodeSystem = new OmopCodeSystem();
     private VocabularyService vocabularyService;
     private ConceptService conceptService;
-    private ConceptRelationshipService conceptRelationshipService; 
+    private ConceptRelationshipService conceptRelationshipService;
+    private Long id = 2000000000L; 
 
 
     public OmopCodeSystem(WebApplicationContext context) {
@@ -177,34 +178,39 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
     
     
     /** 
-     * From FHIR to OMOP
+     * From FHIR to OMOP - used in the create operation 
      * @param codeSystem is the CodeSystem to be mapped to OMOP
      * @param fhirId Associated FHIR ID 
      * @return Returns resource ID in Long 
      */
     @Override
-    public Long toDbase(CodeSystem codeSystem, IdType fhirId) throws FHIRException { 
-        Long omopId = null;
-        Long retval;
-        logger.debug("toDbase, the codesystem name is " + codeSystem.getName() + ". The fhirId is " + fhirId);
-        if (fhirId != null) {
-            // update
-            omopId = fhirId.getIdPartAsLong();
-            if (omopId == null) {
-                // Invalid fhirId.
-                logger.error("Failed to get CodeSystem.id as Long value");
-                return null;
-            }
-        }
-        Vocabulary vocabulary = constructOmop(omopId, codeSystem);
+	public Long toDbase(CodeSystem codeSystem, IdType fhirId) throws FHIRException {
+		Long omopId = null, fhirIdLong = null;
 
-        if (vocabulary.getId() != null) {
-            retval = getMyOmopService().update(vocabulary).getIdAsLong();
-        } else {
-            retval = getMyOmopService().create(vocabulary).getIdAsLong();
-        }
-        return retval;
-    }
+		if (fhirId != null) {
+			// update
+            fhirIdLong = fhirId.getIdPartAsLong();
+			if (fhirIdLong == null) {
+				// Invalid fhirId.
+				logger.error("Failed to get CodeSystem.id as Long value");
+				return null;
+			}
+			
+			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, CodeSystemResourceProvider.getType());
+		}
+        
+		Vocabulary vocab = constructOmop(omopId, codeSystem);
+
+		String omopRecordId = null;
+		if (vocab.getIdAsLong() != null) {
+			omopRecordId = getMyOmopService().update(vocab).getId();
+		} else {
+			omopRecordId = getMyOmopService().create(vocab).getId();
+		}
+        //TODO: need to implement IdMapping for CodeSystem 
+		// Long fhirRecordId = IdMapping.getFHIRfromOMOP(omopRecordId, PatientResourceProvider.getType());
+		return vocab.getVocabularyConcept().getId();
+	}
 
     @Override
     public void removeDbase(Long id) {
@@ -357,57 +363,51 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
     }
 
     /**
-     * TODO: constructs OMOP concept and vocabulary from a CodeSystem
+     * Constructs OMOP concept and vocabulary from a CodeSystem
      * @param omopId Long value representing the OMOP CDM Id 
      * @param codeSystem CodeSystem FHIR resource reference
      * @return Vocabulary that represents the CodeSystem
      */
     @Override
     public Vocabulary constructOmop(Long omopId, CodeSystem codeSystem) {
-        Concept concept;
-        Vocabulary vocabulary; 
-    
-        vocabulary = new Vocabulary();
-        concept = new Concept();
+        Concept concept = new Concept();
+        Vocabulary vocabulary = new Vocabulary(); 
 
-        if (omopId != null) {
-            concept = conceptService.findById(omopId);
-            vocabulary = getMyOmopService().findById(concept.getVocabularyId());
-        } else {
-            vocabulary = new Vocabulary();
-            concept = new Concept();
+        concept.setId(updateId());
+        //set name 
+        String title = codeSystem.getTitle();
+        concept.setConceptName(title);
+        //set domain
+        concept.setDomainId("Metadata");
+        //set vocabulary id
+        concept.setVocabularyId("Vocabulary");
+        //set concept class id 
+        concept.setConceptClassId("Metadata");
+        //set concept code
+        Iterator<ConceptDefinitionComponent> codeIterator = codeSystem.getConcept().iterator();
+        if (codeIterator.hasNext()) {
+            ConceptDefinitionComponent nextCode = codeIterator.next();
+            if (!nextCode.getCode().isEmpty()) {
+                concept.setConceptCode(nextCode.getCode());
+            }
         }
+        //set start date 
+        Calendar calendar = Calendar.getInstance();
+        if (codeSystem.getDate() != null) {
+            calendar.setTime(codeSystem.getDate());
+        }
+        //set end date 
+        Calendar endDateCalendar = Calendar.getInstance();
+        endDateCalendar.set(2099, 12, 31);
+        concept.setValidEndDate(endDateCalendar.getTime());
 
-        // //set id 
-        // Long id = 2100000000L;
-        // concept.setId(id);
-        // //set name 
-        // String title = codeSystem.getTitle();
-        // concept.setConceptName(title);
-        // //set domain
-        // concept.setDomainId("Metadata");
-        // //set vocabulary id
-        // concept.setVocabularyId("Vocabulary");
-        // //set concept class id 
-        // concept.setConceptClassId("Metadata");
-        // //set concept code
-        // Iterator<ConceptDefinitionComponent> codeIterator = codeSystem.getConcept().iterator();
-        // if (codeIterator.hasNext()) {
-        //     ConceptDefinitionComponent nextCode = codeIterator.next();
-        //     if (!nextCode.getCode().isEmpty()) {
-        //         concept.setConceptCode(nextCode.getCode());
-        //     }
-        // }
-        // //set start date 
-        // Calendar calendar = Calendar.getInstance();
-        // if (codeSystem.getDate() != null) {
-        //     calendar.setTime(codeSystem.getDate());
-        //     // concept.setValidStartDate(codeSystem.getDate()); //has to be a date 
-        // }
-        // //set end date 
-        // Calendar endDateCalendar = Calendar.getInstance();
-        // endDateCalendar.set(2099, 12, 31);
-        // concept.setValidEndDate(endDateCalendar.getTime());
+       
+        // vocabulary.setId(Long.toString(omopId));
+        vocabulary.setId(codeSystem.getName());
+        vocabulary.setVocabularyName(codeSystem.getTitle());
+        vocabulary.setVocabularyReference(codeSystem.getUrl());
+        vocabulary.setVocabularyVersion(codeSystem.getVersion());
+        vocabulary.setVocabularyConcept(concept);
 
         return vocabulary;
 
@@ -637,5 +637,9 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         }
         throw new ResourceNotFoundException("The CodeSystem with id " + myId + " was not found.");
 	}
+
+    public Long updateId() {
+        return id++; 
+    }
 
 }

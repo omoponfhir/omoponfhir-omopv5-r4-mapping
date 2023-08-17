@@ -15,9 +15,11 @@
  *******************************************************************************/
 package edu.gatech.chai.omoponfhir.omopv5.r4.provider;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
+
 
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.UriType;
@@ -96,7 +98,7 @@ public class ValueSetResourceProvider implements IResourceProvider {
 
     public Integer getTotalSize(List<ParameterWrapper> paramList) {
         final Long totalSize;
-		if (paramList.size() == 0) {
+		if (paramList.isEmpty()) {
 			totalSize = getMyMapper().getSize();
 		} else {
 			totalSize = getMyMapper().getSize(paramList);
@@ -105,8 +107,11 @@ public class ValueSetResourceProvider implements IResourceProvider {
 		return totalSize.intValue();
     }
 
-	/*
-	 * TODO: This method will add a new instance of a resource to the server 
+	
+	/** 
+	 * Implements the create operation which adds a new instance of a resource to the server 
+	 * @param valueSet from the UI 
+	 * @return MethodOutcome response from the create operation 
 	 */
     @Create()
     public MethodOutcome createValueSet(@ResourceParam ValueSet valueSet) {
