@@ -47,7 +47,6 @@ import org.springframework.web.context.WebApplicationContext;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.api.SortSpec;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.CodeSystemResourceProvider;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.dba.service.VocabularyService;
@@ -72,13 +71,13 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
 
 
     public OmopCodeSystem(WebApplicationContext context) {
-        super(context, Vocabulary.class, VocabularyService.class, CodeSystemResourceProvider.getType());
+        super(context, Vocabulary.class, VocabularyService.class, OmopCodeSystem.FHIRTYPE);
         initialize(context);
     }
 
     public OmopCodeSystem() {
         super(ContextLoaderListener.getCurrentWebApplicationContext(), Vocabulary.class, VocabularyService.class, 
-            CodeSystemResourceProvider.getType());
+            OmopCodeSystem.FHIRTYPE);
         initialize(ContextLoaderListener.getCurrentWebApplicationContext());
     }
 
@@ -96,6 +95,7 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         return omopCodeSystem;
     }
 
+	public static String FHIRTYPE = "CodeSystem";
 
     /**
      * This method will construct a FHIR resource from a vocabulary entry in the VOCABULARY table
