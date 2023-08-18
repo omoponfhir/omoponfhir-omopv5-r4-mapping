@@ -49,8 +49,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.DateUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.SpecimenResourceProvider;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.dba.service.SpecimenService;
@@ -65,7 +63,7 @@ public class OmopSpecimen extends BaseOmopResource<Specimen, edu.gatech.chai.omo
 	private ConceptService conceptService;
 
 	public OmopSpecimen(WebApplicationContext context) {
-		super(context, edu.gatech.chai.omopv5.model.entity.Specimen.class, SpecimenService.class, SpecimenResourceProvider.getType());
+		super(context, edu.gatech.chai.omopv5.model.entity.Specimen.class, SpecimenService.class, OmopSpecimen.FHIRTYPE);
 		initialize(context);
 
 		// Get count and put it in the counts.
@@ -74,7 +72,7 @@ public class OmopSpecimen extends BaseOmopResource<Specimen, edu.gatech.chai.omo
 
 	public OmopSpecimen() {
 		super(ContextLoaderListener.getCurrentWebApplicationContext(), edu.gatech.chai.omopv5.model.entity.Specimen.class,
-				SpecimenService.class, SpecimenResourceProvider.getType());
+				SpecimenService.class, OmopSpecimen.FHIRTYPE);
 		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
 	}
 
@@ -86,6 +84,8 @@ public class OmopSpecimen extends BaseOmopResource<Specimen, edu.gatech.chai.omo
 	public static OmopSpecimen getInstance() {
 		return OmopSpecimen.omopSpecimen;
 	}
+
+	public static String FHIRTYPE = "Specimen";
 
 	@Override
 	public Specimen constructFHIR(Long fhirId, edu.gatech.chai.omopv5.model.entity.Specimen specimen_) {
@@ -112,7 +112,7 @@ public class OmopSpecimen extends BaseOmopResource<Specimen, edu.gatech.chai.omo
 		specimen.setType(new CodeableConcept(new Coding(specimentTypeSystemUri, specimentTypeCode, specimentTypeDisplay)));
 
 		if (specimen_.getFPerson() != null) {
-			Reference personRef = new Reference(new IdType(PatientResourceProvider.getType(), specimen_.getFPerson().getId()));
+			Reference personRef = new Reference(new IdType(OmopPatient.FHIRTYPE, specimen_.getFPerson().getId()));
 			personRef.setDisplay(specimen_.getFPerson().getNameAsSingleString());
 			specimen.setSubject(personRef);
 		}
@@ -321,7 +321,7 @@ public class OmopSpecimen extends BaseOmopResource<Specimen, edu.gatech.chai.omo
 
 		// FHIR Specimen.subject --> OMOP Specimen.person_id
 		Long fhirSubjectId = fhirResource.getSubject().getReferenceElement().getIdPartAsLong();
-		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, PatientResourceProvider.getType());
+		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, OmopPatient.FHIRTYPE);
 
 		FPerson tPerson = new FPerson();
 		tPerson.setId(omopPersonId);
@@ -397,13 +397,13 @@ public class OmopSpecimen extends BaseOmopResource<Specimen, edu.gatech.chai.omo
 			throw new FHIRException("We requres subject to contain a Patient");
 		}
 		if (!subjectReference.getReferenceElement().getResourceType()
-				.equalsIgnoreCase(PatientResourceProvider.getType())) {
-			throw new FHIRException("We only support " + PatientResourceProvider.getType()
+				.equalsIgnoreCase(OmopPatient.FHIRTYPE)) {
+			throw new FHIRException("We only support " + OmopPatient.FHIRTYPE
 					+ " for subject. But provided [" + subjectReference.getReferenceElement().getResourceType() + "]");
 		}
 
 		Long fhirSubjectId = subjectReference.getReferenceElement().getIdPartAsLong();
-		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, PatientResourceProvider.getType());
+		Long omopPersonId = IdMapping.getOMOPfromFHIR(fhirSubjectId, OmopPatient.FHIRTYPE);
 		if (omopPersonId == null) {
 			throw new FHIRException("We couldn't find the patient in the Subject");
 		}
@@ -419,7 +419,7 @@ public class OmopSpecimen extends BaseOmopResource<Specimen, edu.gatech.chai.omo
 
 		if (fhirId != null) {
 			fhirIdLong = fhirId.getIdPartAsLong();
-			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, SpecimenResourceProvider.getType());
+			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, OmopSpecimen.FHIRTYPE);
 		} else {
 			Long patientFhirId = fhirResource.getSubject().getReferenceElement().getIdPartAsLong();
 
@@ -472,7 +472,7 @@ public class OmopSpecimen extends BaseOmopResource<Specimen, edu.gatech.chai.omo
 			omopRecordId = getMyOmopService().create(omopSecimen).getId();
 		}
 
-		return IdMapping.getFHIRfromOMOP(omopRecordId, SpecimenResourceProvider.getType());
+		return IdMapping.getFHIRfromOMOP(omopRecordId, OmopSpecimen.FHIRTYPE);
 	}
 
 	private static Date createDateTime(edu.gatech.chai.omopv5.model.entity.Specimen specimen_) {

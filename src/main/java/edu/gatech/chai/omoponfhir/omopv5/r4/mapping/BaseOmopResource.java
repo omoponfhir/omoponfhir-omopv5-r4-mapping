@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -34,7 +35,6 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import edu.gatech.chai.omoponfhir.local.dao.FhirOmopCodeMapImpl;
 import edu.gatech.chai.omoponfhir.local.dao.FhirOmopVocabularyMapImpl;
 import edu.gatech.chai.omoponfhir.local.dao.TwoLetterStateMapImpl;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
@@ -377,11 +377,11 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	public VisitOccurrence fhirContext2OmopVisitOccurrence(VisitOccurrenceService visitOccurrenceService, Reference contextReference) {
 		VisitOccurrence visitOccurrence = null;
 		if (contextReference != null && !contextReference.isEmpty()) {
-			if (contextReference.getReferenceElement().getResourceType().equals(EncounterResourceProvider.getType())) {
+			if (contextReference.getReferenceElement().getResourceType().equals(OmopEncounter.FHIRTYPE)) {
 				// Encounter context.
 				Long fhirEncounterId = contextReference.getReferenceElement().getIdPartAsLong();
 				Long omopVisitOccurrenceId = IdMapping.getOMOPfromFHIR(fhirEncounterId,
-						EncounterResourceProvider.getType());
+						OmopEncounter.FHIRTYPE);
 				if (omopVisitOccurrenceId != null) {
 					visitOccurrence = visitOccurrenceService.findById(omopVisitOccurrenceId);
 				}
