@@ -16,7 +16,7 @@
 	<groupId>edu.gatech.chai</groupId>
 	<artifactId>omoponfhir-omopv5-r4-mapping</artifactId>
 	<packaging>jar</packaging>
-	<version>1.4.1</version>
+	<version>2.0.0</version>
 	<name>omoponfhir-omopv5-r4-mapping</name>
 	<description>OMOP on FHIR Mapping between OMOP version 5 and FHIR R4</description>
 	<url>http://maven.apache.org</url>
@@ -25,8 +25,8 @@
 		<hapi_stable_version>6.4.1</hapi_stable_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
-		<spring_version>5.3.23</spring_version>
-		<omoponfhir_sqlrender_version>1.5.0</omoponfhir_sqlrender_version>
+		<spring_version>5.3.27</spring_version>
+		<omoponfhir_sqlrender_version>1.6.1</omoponfhir_sqlrender_version>
 	</properties>
 	
 	<dependencies>
@@ -82,7 +82,7 @@
 		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.36.0.2</version>
+			<version>3.42.0.0</version>
 		</dependency>
 
 		<dependency>

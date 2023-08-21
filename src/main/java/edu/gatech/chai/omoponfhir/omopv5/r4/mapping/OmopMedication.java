@@ -31,7 +31,6 @@ import org.springframework.web.context.WebApplicationContext;
 import ca.uhn.fhir.rest.param.TokenParam;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.ExtensionUtil;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.MedicationResourceProvider;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.model.entity.Concept;
@@ -41,7 +40,7 @@ public class OmopMedication extends BaseOmopResource<Medication, Concept, Concep
 	private static OmopMedication omopMedication = new OmopMedication();
 	
 	public OmopMedication(WebApplicationContext context) {
-		super(context, Concept.class, ConceptService.class, MedicationResourceProvider.getType());
+		super(context, Concept.class, ConceptService.class, OmopMedication.FHIRTYPE);
 		
 		initialize(context);
 
@@ -50,7 +49,7 @@ public class OmopMedication extends BaseOmopResource<Medication, Concept, Concep
 	}
 
 	public OmopMedication() {
-		super(ContextLoaderListener.getCurrentWebApplicationContext(), Concept.class, ConceptService.class, MedicationResourceProvider.getType());
+		super(ContextLoaderListener.getCurrentWebApplicationContext(), Concept.class, ConceptService.class, OmopMedication.FHIRTYPE);
 		
 		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
 	}
@@ -62,6 +61,8 @@ public class OmopMedication extends BaseOmopResource<Medication, Concept, Concep
 	public static OmopMedication getInstance() {
 		return omopMedication;
 	}
+
+	public static String FHIRTYPE = "Medication";
 	
 	@Override
 	public Long toDbase(Medication fhirResource, IdType fhirId) throws FHIRException {
@@ -177,7 +178,7 @@ public class OmopMedication extends BaseOmopResource<Medication, Concept, Concep
 		Long size = getSize(paramList);
 		
 		// update the counts map.
-		ExtensionUtil.addResourceCount(MedicationResourceProvider.getType(), size);
+		ExtensionUtil.addResourceCount(OmopMedication.FHIRTYPE, size);
 		
 		return size;
 	}

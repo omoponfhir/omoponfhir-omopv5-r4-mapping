@@ -29,10 +29,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ImmunizationResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvider;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.CodeableConceptUtil;
 import edu.gatech.chai.omoponfhir.omopv5.r4.utilities.DateUtil;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
@@ -96,7 +92,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 	private String _where = "c2.vocabulary_id = 'CVX'";
 
 	public OmopImmunization(WebApplicationContext context) {
-		super(context, FImmunizationView.class, FImmunizationViewService.class, ImmunizationResourceProvider.getType());
+		super(context, FImmunizationView.class, FImmunizationViewService.class, OmopImmunization.FHIRTYPE);
 		initialize(context);
 
 		// String sizeSql = "select count(distinct d) from " + _from + " where " + _where;
@@ -106,7 +102,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 
 	public OmopImmunization() {
 		super(ContextLoaderListener.getCurrentWebApplicationContext(), FImmunizationView.class,
-		FImmunizationViewService.class, ImmunizationResourceProvider.getType());
+		FImmunizationViewService.class, OmopImmunization.FHIRTYPE);
 		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
 	}
 
@@ -122,6 +118,8 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 	public static OmopImmunization getInstance() {
 		return OmopImmunization.omopImmunization;
 	}
+
+	public static String FHIRTYPE = "Immunization";
 
 	@Override
 	public Long toDbase(Immunization fhirResource, IdType fhirId) throws FHIRException {
@@ -389,7 +387,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		immunization.setId(new IdType(fhirId));
 
 		// Set patient
-		Reference patientReference = new Reference(new IdType(PatientResourceProvider.getType(), entity.getFPerson().getId()));
+		Reference patientReference = new Reference(new IdType(OmopPatient.FHIRTYPE, entity.getFPerson().getId()));
 		patientReference.setDisplay(entity.getFPerson().getNameAsSingleString());
 		immunization.setPatient(patientReference);
 
@@ -413,8 +411,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		// performer
 		Provider provider = entity.getProvider();
 		if (provider != null) {
-			Reference performerReference = new Reference(
-					new IdType(PractitionerResourceProvider.getType(), entity.getProvider().getId()));
+			Reference performerReference = new Reference(new IdType(OmopPractitioner.FHIRTYPE, entity.getProvider().getId()));
 			ImmunizationPerformerComponent perf = new ImmunizationPerformerComponent(performerReference);
 			immunization.setPerformer(Arrays.asList(perf));
 		}
@@ -423,7 +420,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		VisitOccurrence visitOccurrence = entity.getVisitOccurrence();
 		if (visitOccurrence != null) {
 			Reference encounterReference = new Reference(
-					new IdType(EncounterResourceProvider.getType(), entity.getVisitOccurrence().getId()));
+					new IdType(OmopEncounter.FHIRTYPE, entity.getVisitOccurrence().getId()));
 			immunization.setEncounter(encounterReference);
 		}
 

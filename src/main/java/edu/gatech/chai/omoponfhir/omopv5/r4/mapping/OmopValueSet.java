@@ -34,8 +34,6 @@ import edu.gatech.chai.omopv5.model.entity.Concept;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
 
 import ca.uhn.fhir.rest.api.SortSpec;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.CodeSystemResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ValueSetResourceProvider;
 import edu.gatech.chai.omopv5.dba.service.ConceptRelationshipService;
 import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
@@ -61,14 +59,14 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 
 
     public OmopValueSet(WebApplicationContext context) {
-        super(context, ConceptRelationship.class, ConceptRelationshipService.class, CodeSystemResourceProvider.getType());
+        super(context, ConceptRelationship.class, ConceptRelationshipService.class, OmopValueSet.FHIRTYPE);
         initialize(context);
         getSize();
     }
 
     public OmopValueSet() {
         super(ContextLoaderListener.getCurrentWebApplicationContext(), ConceptRelationship.class, ConceptRelationshipService.class, 
-        ValueSetResourceProvider.getType());
+        OmopValueSet.FHIRTYPE);
     initialize(ContextLoaderListener.getCurrentWebApplicationContext());
     }
 
@@ -86,7 +84,7 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 		return omopValueSet;
 	}
 
-
+	public static String FHIRTYPE = "ValueSet";
     
     /** 
      * 
@@ -151,8 +149,7 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 				logger.error("Failed to get ValueSet.id as Long value");
 				return null;
 			}
-			
-			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, CodeSystemResourceProvider.getType());
+			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, OmopValueSet.FHIRTYPE);
 		}
         
 		ConceptRelationship conceptRelationship = constructOmop(omopId, valueSet);

@@ -31,10 +31,6 @@ import edu.gatech.chai.omopv5.model.entity.ConditionOccurrence;
 import edu.gatech.chai.omopv5.model.entity.FPerson;
 import edu.gatech.chai.omopv5.model.entity.Provider;
 import edu.gatech.chai.omopv5.model.entity.VisitOccurrence;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.ConditionResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.EncounterResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PatientResourceProvider;
-import edu.gatech.chai.omoponfhir.omopv5.r4.provider.PractitionerResourceProvider;
 
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConditionCategory;
@@ -63,7 +59,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 	public OmopCondition(WebApplicationContext context) {
 		super(context, ConditionOccurrence.class, ConditionOccurrenceService.class,
-				ConditionResourceProvider.getType());
+				OmopCondition.FHIRTYPE);
 		initialize(context);
 		
 		// Get count and put it in the counts.
@@ -72,7 +68,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 
 	public OmopCondition() {
 		super(ContextLoaderListener.getCurrentWebApplicationContext(), ConditionOccurrence.class,
-				ConditionOccurrenceService.class, ConditionResourceProvider.getType());
+				ConditionOccurrenceService.class, OmopCondition.FHIRTYPE);
 		initialize(ContextLoaderListener.getCurrentWebApplicationContext());
 	}
 
@@ -92,6 +88,8 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 	public static OmopCondition getInstance() {
 		return OmopCondition.omopCondition;
 	}
+
+	public static String FHIRTYPE = "Condition";
 
 	@Override
 	public Condition constructFHIR(Long fhirId, ConditionOccurrence conditionOccurrence) {
@@ -129,7 +127,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 				return null;
 			}
 			
-			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, ConditionResourceProvider.getType());
+			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, OmopCondition.FHIRTYPE);
 		}
 
 		ConditionOccurrence conditionOccurrence = constructOmop(omopId, fhirResource);
@@ -142,7 +140,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 			retval = getMyOmopService().create(conditionOccurrence).getId();
 		}
 
-		return IdMapping.getFHIRfromOMOP(retval, ConditionResourceProvider.getType());
+		return IdMapping.getFHIRfromOMOP(retval, OmopCondition.FHIRTYPE);
 	}
 
 	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
@@ -366,7 +364,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		// Condition.subject
 		FPerson fPerson = conditionOccurrence.getFPerson();
 		// set the person
-		Reference subjectRef = new Reference(new IdType(PatientResourceProvider.getType(), fPerson.getId()));
+		Reference subjectRef = new Reference(new IdType(OmopPatient.FHIRTYPE, fPerson.getId()));
 		subjectRef.setDisplay(fPerson.getNameAsSingleString());
 		condition.setSubject(subjectRef);
 	}
@@ -430,7 +428,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		// Condition.asserter
 		Provider provider = conditionOccurrence.getProvider();
 		if (provider != null) {
-			Reference providerRef = new Reference(new IdType(PractitionerResourceProvider.getType(), provider.getId()));
+			Reference providerRef = new Reference(new IdType(OmopPractitioner.FHIRTYPE, provider.getId()));
 			providerRef.setDisplay(provider.getProviderName());
 			condition.setAsserter(providerRef);
 		}
@@ -441,7 +439,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		VisitOccurrence visitOccurrence = conditionOccurrence.getVisitOccurrence();
 		if (visitOccurrence != null) {
 			Reference visitRef = new Reference(
-					new IdType(EncounterResourceProvider.getType(), visitOccurrence.getId()));
+					new IdType(OmopEncounter.FHIRTYPE, visitOccurrence.getId()));
 			condition.setEncounter(visitRef);
 		}
 	}
@@ -464,7 +462,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		// get the Subject
 		if (fhirResource.getSubject() != null) {
 			Long subjectId = fhirResource.getSubject().getReferenceElement().getIdPartAsLong();
-			Long subjectFhirId = IdMapping.getOMOPfromFHIR(subjectId, PatientResourceProvider.getType());
+			Long subjectFhirId = IdMapping.getOMOPfromFHIR(subjectId, OmopPatient.FHIRTYPE);
 			fPerson = fPersonService.findById(subjectFhirId);
 			if (fPerson == null) {
 				try {
@@ -482,7 +480,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		// get the Provider
 		if (fhirResource.getAsserter() != null && !fhirResource.getAsserter().isEmpty()) {
 			Long providerId = fhirResource.getAsserter().getReferenceElement().getIdPartAsLong();
-			Long providerOmopId = IdMapping.getOMOPfromFHIR(providerId, PractitionerResourceProvider.getType());
+			Long providerOmopId = IdMapping.getOMOPfromFHIR(providerId, OmopPractitioner.FHIRTYPE);
 			provider = providerService.findById(providerOmopId);
 			if (provider != null) {
 				conditionOccurrence.setProvider(provider);
