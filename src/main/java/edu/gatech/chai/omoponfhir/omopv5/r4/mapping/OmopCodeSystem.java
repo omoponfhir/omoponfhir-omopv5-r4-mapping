@@ -196,7 +196,7 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
 				return null;
 			}
 			
-			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, CodeSystemResourceProvider.getType());
+			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, OmopCodeSystem.FHIRTYPE);
 		}
         
 		Vocabulary vocab = constructOmop(omopId, codeSystem);
