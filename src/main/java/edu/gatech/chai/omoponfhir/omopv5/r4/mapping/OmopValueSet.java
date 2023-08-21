@@ -17,15 +17,21 @@ package edu.gatech.chai.omoponfhir.omopv5.r4.mapping;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
+import edu.gatech.chai.omopv5.model.entity.Concept;
+import edu.gatech.chai.omopv5.dba.service.ConceptService;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import edu.gatech.chai.omopv5.dba.service.ConceptRelationshipService;
@@ -33,6 +39,8 @@ import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.dba.service.RelationshipService;
 import edu.gatech.chai.omopv5.model.entity.ConceptRelationship;
+import edu.gatech.chai.omopv5.model.entity.ConceptRelationshipPK;
+import edu.gatech.chai.omopv5.model.entity.Vocabulary;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,28 +87,63 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 	public static String FHIRTYPE = "ValueSet";
     
     /** 
-     * TODO: ConceptRelationshipService needs to implement a PK
+     * 
      * @param fhirId
      * @param conceptRelationship
      * @return ValueSet
      */
     @Override
     public ValueSet constructFHIR(Long fhirId, ConceptRelationship conceptRelationship) {
-        ValueSet valueSet = new ValueSet();
 
-        valueSet.setId(new IdType(fhirId));
+        ValueSet valueSet = new ValueSet();
+        Concept concept = new Concept();
+
+        // TODO: ConceptRelationshipService needs to implement a PK 
+        // valueSet.setId(new IdType(fhirId));
+        Long concept1 = conceptRelationship.getConceptId1();
+
+
+        valueSet.setId(new IdType(20000000000L));
+
+        Calendar calendar = Calendar.getInstance();
+        Meta metaData = new Meta();
+        Date date = conceptRelationship.getValidStartDate();
+        if (date != null) {
+            calendar.setTime(date);
+            valueSet.setDate(calendar.getTime());
+            metaData.setLastUpdated(calendar.getTime());
+            valueSet.setMeta(metaData);
+        }
+        valueSet.setName("new ValueSet");
+
+
+        // List<ConceptDefinitionComponent> theConcept = new ArrayList<ConceptDefinitionComponent>();
+
+        // List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
+        // params.addAll(mapParameter (CodeSystem.SP_RES_ID, conceptRelationship.getConceptId1(), false));
+        // List<Concept> conceptIds = conceptService.searchWithParams(0, 100, params, null);
+        
+        // for (Concept match: conceptIds) {
+        //     System.out.println("This is the concept code " + match.getConceptCode());
+        //     System.out.println("This is the concept name " + match.getConceptName());
+        // }
+        
+
+        
+        
+
         return valueSet;
     }
 
 
     
     @Override
-    public Long toDbase(ValueSet fhirResource, IdType fhirId) throws FHIRException {
-        Long omopId = null;
+    public Long toDbase(ValueSet valueSet, IdType fhirId) throws FHIRException { 
+		Long omopId = null, fhirIdLong = null;
 
 		if (fhirId != null) {
 			// update
-			Long fhirIdLong = fhirId.getIdPartAsLong();
+            fhirIdLong = fhirId.getIdPartAsLong();
 			if (fhirIdLong == null) {
 				// Invalid fhirId.
 				logger.error("Failed to get ValueSet.id as Long value");
@@ -108,8 +151,18 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 			}
 			omopId = IdMapping.getOMOPfromFHIR(fhirIdLong, OmopValueSet.FHIRTYPE);
 		}
+        
+		ConceptRelationship conceptRelationship = constructOmop(omopId, valueSet);
 
-        return null;
+		ConceptRelationship omopRecordId = null;
+		if (conceptRelationship.getIdAsLong() != null) {
+			omopRecordId = getMyOmopService().update(conceptRelationship);
+		} else {
+			omopRecordId = getMyOmopService().create(conceptRelationship);
+		}
+        // TODO: need to implement IdMapping for ValueSet and ConceptRelationshipPK  
+		// Long fhirRecordId = IdMapping.getFHIRfromOMOP(omopRecordId, PatientResourceProvider.getType());
+		return 2L;
     }
 
     @Override
@@ -161,7 +214,13 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
     
     @Override
     public ConceptRelationship constructOmop(Long omopId, ValueSet fhirResource) {
-        return null;
+        ConceptRelationshipPK pk = new ConceptRelationshipPK(2L, 1L, "In ValueSet");
+        ConceptRelationship conceptRelationship = new ConceptRelationship();
+        // conceptRelationship.setConceptId1(2L);
+        // conceptRelationship.setConceptId2(1L);
+        // conceptRelationship.setRelationshipId("In ValueSet");
+        conceptRelationship.setId(pk);
+        return conceptRelationship;
     }
 
     @Override
