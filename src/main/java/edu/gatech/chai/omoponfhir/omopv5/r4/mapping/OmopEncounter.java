@@ -146,7 +146,7 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 		// set Period
 		Period visitPeriod = new Period();
 		DateFormat dateOnlyFormat = new SimpleDateFormat("yyyy/MM/dd");
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd hh:mm:ss");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 //		try {
 			// For start Date
 //			String timeString = "00:00:00";

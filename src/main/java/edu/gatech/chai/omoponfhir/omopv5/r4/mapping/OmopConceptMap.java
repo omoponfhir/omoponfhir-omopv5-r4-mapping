@@ -24,8 +24,7 @@ import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.model.entity.Concept;
 import edu.gatech.chai.omopv5.model.entity.ConceptRelationship;
 
-public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelationship, ConceptRelationshipService>
-		implements IResourceMapping<ConceptMap, ConceptRelationship> {
+public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelationship, ConceptRelationshipService> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OmopConceptMap.class);
 	private static OmopConceptMap omopConceptMap = new OmopConceptMap();

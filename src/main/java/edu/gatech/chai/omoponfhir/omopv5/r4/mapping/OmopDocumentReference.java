@@ -240,7 +240,7 @@ public class OmopDocumentReference extends BaseOmopResource<DocumentReference, N
 		Coding loincCoding = null;
 		Concept typeOmopConcept = null;
 		Concept typeFhirConcept = null;
-		if (typeCodeableConcept != null & !typeCodeableConcept.isEmpty()) {
+		if (typeCodeableConcept != null && !typeCodeableConcept.isEmpty()) {
 			for (Coding coding: typeCodeableConcept.getCoding()) {
 				try {
 					typeFhirConcept = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, coding);

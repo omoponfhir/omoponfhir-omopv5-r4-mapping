@@ -51,9 +51,6 @@ import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.dba.service.VocabularyService;
 import edu.gatech.chai.omopv5.model.entity.Concept;
-import edu.gatech.chai.omopv5.model.entity.ConceptRelationship;
-import edu.gatech.chai.omopv5.dba.service.ConceptRelationshipService;
-import edu.gatech.chai.omopv5.model.entity.ConceptRelationshipPK;
 import edu.gatech.chai.omopv5.model.entity.Vocabulary;
 
 /**
@@ -67,7 +64,6 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
     private static OmopCodeSystem omopCodeSystem = new OmopCodeSystem();
     private VocabularyService vocabularyService;
     private ConceptService conceptService;
-    private ConceptRelationshipService conceptRelationshipService;
     private Long id = 2000000000L; 
 
 
@@ -86,7 +82,6 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         if (context != null) {
             vocabularyService = context.getBean(VocabularyService.class);
             conceptService = context.getBean(ConceptService.class);
-            conceptRelationshipService = context.getBean(ConceptRelationshipService.class);
         } else {
             logger.error("context must NOT be null");
         }
@@ -201,11 +196,10 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         
 		Vocabulary vocab = constructOmop(omopId, codeSystem);
 
-		String omopRecordId = null;
 		if (vocab.getIdAsLong() != null) {
-			omopRecordId = getMyOmopService().update(vocab).getId();
+			getMyOmopService().update(vocab);
 		} else {
-			omopRecordId = getMyOmopService().create(vocab).getId();
+			getMyOmopService().create(vocab);
 		}
         //TODO: need to implement IdMapping for CodeSystem 
 		// Long fhirRecordId = IdMapping.getFHIRfromOMOP(omopRecordId, PatientResourceProvider.getType());
