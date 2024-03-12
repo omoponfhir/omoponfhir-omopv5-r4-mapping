@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConfigValues {
 
-	@Value("${schema.registry}")
+	@Value("${schema.data}")
     private String dataSchema;
 
 	@Value("${schema.vocabularies}")
