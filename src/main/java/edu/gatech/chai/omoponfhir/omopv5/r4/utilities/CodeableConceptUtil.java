@@ -150,6 +150,23 @@ public class CodeableConceptUtil {
 		return codeableConcept;
 	}
 	
+	public static String convert2String(Coding coding) {
+		String retVal = "";
+		if (coding.getSystem() != null && !coding.getSystem().isBlank()) {
+			retVal += coding.getSystem() + " ";
+		}
+
+		if (coding.getCode() != null && !coding.getCode().isBlank()) {
+			retVal += coding.getCode() + " ";
+		}
+
+		if (coding.getDisplay() != null && !coding.getDisplay().isBlank()) {
+			retVal += coding.getDisplay();
+		}
+
+		return retVal;
+	}
+	
 	/**
 	 * 
 	 * @param coding1

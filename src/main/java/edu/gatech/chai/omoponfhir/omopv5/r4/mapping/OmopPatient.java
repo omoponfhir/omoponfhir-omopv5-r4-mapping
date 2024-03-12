@@ -1087,9 +1087,12 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		List<Reference> generalPractitioners = patient.getGeneralPractitioner();
 		if (!generalPractitioners.isEmpty()) {
 			// We can handle only one provider.
-			Provider retProvider = searchAndUpdate(generalPractitioners.get(0));
-			if (retProvider != null) {
-				fperson.setProvider(retProvider);
+			Reference gPref = generalPractitioners.get(0);
+			if (gPref != null && !gPref.isEmpty()) {
+				Provider retProvider = searchAndUpdate(generalPractitioners.get(0));
+				if (retProvider != null) {
+					fperson.setProvider(retProvider);
+				}
 			}
 		}
 

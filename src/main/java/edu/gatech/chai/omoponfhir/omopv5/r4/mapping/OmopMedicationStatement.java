@@ -738,7 +738,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 			// See if we have any reasons found. If so, put them in the stop
 			// reason field.
 			if (!"".equals(reasonsForStopped)) {
-				if (reasonsForStopped.length() > 20) {
+				if (reasonsForStopped.trim().length() > 20) {
 					reasonsForStopped = reasonsForStopped.trim().substring(0, 20);
 				}
 				drugExposure.setStopReason(reasonsForStopped);
@@ -751,7 +751,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		CodeableConcept medicationCodeableConcept = null;
 		if (medicationType instanceof Reference) {
 			// We may have reference.
-			Reference medicationReference;
+			Reference medicationReference = null;
 			try {
 				medicationReference = fhirResource.getMedicationReference();
 				if (medicationReference.isEmpty()) {
@@ -771,8 +771,6 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 								break;
 							}
 						}
-					} else {
-						throw new FHIRException("Medication Reference must have the medication in the contained");
 					}
 				}
 			} catch (FHIRException e) {
@@ -792,7 +790,13 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 
 		omopConcept = CodeableConceptUtil.searchConcept(conceptService, medicationCodeableConcept);
 		if (omopConcept == null) {
-			throw new FHIRException("Medication[CodeableConcept or Reference] could not be found");
+			if (medicationCodeableConcept.getText() != null && !medicationCodeableConcept.getText().isEmpty()) {
+				drugExposure.setDrugSourceValue(medicationCodeableConcept.getText());
+			} else {
+				drugExposure.setDrugSourceValue(CodeableConceptUtil.convert2String(medicationCodeableConcept.getCodingFirstRep()));
+			}
+			drugExposure.setDrugConcept(new Concept(0L));
+			// throw new FHIRException("Medication[CodeableConcept or Reference] could not be found");
 		} else {
 			drugExposure.setDrugConcept(omopConcept);
 		}

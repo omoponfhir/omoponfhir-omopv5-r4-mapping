@@ -40,6 +40,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -517,20 +520,32 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		
 		// get the start and end date. We are expecting both to be of type DateTimeType
 		Type onSet = fhirResource.getOnset();
-		if (onSet instanceof DateTimeType) {
-			Date start = ((DateTimeType) fhirResource.getOnset()).toCalendar().getTime();
-			conditionOccurrence.setConditionStartDate(start);
-			conditionOccurrence.setConditionStartDateTime(start);
-		} else if (onSet instanceof Period) {
-			Period period = (Period)onSet;
-			Date start = period.getStart();
-			Date end = period.getEnd();
-			if (start != null) { 
+		if (onSet == null || onSet.isEmpty()) {
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			Date date;
+			try {
+				date = dateFormat.parse("9999-12-31");
+			} catch (ParseException e) {
+				throw new FHIRException("Failed to set invalid date for missing onset Condition");
+			}
+			conditionOccurrence.setConditionStartDate(date);
+			conditionOccurrence.setConditionStartDateTime(date);
+		} else {
+			if (onSet instanceof DateTimeType) {
+				Date start = ((DateTimeType) fhirResource.getOnset()).toCalendar().getTime();
 				conditionOccurrence.setConditionStartDate(start);
 				conditionOccurrence.setConditionStartDateTime(start);
-			}
-			if (end != null) conditionOccurrence.setConditionEndDate(end);
-		} 
+			} else if (onSet instanceof Period) {
+				Period period = (Period)onSet;
+				Date start = period.getStart();
+				Date end = period.getEnd();
+				if (start != null) { 
+					conditionOccurrence.setConditionStartDate(start);
+					conditionOccurrence.setConditionStartDateTime(start);
+				}
+				if (end != null) conditionOccurrence.setConditionEndDate(end);
+			} 
+		}
 
 		if (fhirResource.getAbatement() instanceof DateTimeType) {
 			conditionOccurrence.setConditionEndDate(((DateTimeType) fhirResource.getAbatement()).toCalendar().getTime());

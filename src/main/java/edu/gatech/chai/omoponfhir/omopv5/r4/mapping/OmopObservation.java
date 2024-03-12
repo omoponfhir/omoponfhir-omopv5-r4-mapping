@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -119,7 +117,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		observationService = context.getBean(ObservationService.class);
 		visitOccurrenceService = context.getBean(VisitOccurrenceService.class);
 		noteService = context.getBean(NoteService.class);
-		factRelationshipService = context.getBean(FactRelationshipService.class);		
+		factRelationshipService = context.getBean(FactRelationshipService.class);
 	}
 
 	public Long getDiastolicConcept() {
@@ -1808,7 +1806,7 @@ public class OmopObservation extends BaseOmopResource<Observation, FObservationV
 		Long factId2 = referenceIdType.getIdPartAsLong();
 
 		Long domainConceptId2;
-		if (OmopMedicationStatement.FHIRTYPE.equals(targetResourceType)) {
+		if (OmopMedicationStatement.FHIRTYPE.equals(targetResourceType) || OmopMedicationRequest.FHIRTYPE.equals(targetResourceType)) {
 			domainConceptId2 = 13L;
 		} else if (OmopCondition.FHIRTYPE.equals(targetResourceType)) {
 			domainConceptId2 = 19L;
