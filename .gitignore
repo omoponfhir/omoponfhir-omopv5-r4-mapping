@@ -150,3 +150,5 @@ local.properties
 .vscode
 /.apt_generated/
 /.apt_generated_tests/
+
+.fake

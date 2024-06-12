@@ -191,7 +191,22 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 			break;
 		case Condition.SP_CATEGORY:
 			// Condition.category
-			putConditionInParamWrapper(paramWrapper, value);
+			// putConditionInParamWrapper(paramWrapper, value);
+			String categoryCode = ((TokenParam) value).getValue();
+			if (categoryCode == null || categoryCode.isEmpty()) {
+				break;
+			}
+
+			Long conditionTypeConcept = OmopConceptMapping.omopForConditionCategoryCode(categoryCode);
+			if (conditionTypeConcept == OmopConceptMapping.COND_NULL.getOmopConceptId()) {
+				break;
+			}
+
+			paramWrapper.setParameterType("Long");
+			paramWrapper.setParameters(Arrays.asList("conditionTypeConcept.id"));
+			paramWrapper.setOperators(Arrays.asList("="));
+			paramWrapper.setValues(Arrays.asList(String.valueOf(conditionTypeConcept)));
+			paramWrapper.setRelationship("or");
 			mapList.add(paramWrapper);
 			break;
 		case Condition.SP_CLINICAL_STATUS:
@@ -316,16 +331,16 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 	/* PRIVATE METHODS */
 	/* ====================================================================== */
 
-	private void putConditionInParamWrapper(ParameterWrapper paramWrapper, Object value) {
-		String system = ((TokenParam) value).getSystem();
-		String code = ((TokenParam) value).getValue();
+	// private void putConditionInParamWrapper(ParameterWrapper paramWrapper, Object value) {
+	// 	String system = ((TokenParam) value).getSystem();
+	// 	String code = ((TokenParam) value).getValue();
 
-		paramWrapper.setParameterType("String");
-		paramWrapper.setParameters(Arrays.asList("concept.vocabularyId", "concept.conceptCode"));
-		paramWrapper.setParameters(Arrays.asList("like", "like"));
-		paramWrapper.setValues(Arrays.asList(system, code));
-		paramWrapper.setRelationship("and");
-	}
+	// 	paramWrapper.setParameterType("String");
+	// 	paramWrapper.setParameters(Arrays.asList("concept.vocabularyId", "concept.conceptCode"));
+	// 	paramWrapper.setParameters(Arrays.asList("like", "like"));
+	// 	paramWrapper.setValues(Arrays.asList(system, code));
+	// 	paramWrapper.setRelationship("and");
+	// }
 
 	private void putDateInParamWrapper(ParameterWrapper paramWrapper, Object value, String omopTableColumn) {
 		DateParam dateParam = (DateParam) value;
