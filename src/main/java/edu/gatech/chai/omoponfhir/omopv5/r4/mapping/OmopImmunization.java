@@ -68,26 +68,26 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 	private final static Long SELF_REPORTED_CONCEPTID = 44787730L;
 	private final static Long PHYSICIAN_ADMINISTERED_PROCEDURE = 38000179L;
 
-	private static String _columns = "distinct d.drug_exposure_id as id," + " d.stop_reason as stopReason,"
-			+ " d.drug_exposure_start_date as drugExposureStartDate,"
-			+ " d.drug_exposure_start_datetime as drugExposureStartDateTime,"
-			+ " d.drug_exposure_end_date as drugExposureEndDate,"
-			+ " d.drug_exposure_end_datetime as drugExposureEndDateTime," + " d.drug_concept_id as drugConceptId,"
-			+ " c.vocabulary_id as vaccineVocabularyId," + " c.concept_code as vaccineConceptCode,"
-			+ " c.concept_name as vaccineConceptName," + " d.person_id as persionId," + " fp.family_name as familyName,"
-			+ " fp.given1_name as given1Name," + " fp.given2_name as given2Name," + " fp.prefix_name as prefixName,"
-			+ " fp.suffix_name as suffixName," + " d.provider_id as providerId," + " pr.provider_name as providerName,"
-			+ " d.visit_occurrence_id as visitOccurrenceId," + " d.lot_number as lotName,"
-			+ " d.route_concept_id as routeConceptId," + " r.vocabulary_id as routeVocabularyId,"
-			+ " r.concept_code as routeConceptCode," + " r.concept_name as routeConceptName," + " d.quantity as quantity,"
-			+ " d.sig as sig";
+	// private static String _columns = "distinct d.drug_exposure_id as id," + " d.stop_reason as stopReason,"
+	// 		+ " d.drug_exposure_start_date as drugExposureStartDate,"
+	// 		+ " d.drug_exposure_start_datetime as drugExposureStartDateTime,"
+	// 		+ " d.drug_exposure_end_date as drugExposureEndDate,"
+	// 		+ " d.drug_exposure_end_datetime as drugExposureEndDateTime," + " d.drug_concept_id as drugConceptId,"
+	// 		+ " c.vocabulary_id as vaccineVocabularyId," + " c.concept_code as vaccineConceptCode,"
+	// 		+ " c.concept_name as vaccineConceptName," + " d.person_id as persionId," + " fp.family_name as familyName,"
+	// 		+ " fp.given1_name as given1Name," + " fp.given2_name as given2Name," + " fp.prefix_name as prefixName,"
+	// 		+ " fp.suffix_name as suffixName," + " d.provider_id as providerId," + " pr.provider_name as providerName,"
+	// 		+ " d.visit_occurrence_id as visitOccurrenceId," + " d.lot_number as lotName,"
+	// 		+ " d.route_concept_id as routeConceptId," + " r.vocabulary_id as routeVocabularyId,"
+	// 		+ " r.concept_code as routeConceptCode," + " r.concept_name as routeConceptName," + " d.quantity as quantity,"
+	// 		+ " d.sig as sig";
 
-	private static String _from = "drug_exposure d join concept c on d.drug_concept_id = c.concept_id"
-			+ " join concept_relationship cr on d.drug_concept_id = cr.concept_id_2"
-			+ " join Concept c2 on cr.concept_id_1 = c2.concept_id" + " join person p on d.person_id = p.person_id"
-			+ " join f_person fp on d.person_id = fp.person_id" + " left join provider pr on d.provider_id = pr.provider_id"
-			+ " left join visit_occurrence v on d.visit_occurrence_id = v.visit_occurrence_id"
-			+ " left join concept r on d.route_concept_id = r.concept_id";
+	// private static String _from = "drug_exposure d join concept c on d.drug_concept_id = c.concept_id"
+	// 		+ " join concept_relationship cr on d.drug_concept_id = cr.concept_id_2"
+	// 		+ " join Concept c2 on cr.concept_id_1 = c2.concept_id" + " join person p on d.person_id = p.person_id"
+	// 		+ " join f_person fp on d.person_id = fp.person_id" + " left join provider pr on d.provider_id = pr.provider_id"
+	// 		+ " left join visit_occurrence v on d.visit_occurrence_id = v.visit_occurrence_id"
+	// 		+ " left join concept r on d.route_concept_id = r.concept_id";
 
 	private String _where = "c2.vocabulary_id = 'CVX'";
 
@@ -213,23 +213,23 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		return mapList;
 	}
 
-	public String constructSearchSql(String whereStatement) {
-		String searchSql = "select distinct d from " + _from + " where " + _where;
-		if (whereStatement != null && !whereStatement.isEmpty()) {
-			searchSql += " and " + whereStatement;
-		}
+	// public String constructSearchSql(String whereStatement) {
+	// 	String searchSql = "select distinct d from " + _from + " where " + _where;
+	// 	if (whereStatement != null && !whereStatement.isEmpty()) {
+	// 		searchSql += " and " + whereStatement;
+	// 	}
 
-		return searchSql;
-	}
+	// 	return searchSql;
+	// }
 
-	public String constructSizeSql(String whereStatement) {
-		String searchSql = "select count(distinct d) from " + _from + " where " + _where;
-		if (whereStatement != null && !whereStatement.isEmpty()) {
-			searchSql += " and " + whereStatement;
-		}
+	// public String constructSizeSql(String whereStatement) {
+	// 	String searchSql = "select count(distinct d) from " + _from + " where " + _where;
+	// 	if (whereStatement != null && !whereStatement.isEmpty()) {
+	// 		searchSql += " and " + whereStatement;
+	// 	}
 
-		return searchSql;
-	}
+	// 	return searchSql;
+	// }
 
 	public String mapParameter(String parameter, Object value, List<String> parameterList, List<String> valueList) {
 		String whereStatement = "";
