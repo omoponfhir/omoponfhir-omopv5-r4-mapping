@@ -84,6 +84,8 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 		}
 		
 		String relationshipId = omopSrcVocab+" % "+omopTargetVocab+" eq";
+		String relationshipId2 = "Has Alias";
+
 		logger.debug("$translate requested for "+relationshipId);
 		
 		// Find concept_id for source coding.
@@ -97,7 +99,7 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 		List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
 		ParameterWrapper paramConceptId1 = new ParameterWrapper(
 				"Long",
-				Arrays.asList("id.conceptId1"),
+				Arrays.asList("conceptId1"),
 				Arrays.asList("="),
 				Arrays.asList(String.valueOf(omopSrcConcept.getId())),
 				"or"
@@ -106,7 +108,7 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 		
 		ParameterWrapper paramRelationshipId = new ParameterWrapper(
 				"String",
-				Arrays.asList("id.relationshipId"),
+				Arrays.asList("relationshipId"),
 				Arrays.asList("like"),
 				Arrays.asList(relationshipId),
 				"or"
@@ -115,8 +117,31 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 		
 		List<ConceptRelationship> conceptRealationships = getMyOmopService().searchWithParams(0, 0, params, null);
 		if (conceptRealationships.isEmpty()) {
-			logger.info("$translate: mapping information is not found ("+system+"|"+code+" to "+targetSystem+")");
-			return retVal;
+			logger.info("$translate: mapping information is not found ("+system+"|"+code+" eq "+targetSystem+")");
+
+			params.clear();;
+			paramConceptId1 = new ParameterWrapper(
+				"Long",
+				Arrays.asList("conceptId1"),
+				Arrays.asList("="),
+				Arrays.asList(String.valueOf(omopSrcConcept.getId())),
+				"or"
+				);
+			params.add(paramConceptId1);
+			
+			paramRelationshipId = new ParameterWrapper(
+					"String",
+					Arrays.asList("relationshipId"),
+					Arrays.asList("like"),
+					Arrays.asList(relationshipId2),
+					"or"
+					);
+			params.add(paramRelationshipId);
+
+			conceptRealationships = getMyOmopService().searchWithParams(0, 0, params, null);
+			if (conceptRealationships.isEmpty()) {
+				return retVal;
+			}
 		}
 		
 		ParametersParameterComponent parameter = retVal.addParameter();
