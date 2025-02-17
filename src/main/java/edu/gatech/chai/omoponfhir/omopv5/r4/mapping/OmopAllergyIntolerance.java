@@ -62,8 +62,6 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 		super(context, Observation.class, ObservationService.class,
 				OmopAllergyIntolerance.FHIRTYPE);
 		initialize(context);
-		
-		getSize(true);
 	}
 
 	public OmopAllergyIntolerance() {
@@ -121,7 +119,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 	}
 
 	@Override
-	public AllergyIntolerance constructFHIR(Long fhirId, Observation observation) {
+	public AllergyIntolerance constructFHIR(Long fhirId, Observation observation) throws Exception {
 		AllergyIntolerance allergyIntolerance = new AllergyIntolerance();
 		allergyIntolerance.setId(new IdType(fhirId));
 
@@ -187,7 +185,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 	}
 
 	@Override
-	public Long toDbase(AllergyIntolerance fhirResource, IdType fhirId) throws FHIRException {
+	public Long toDbase(AllergyIntolerance fhirResource, IdType fhirId) throws FHIRException, Exception {
 		Long retval;
 		Long omopId = null;
 
@@ -215,7 +213,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 			new ParameterWrapper("String", Arrays.asList("observationConcept.domainId"),	Arrays.asList("="), Arrays.asList("Observation"), "or"));
 
 	@Override
-	public Long getSize() {
+	public Long getSize() throws Exception {
 		List<ParameterWrapper> paramList = new ArrayList<ParameterWrapper>();
 		// call getSize with empty parameter list. The getSize will add filter
 		// parameter.
@@ -227,7 +225,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 	}
 
 	@Override
-	public Long getSize(List<ParameterWrapper> paramList) {
+	public Long getSize(List<ParameterWrapper> paramList) throws Exception {
 		paramList.addAll(filterParams);
 
 		return getMyOmopService().getSize(paramList);
@@ -235,7 +233,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 
 	@Override
 	public void searchWithoutParams(int fromIndex, int toIndex, List<IBaseResource> listResources,
-			List<String> includes, String sort) {
+			List<String> includes, String sort) throws Exception {
 
 		// This is read all. But, since we will add an exception conditions to add
 		// filter.
@@ -246,7 +244,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 
 	@Override
 	public void searchWithParams(int fromIndex, int toIndex, List<ParameterWrapper> mapList,
-			List<IBaseResource> listResources, List<String> includes, String sort) {
+			List<IBaseResource> listResources, List<String> includes, String sort) throws Exception {
 		mapList.addAll(filterParams);
 
 		List<Observation> entities = getMyOmopService().searchWithParams(fromIndex, toIndex, mapList, sort);
@@ -264,7 +262,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 	}
 
 	
-	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
+	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) throws Exception {
 		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
 		ParameterWrapper paramWrapper = new ParameterWrapper();
 		if (or)
@@ -349,7 +347,7 @@ public class OmopAllergyIntolerance extends BaseOmopResource<AllergyIntolerance,
 	}
 
 	@Override
-	public Observation constructOmop(Long omopId, AllergyIntolerance fhirResource) {
+	public Observation constructOmop(Long omopId, AllergyIntolerance fhirResource) throws Exception {
 		// things to update Condition_Occurrence, Concept, FPerson, Provider,
 		// VisitOccurrence
 		Observation observation;

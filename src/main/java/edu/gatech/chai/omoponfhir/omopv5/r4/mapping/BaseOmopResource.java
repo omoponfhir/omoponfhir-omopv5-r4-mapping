@@ -88,44 +88,46 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 		return this.myEntityClass;
 	}
 
-	public void removeDbase(Long id) {
+	public void removeDbase(Long id) throws Exception {
 		myOmopService.removeById(id);
 	}
 
-	public Long removeByFhirId(IdType fhirId) {
+	public Long removeByFhirId(IdType fhirId) throws Exception {
 		Long idLongPart = fhirId.getIdPartAsLong();
 		Long myId = IdMapping.getOMOPfromFHIR(idLongPart, getMyFhirResourceType());
 
 		return myOmopService.removeById(myId);
 	}
 
-	public Long getSize(boolean cacheOnly) {
-		return myOmopService.getSize(true);
-	}
+	// public Long getSize(boolean cacheOnly) {
+	// 	return myOmopService.getSize(true);
+	// }
 
-	public Long getSize() {
+	public Long getSize() throws Exception {
 		Long size = myOmopService.getSize();
 		
 		// update the counts map.
-		ExtensionUtil.addResourceCount(myFhirResourceType, size);
+		if (size != null)
+			ExtensionUtil.addResourceCount(myFhirResourceType, size);
+
 		return size;
 	}
 
-	public Long getSize(List<ParameterWrapper> mapList, boolean cacheOnly) {
-		return myOmopService.getSize(mapList, cacheOnly);
-	}
+	// public Long getSize(List<ParameterWrapper> mapList, boolean cacheOnly) {
+	// 	return myOmopService.getSize(mapList, cacheOnly);
+	// }
 
-	public Long getSize(List<ParameterWrapper> mapList) {
+	public Long getSize(List<ParameterWrapper> mapList) throws Exception {
 		return myOmopService.getSize(mapList);
 	}
 
-	public Long getSize(String queryString, List<String> parameterList, List<String> valueList, boolean cacheOnly) {
-		return myOmopService.getSize(queryString, parameterList, valueList, cacheOnly);
-	}
+	// public Long getSize(String queryString, List<String> parameterList, List<String> valueList, boolean cacheOnly) {
+	// 	return myOmopService.getSize(queryString, parameterList, valueList, cacheOnly);
+	// }
 
-	public Long getSize(String queryString, List<String> parameterList, List<String> valueList) {
+	public Long getSize(String queryString, List<String> parameterList, List<String> valueList) throws Exception {
 		Long size = myOmopService.getSize(queryString, parameterList, valueList);
-		if (parameterList == null || parameterList.isEmpty()) {
+		if (size != null && (parameterList == null || parameterList.isEmpty())) {
 			ExtensionUtil.addResourceCount(myFhirResourceType, size);
 		}
 
@@ -135,7 +137,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	/***
 	 * constructResource: Overwrite this if you want to implement includes.
 	 */
-	public v constructResource(Long fhirId, t entity, List<String> includes) {
+	public v constructResource(Long fhirId, t entity, List<String> includes) throws Exception {
 		return constructFHIR(fhirId, entity);
 	}
 
@@ -155,7 +157,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	/***
 	 * toFHIR this is called from FHIR provider for read operation.
 	 */
-	public v toFHIR(IdType id) {
+	public v toFHIR(IdType id) throws Exception {
 		Long id_long_part = id.getIdPartAsLong();
 		Long myId = IdMapping.getOMOPfromFHIR(id_long_part, getMyFhirResourceType());
 		System.out.println("This is the id from baseOMOPResource " + id);
@@ -169,7 +171,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	}
 
 	public void searchWithoutParams(int fromIndex, int toIndex, List<IBaseResource> listResources,
-			List<String> includes, String sort) {
+			List<String> includes, String sort) throws Exception {
 		List<t> entities = getMyOmopService().searchWithoutParams(fromIndex, toIndex, sort);
 
 		// We got the results back from OMOP database. Now, we need to construct
@@ -187,7 +189,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	}
 
 	public void searchWithParams(int fromIndex, int toIndex, List<ParameterWrapper> mapList,
-			List<IBaseResource> listResources, List<String> includes, String sort) {
+			List<IBaseResource> listResources, List<String> includes, String sort) throws Exception {
 		List<t> entities = getMyOmopService().searchWithParams(fromIndex, toIndex, mapList, sort);
 
 		for (t entity : entities) {
@@ -202,7 +204,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 		}
 	}
 	
-	public void searchWithSql(String sql, List<String> parameterList, List<String> valueList, int fromIndex, int toIndex, String sort, List<IBaseResource> listResources) {
+	public void searchWithSql(String sql, List<String> parameterList, List<String> valueList, int fromIndex, int toIndex, String sort, List<IBaseResource> listResources) throws Exception {
 		List<t> entities = getMyOmopService().searchBySql(fromIndex, toIndex, sql, parameterList, valueList, sort);
 
 		for (t entity : entities) {
@@ -216,13 +218,13 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 	}
 
 	// Override the this method to provide rev_includes.
-	public void addRevIncludes(Long omopId, List<String> includes, List<IBaseResource> listResources) {
+	public void addRevIncludes(Long omopId, List<String> includes, List<IBaseResource> listResources) throws Exception {
 
 	}
 
 	// Some common functions that are repetitively used.
 	protected void addParamlistForPatientIDName(String parameter, String value, ParameterWrapper paramWrapper,
-			List<ParameterWrapper> mapList) {
+			List<ParameterWrapper> mapList) throws Exception {
 		switch (parameter) {
 		case "Patient:" + Patient.SP_RES_ID:
 			String pId = value;
@@ -314,7 +316,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 		return retv.trim();
 	}
 
-	public Concept fhirCode2OmopConcept(ConceptService conceptService, CodeableConcept code, String valueSourceString) {
+	public Concept fhirCode2OmopConcept(ConceptService conceptService, CodeableConcept code, String valueSourceString) throws Exception {
 		List<Coding> codings = code.getCoding();
 		Coding codingFound = null;
 		Coding codingSecondChoice = null;
@@ -373,7 +375,7 @@ public abstract class BaseOmopResource<v extends Resource, t extends BaseEntity,
 		return concept;
 	}
 	
-	public VisitOccurrence fhirContext2OmopVisitOccurrence(VisitOccurrenceService visitOccurrenceService, Reference contextReference) {
+	public VisitOccurrence fhirContext2OmopVisitOccurrence(VisitOccurrenceService visitOccurrenceService, Reference contextReference) throws Exception {
 		VisitOccurrence visitOccurrence = null;
 		if (contextReference != null && !contextReference.isEmpty()) {
 			if (contextReference.getReferenceElement().getResourceType().equals(OmopEncounter.FHIRTYPE)) {

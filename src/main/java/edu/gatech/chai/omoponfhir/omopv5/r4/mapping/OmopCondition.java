@@ -66,7 +66,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize(true);
+		// getSize(true);
 	}
 
 	public OmopCondition() {
@@ -119,7 +119,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 	}
 
 	@Override
-	public Long toDbase(Condition fhirResource, IdType fhirId) throws FHIRException {
+	public Long toDbase(Condition fhirResource, IdType fhirId) throws Exception {
 		Long retval;
 		Long omopId = null, fhirIdLong = null;
 
@@ -146,7 +146,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 		return IdMapping.getFHIRfromOMOP(retval, OmopCondition.FHIRTYPE);
 	}
 
-	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
+	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) throws Exception {
 		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
 		ParameterWrapper paramWrapper = new ParameterWrapper();
 		if (or)
@@ -463,7 +463,7 @@ public class OmopCondition extends BaseOmopResource<Condition, ConditionOccurren
 	}
 
 	@Override
-	public ConditionOccurrence constructOmop(Long omopId, Condition fhirResource) {
+	public ConditionOccurrence constructOmop(Long omopId, Condition fhirResource) throws Exception {
 		// things to update Condition_Occurrence, Concept, FPerson, Provider,
 		// VisitOccurrence
 		ConditionOccurrence conditionOccurrence;

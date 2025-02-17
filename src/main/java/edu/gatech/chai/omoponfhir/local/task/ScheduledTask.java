@@ -31,7 +31,6 @@ import edu.gatech.chai.omopv5.dba.service.RelationshipService;
 import edu.gatech.chai.omopv5.dba.service.VocabularyService;
 import edu.gatech.chai.omopv5.model.entity.Concept;
 import edu.gatech.chai.omopv5.model.entity.ConceptRelationship;
-import edu.gatech.chai.omopv5.model.entity.ConceptRelationshipPK;
 import edu.gatech.chai.omopv5.model.entity.Relationship;
 import edu.gatech.chai.omopv5.model.entity.Vocabulary;
 
@@ -58,7 +57,7 @@ public class ScheduledTask {
 	}
 
 	@Scheduled(fixedDelay = 60000)
-	public void localCodeMappingTask() {
+	public void localCodeMappingTask() throws Exception {
 		// We may need to load local mapping data. Get a path where the mapping CSV
 		// file(s) are located and load them if files exist. The files will then be
 		// deleted.
@@ -302,18 +301,14 @@ public class ScheduledTask {
 						}
 
 						// see if this relationship exists. If not create one.
-						ConceptRelationshipPK conceptRelationshipPk = new ConceptRelationshipPK(sourceConcept.getId(),
-								targetConcept.getId(), relationshipId);
-						ConceptRelationship conceptRelationship = conceptRelationshipService
-								.findById(conceptRelationshipPk);
+						ConceptRelationship conceptRelationship = conceptRelationshipService.find(sourceConcept, targetConcept, relationshipId);
 						if (conceptRelationship != null) {
 							line = reader.readLine();
 							continue;
 						}
 
 						// Create concept_relationship entry
-						conceptRelationship = new ConceptRelationship();
-						conceptRelationship.setId(conceptRelationshipPk);
+						conceptRelationship = new ConceptRelationship(sourceConcept, targetConcept, relationshipId);
 						conceptRelationship.setValidStartDate(new Date(0L));
 						SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 						try {
@@ -351,7 +346,7 @@ public class ScheduledTask {
 		return conceptIdStart;
 	}
 
-	private Vocabulary createNewEntry(String[] omopVacab, String fhirCoding) {
+	private Vocabulary createNewEntry(String[] omopVacab, String fhirCoding) throws Exception {
 		Vocabulary vocab = createOmopVocabularyConcept(omopVacab);
 
 		// Create FHIR representation of the vocabulary.
@@ -371,7 +366,7 @@ public class ScheduledTask {
 		return vocab;
 	}
 
-	private Vocabulary createOmopVocabularyConcept(String[] values) {
+	private Vocabulary createOmopVocabularyConcept(String[] values) throws Exception {
 		Vocabulary newVocab = new Vocabulary();
 		String vocName = null;
 		newVocab.setId(values[0]);
@@ -427,7 +422,7 @@ public class ScheduledTask {
 		return vocabularyService.create(newVocab);
 	}
 
-	private Relationship createOmopRelationshipConcept(String id, String name, String revId) {
+	private Relationship createOmopRelationshipConcept(String id, String name, String revId) throws Exception {
 		Relationship newRelationship = new Relationship();
 		newRelationship.setId(id);
 		newRelationship.setRelationshipName(name);
@@ -461,7 +456,7 @@ public class ScheduledTask {
 		return relationshipService.create(newRelationship);
 	}
 
-	private Concept createVocabularyConcept(String name, String vocabId) {
+	private Concept createVocabularyConcept(String name, String vocabId) throws Exception {
 		Concept conceptVoc = new Concept();
 		conceptVoc.setId(getTheLargestConceptId());
 		conceptVoc.setConceptName(name);

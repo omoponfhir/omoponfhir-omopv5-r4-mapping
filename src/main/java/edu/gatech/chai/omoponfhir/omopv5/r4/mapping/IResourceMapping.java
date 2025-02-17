@@ -27,20 +27,20 @@ import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.model.entity.BaseEntity;
 
 public interface IResourceMapping<v extends Resource, t extends BaseEntity> {
-	public v toFHIR(IdType id);
-	public Long toDbase(v fhirResource, IdType fhirId) throws FHIRException;
-	public void removeDbase(Long id);
-	public Long removeByFhirId (IdType fhirId) throws FHIRException;
-	public Long getSize();
-	public Long getSize(List<ParameterWrapper> mapList);
+	public v toFHIR(IdType id) throws Exception;
+	public Long toDbase(v fhirResource, IdType fhirId) throws FHIRException, Exception;
+	public void removeDbase(Long id) throws Exception;
+	public Long removeByFhirId (IdType fhirId) throws FHIRException, Exception;
+	public Long getSize() throws Exception;
+	public Long getSize(List<ParameterWrapper> mapList) throws Exception;
 
-	public v constructResource(Long fhirId, t entity, List<String> includes);
-	public void searchWithoutParams(int fromIndex, int toIndex, List<IBaseResource> listResources, List<String> includes, String sort);
-	public void searchWithParams(int fromIndex, int toIndex, List<ParameterWrapper> map, List<IBaseResource> listResources, List<String> includes, String sort);
+	public v constructResource(Long fhirId, t entity, List<String> includes) throws Exception;
+	public void searchWithoutParams(int fromIndex, int toIndex, List<IBaseResource> listResources, List<String> includes, String sort) throws Exception;
+	public void searchWithParams(int fromIndex, int toIndex, List<ParameterWrapper> map, List<IBaseResource> listResources, List<String> includes, String sort) throws Exception;
 
-	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or);
-	public v constructFHIR(Long fhirId, t entity);
-	public t constructOmop(Long omopId, v fhirResource);
+	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) throws Exception;
+	public v constructFHIR(Long fhirId, t entity) throws Exception;
+	public t constructOmop(Long omopId, v fhirResource) throws Exception;
 	
 	public String constructOrderParams(SortSpec theSort);
 }

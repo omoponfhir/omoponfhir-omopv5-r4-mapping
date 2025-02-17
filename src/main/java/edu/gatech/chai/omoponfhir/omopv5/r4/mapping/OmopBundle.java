@@ -85,7 +85,7 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		initialize(context);
 
 		// Get count and put it in the counts.
-		getSize(true);
+		// getSize(true);
 	}
 
 	public OmopBundle() {
@@ -105,7 +105,7 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 	public static String FHIRTYPE = "Bundle";
 	
 
-	private void transactionFailed(Bundle theBundle) {
+	private void transactionFailed(Bundle theBundle) throws Exception {
 		// Undo previous transactions.
 		for (String id : toBeDeleted) {
 			deleteFromId(new IdType(id));
@@ -128,7 +128,7 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		return true;
 	}
 
-	private Resource getResource(IdType fhirId) {
+	private Resource getResource(IdType fhirId) throws Exception {
 		String resourceType = fhirId.getResourceType();
 
 		if ("Organization".equals(resourceType)) {
@@ -211,7 +211,7 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		return null;
 	}
 
-	private Long deleteFromId(IdType fhirId) {
+	private Long deleteFromId(IdType fhirId) throws Exception {
 		String resourceType = fhirId.getResourceType();
 
 		if ("Organization".equals(resourceType)) {
@@ -285,7 +285,7 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		return null;
 	}
 
-	private int updateReferences(List<Reference> references, Bundle theBundle) {
+	private int updateReferences(List<Reference> references, Bundle theBundle) throws Exception{
 		if (references == null || references.isEmpty()) return 0;
 
 		for (Reference reference : references) {
@@ -295,7 +295,7 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		return 0;
 	}
 
-	private int updateReference(Reference reference, Bundle theBundle) {
+	private int updateReference(Reference reference, Bundle theBundle) throws Exception {
 		if (reference == null || reference.isEmpty()) return 0;
 
 		int ret = 0;
@@ -339,7 +339,7 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		return ret;
 	}
 
-	private Long postResource(Resource resource, IdType fhirId, Bundle theBundle) {
+	private Long postResource(Resource resource, IdType fhirId, Bundle theBundle) throws Exception{
 		String resourceType = fhirId.getResourceType();
 		Long id = null;
 		// Make sure to visit all the reference fields for each resource
@@ -865,7 +865,7 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		return id;
 	}
 
-	private void errorOnTransactionBatch(Bundle theBundle, BundleEntryComponent entry, String status, String message) {
+	private void errorOnTransactionBatch(Bundle theBundle, BundleEntryComponent entry, String status, String message) throws Exception {
 		if (BundleType.TRANSACTION == theBundle.getType()) {
 			// Get this resource and save it for the restoration.
 			transactionFailed(theBundle);
@@ -884,13 +884,13 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		}								
 	}
 
-	private void processDeletes(List<BundleEntryComponent> entries, Bundle theBundle) {
+	private void processDeletes(List<BundleEntryComponent> entries, Bundle theBundle) throws Exception {
 		for (BundleEntryComponent entry : entries) {
 			processDelete(entry, theBundle);
 		}
 	}
 
-	private void processDelete(BundleEntryComponent entry, Bundle theBundle) {
+	private void processDelete(BundleEntryComponent entry, Bundle theBundle) throws Exception {
 		if (entry.hasRequest()) {
 			String deleteUrl = entry.getRequest().getUrl();
 			if (deleteUrl != null && !deleteUrl.isBlank()) {
@@ -934,13 +934,13 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		}			
 	}
 
-	private void processPosts(List<BundleEntryComponent> entries, Bundle theBundle) {
+	private void processPosts(List<BundleEntryComponent> entries, Bundle theBundle) throws Exception {
 		for (BundleEntryComponent entry : entries) {
 			processPost(entry, theBundle);
 		}
 	}
 
-	private void processPost(BundleEntryComponent entry, Bundle theBundle) {
+	private void processPost(BundleEntryComponent entry, Bundle theBundle) throws Exception {
 		if (entry.hasResource()) {
 			Resource postResource = entry.getResource();
 			Long idc = postResource(postResource, null, theBundle);
@@ -956,13 +956,13 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		}
 	}
 
-	private void processPuts(List<BundleEntryComponent> entries, Bundle theBundle) {
+	private void processPuts(List<BundleEntryComponent> entries, Bundle theBundle) throws Exception {
 		for (BundleEntryComponent entry : entries) {
 			processPut(entry, theBundle);
 		}
 	}
 
-	private void processPut(BundleEntryComponent entry, Bundle theBundle) {
+	private void processPut(BundleEntryComponent entry, Bundle theBundle) throws Exception {
 		if (entry.hasResource()) {
 			Resource putResource = entry.getResource();
 			IdType putResourceFhirId = putResource.getIdElement();
@@ -996,13 +996,13 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		}
 	}
 
-	private void processGets(List<BundleEntryComponent> entries, Bundle theBundle) {
+	private void processGets(List<BundleEntryComponent> entries, Bundle theBundle) throws Exception {
 		for (BundleEntryComponent entry : entries) {
 			processGet(entry, theBundle);
 		}
 	}
 
-	private void processGet(BundleEntryComponent entry, Bundle theBundle) {
+	private void processGet(BundleEntryComponent entry, Bundle theBundle) throws Exception {
 		IdType fhirIdType = null;
 		if (entry.hasRequest()) {
 			String urlString = entry.getRequest().getUrl();
@@ -1032,7 +1032,7 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 	}
 
 	@Override
-	public Long toDbase(Bundle theBundle, IdType fhirId) throws FHIRException {
+	public Long toDbase(Bundle theBundle, IdType fhirId) throws Exception {
 		Long retVal = null;
 
 		List<BundleEntryComponent> deleteList = new ArrayList<BundleEntryComponent>();

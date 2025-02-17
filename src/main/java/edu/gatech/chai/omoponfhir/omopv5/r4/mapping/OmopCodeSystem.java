@@ -156,7 +156,12 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
         params.addAll(mapParameter (CodeSystem.SP_NAME, vocabulary.getId(), false));
 
-        List<Concept> conceptIds = conceptService.searchWithParams(0, 100, params, null); //increase toIndex as needed
+        List<Concept> conceptIds = new ArrayList<Concept>();
+        try {
+            conceptIds.addAll(conceptService.searchWithParams(0, 100, params, null));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } 
         
         for (Concept match: conceptIds) {
             ConceptDefinitionComponent code = new ConceptDefinitionComponent();
@@ -164,7 +169,10 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
             code.setDisplay(match.getConceptName());
             theConcept.add(code);
         }
-        codeSystem.setConcept(theConcept);
+
+        if (!theConcept.isEmpty()) {
+            codeSystem.setConcept(theConcept);
+        }
 
         return codeSystem;
     }
@@ -179,7 +187,7 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
      * @return Returns resource ID in Long 
      */
     @Override
-	public Long toDbase(CodeSystem codeSystem, IdType fhirId) throws FHIRException {
+	public Long toDbase(CodeSystem codeSystem, IdType fhirId) throws Exception {
 		Long omopId = null, fhirIdLong = null;
 
 		if (fhirId != null) {
@@ -217,24 +225,24 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
     }
 
     @Override
-    public Long getSize() {
+    public Long getSize() throws Exception {
         return super.getSize();
     }
 
     @Override
-    public Long getSize(List<ParameterWrapper> mapList) {
+    public Long getSize(List<ParameterWrapper> mapList) throws Exception {
         return super.getSize(mapList);
     }
 
     @Override
     public void searchWithoutParams(int fromIndex, int toIndex, List<IBaseResource> listResources,
-            List<String> includes, String sort) {
+            List<String> includes, String sort) throws Exception {
                 super.searchWithoutParams(fromIndex, toIndex, listResources, includes, sort);
     }
 
     @Override
     public void searchWithParams(int fromIndex, int toIndex, List<ParameterWrapper> mapList, List<IBaseResource> listResources, 
-        List<String> includes, String sort) {
+        List<String> includes, String sort) throws Exception {
             super.searchWithParams(fromIndex, toIndex, mapList, listResources, includes, sort);   
     }
 
@@ -443,7 +451,12 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
 
         List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
         params.addAll(mapParameter (CodeSystem.SP_NAME, id.substring(11), false));
-        List<Concept> conceptIds = conceptService.searchWithParams(0, 100, params, null);
+        List<Concept> conceptIds = new ArrayList<Concept>();
+        try {
+            conceptIds = conceptService.searchWithParams(0, 100, params, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         ParametersParameterComponent displayParameter = new ParametersParameterComponent();
         displayParameter.setName("display");
@@ -532,7 +545,14 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
         List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
 
         params.addAll(mapParameter (CodeSystem.SP_URL, system, true));
-        List<Vocabulary> vocabulary = vocabularyService.searchWithParams(0, 100, params, null);
+        List<Vocabulary> vocabulary;
+        try {
+            vocabulary = vocabularyService.searchWithParams(0, 100, params, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return responseParameter;
+        }
+        
         for (Vocabulary v: vocabulary) {
             logger.debug("These are the listed vocabularies " + v.getId());
             List<ParameterWrapper> param = new ArrayList<ParameterWrapper>();
@@ -541,7 +561,14 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
             param.addAll(mapParameter (CodeSystem.SP_NAME, v.getId(), false)); 
             
             //these are all the concepts in a CodeSystem
-            List<Concept> conceptIds = conceptService.searchWithParams(0, 100, param, null);
+            List<Concept> conceptIds = null;
+            try {
+                conceptIds = conceptService.searchWithParams(0, 100, param, null);
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
+
             for (Concept c: conceptIds) {
                 if (c.getConceptCode().equals(code) && v.getVocabularyReference().equals(system)) {
                     nameParameter.setValue(new StringType(v.getId()));
@@ -616,7 +643,7 @@ public class OmopCodeSystem extends BaseOmopResource<CodeSystem, Vocabulary, Voc
 
     
     @Override
-    public CodeSystem toFHIR(IdType id) {
+    public CodeSystem toFHIR(IdType id) throws Exception {
         Long myId = id.getIdPartAsLong();
         
 		Concept concept = conceptService.findById(myId);

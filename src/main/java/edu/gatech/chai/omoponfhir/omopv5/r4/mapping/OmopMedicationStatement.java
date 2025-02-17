@@ -93,7 +93,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 		initialize(context);
 
 		// Get count and put it in the counts.
-		getSize(true);
+		// getSize(true);
 	}
 
 	public OmopMedicationStatement() {
@@ -118,7 +118,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 	public static String FHIRTYPE = "MedicationStatement";
 
 	@Override
-	public Long toDbase(MedicationStatement fhirResource, IdType fhirId) throws FHIRException {
+	public Long toDbase(MedicationStatement fhirResource, IdType fhirId) throws Exception {
 		Long omopId = null;
 		if (fhirId != null) {
 			// Update
@@ -139,7 +139,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 	}
 
 	@Override
-	public MedicationStatement constructFHIR(Long fhirId, DrugExposure entity) {
+	public MedicationStatement constructFHIR(Long fhirId, DrugExposure entity) throws Exception {
 		MedicationStatement medicationStatement = new MedicationStatement();
 		medicationStatement.setId(new IdType(fhirId));
 
@@ -418,7 +418,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 	}
 
 	@Override
-	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
+	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) throws Exception {
 		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
 		ParameterWrapper paramWrapper = new ParameterWrapper();
 		if (or)
@@ -654,7 +654,7 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 //	}
 
 	@Override
-	public DrugExposure constructOmop(Long omopId, MedicationStatement fhirResource) {
+	public DrugExposure constructOmop(Long omopId, MedicationStatement fhirResource) throws Exception {
 		DrugExposure drugExposure = null;
 		if (omopId != null) {
 			// Update
@@ -719,10 +719,13 @@ public class OmopMedicationStatement extends BaseOmopResource<MedicationStatemen
 				for (Coding rNTCoding : rNTCodings) {
 					String rNTCodingDisplay = rNTCoding.getDisplay();
 					if (rNTCodingDisplay == null || rNTCodingDisplay.isEmpty()) {
-						Concept rNTOmopConcept;
+						Concept rNTOmopConcept = null;
 						try {
-							rNTOmopConcept = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService,
-									rNTCoding);
+							List<Concept> rNTOmopConcepts = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, rNTCoding);
+							if (rNTOmopConcepts != null && !rNTOmopConcepts.isEmpty()) {
+								rNTOmopConcept = rNTOmopConcepts.get(0);
+							}
+
 							if (rNTOmopConcept != null) {
 								reasonsForStopped = reasonsForStopped.concat(" " + rNTOmopConcept.getConceptName());
 							}

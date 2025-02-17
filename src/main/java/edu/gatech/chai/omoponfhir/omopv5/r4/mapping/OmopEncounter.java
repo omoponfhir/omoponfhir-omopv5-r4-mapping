@@ -71,7 +71,7 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize(true);
+		// getSize(true);
 	}
 
 	private void initialize(WebApplicationContext context) {
@@ -89,7 +89,7 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 	public static String FHIRTYPE = "Encounter";
 
 	@Override
-	public Encounter constructFHIR(Long fhirId, VisitOccurrence visitOccurrence) {
+	public Encounter constructFHIR(Long fhirId, VisitOccurrence visitOccurrence) throws Exception {
 		Encounter encounter = new Encounter();
 		encounter.setId(new IdType(fhirId));
 
@@ -223,7 +223,7 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 	}
 
 	@Override
-	public Long toDbase(Encounter fhirResource, IdType fhirId) throws FHIRException {
+	public Long toDbase(Encounter fhirResource, IdType fhirId) throws Exception {
 		Long retval;
 		Long omopId = null;
 		if (fhirId != null) {
@@ -241,7 +241,7 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 		return IdMapping.getFHIRfromOMOP(retval, getMyFhirResourceType());
 	}
 
-	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
+	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) throws Exception {
 		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
 		ParameterWrapper paramWrapper = new ParameterWrapper();
         if (or) paramWrapper.setUpperRelationship("or");
@@ -282,7 +282,7 @@ public class OmopEncounter extends BaseOmopResource<Encounter, VisitOccurrence, 
 	}
 
 	@Override
-	public VisitOccurrence constructOmop(Long omopId, Encounter encounter) {
+	public VisitOccurrence constructOmop(Long omopId, Encounter encounter) throws Exception {
 		FPerson fPerson;
 		VisitOccurrence visitOccurrence = null;
 		

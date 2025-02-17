@@ -96,7 +96,7 @@ public class OmopTransaction {
 		list.add(entity);
 	}
 
-	private IdType linkToPatient(Reference subject, Map<String, Long> patientMap) {
+	private IdType linkToPatient(Reference subject, Map<String, Long> patientMap) throws Exception {
 		if (subject == null || subject.isEmpty()) {
 			// We must have subject information to link this to patient.
 			// This is OMOP requirement. We skip this for Transaction Messages.
@@ -149,7 +149,7 @@ public class OmopTransaction {
 		responseEntries.add(entryBundle);
 	}
 
-	public List<BundleEntryComponent> executeRequests(Map<HTTPVerb, Object> entries) throws FHIRException {
+	public List<BundleEntryComponent> executeRequests(Map<HTTPVerb, Object> entries) throws Exception {
 		List<BundleEntryComponent> responseEntries = new ArrayList<BundleEntryComponent>();
 
 		List<Resource> postList = (List<Resource>) entries.get(HTTPVerb.POST);
@@ -288,7 +288,7 @@ public class OmopTransaction {
 	 *                       JPA transaction so that if one failed, all can be
 	 *                       rolled back.
 	 */
-	public List<BundleEntryComponent> executeTransaction(Map<HTTPVerb, Object> entries) throws FHIRException {
+	public List<BundleEntryComponent> executeTransaction(Map<HTTPVerb, Object> entries) throws Exception {
 		List<BundleEntryComponent> responseEntries = new ArrayList<BundleEntryComponent>();
 		Map<String, List<BaseEntity>> entityToCreate = new HashMap<String, List<BaseEntity>>();
 

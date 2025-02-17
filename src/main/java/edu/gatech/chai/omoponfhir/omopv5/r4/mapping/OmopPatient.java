@@ -95,7 +95,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize(true);
+		// getSize(true);
 	}
 
 	public OmopPatient() {
@@ -119,7 +119,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 	public static String FHIRTYPE = "Patient";
 
 	@Override
-	public USCorePatient constructResource(Long fhirId, FPerson entity, List<String> includes) {
+	public USCorePatient constructResource(Long fhirId, FPerson entity, List<String> includes) throws Exception {
 		USCorePatient patient = constructFHIR(fhirId, entity);
 		Long omopId = entity.getId();
 
@@ -180,7 +180,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 	}
 
 	@Override
-	public USCorePatient constructFHIR(Long fhirId, FPerson fPerson) {
+	public USCorePatient constructFHIR(Long fhirId, FPerson fPerson) throws Exception {
 		USCorePatient patient = new USCorePatient();
 		patient.setId(new IdType(fhirId));
 
@@ -441,7 +441,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		return patient;
 	}
 
-	private String getPersonSourceValue(Identifier identifier) {
+	private String getPersonSourceValue(Identifier identifier) throws Exception {
 		String value = identifier.getValue();
 		String system = identifier.getSystem();
 
@@ -485,7 +485,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 	 *         refer this resource.
 	 */
 	@Override
-	public Long toDbase(USCorePatient patient, IdType fhirId) throws FHIRException {
+	public Long toDbase(USCorePatient patient, IdType fhirId) throws Exception {
 		Long omopId = null, fhirIdLong = null;
 
 		if (fhirId != null) {
@@ -513,7 +513,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 	}
 
 	@Override
-	public void addRevIncludes(Long omopId, List<String> includes, List<IBaseResource> listResources) {
+	public void addRevIncludes(Long omopId, List<String> includes, List<IBaseResource> listResources) throws Exception {
 		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
 
 		if (includes.contains("Encounter:subject")) {
@@ -568,7 +568,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 	 * @param generalPractitioner
 	 * @return
 	 */
-	public Provider searchAndUpdate(Reference generalPractitioner) {
+	public Provider searchAndUpdate(Reference generalPractitioner) throws Exception {
 		if (generalPractitioner == null)
 			return null;
 
@@ -611,7 +611,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 	 * @return returns ParameterWrapper class, which contains OMOP column name and
 	 *         value with operator.
 	 */
-	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
+	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) throws Exception {
 		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
 		ParameterWrapper paramWrapper = new ParameterWrapper();
 		if (or)
@@ -948,7 +948,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 	}
 
 	@Override
-	public FPerson constructOmop(Long omopId, USCorePatient patient) {
+	public FPerson constructOmop(Long omopId, USCorePatient patient) throws Exception {
 		FPerson fperson = null;
 		String personSourceValue = null;
 
@@ -1209,7 +1209,7 @@ public class OmopPatient extends BaseOmopResource<USCorePatient, FPerson, FPerso
 		return dateParamWrapper;
 	}
 
-	public void getEverthingfor(List<IBaseResource> resources, Long patientId, Date startDate, Date endDate) {
+	public void getEverthingfor(List<IBaseResource> resources, Long patientId, Date startDate, Date endDate) throws Exception {
 		// OMOP Tables that references the patient are as follows.
 		// * condition_occurrence : Condition
 		// * death : death on FHIR (need to revisit) TODO

@@ -95,7 +95,13 @@ public class OmopServerOperations {
 				// giving up... :(
 				return null;
 			}
-			FPerson refFPerson = fPersonService.findById(omopId);
+			FPerson refFPerson;
+			try {
+				refFPerson = fPersonService.findById(omopId);
+			} catch (Exception e) {
+				e.printStackTrace();
+				refFPerson = null;
+			}
 			if (refFPerson == null) {
 				// giving up...
 				return null;
@@ -119,7 +125,7 @@ public class OmopServerOperations {
 		return entryBundle;
 	}
 
-	public List<BundleEntryComponent> createEntries(List<Resource> resources) throws FHIRException {
+	public List<BundleEntryComponent> createEntries(List<Resource> resources) throws Exception {
 		List<BundleEntryComponent> responseEntries = new ArrayList<BundleEntryComponent>();
 		Map<String, Long> patientMap = new HashMap<String, Long>();
 

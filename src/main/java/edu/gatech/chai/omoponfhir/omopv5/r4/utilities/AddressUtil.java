@@ -31,7 +31,7 @@ public class AddressUtil {
 	 * @param location : Location entity class in OMOP
 	 * @return : Location class found. Null if not found
 	 */
-	public static Location searchAndUpdate(LocationService locationService, Address address, Location location) {
+	public static Location searchAndUpdate(LocationService locationService, Address address, Location location) throws Exception {
 		if (address == null)
 			return null;
 

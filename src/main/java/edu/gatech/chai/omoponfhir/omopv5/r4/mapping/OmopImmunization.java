@@ -97,7 +97,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 
 		// String sizeSql = "select count(distinct d) from " + _from + " where " + _where;
 		// getSize(sizeSql, null, null);
-		getSize(true);
+		// getSize(true);
 	}
 
 	public OmopImmunization() {
@@ -122,7 +122,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 	public static String FHIRTYPE = "Immunization";
 
 	@Override
-	public Long toDbase(Immunization fhirResource, IdType fhirId) throws FHIRException {
+	public Long toDbase(Immunization fhirResource, IdType fhirId) throws Exception {
 		Long omopId = null;
 		DrugExposure drugExposure = null;
 		if (fhirId != null) {
@@ -141,7 +141,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 	}
 
 	@Override
-	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
+	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) throws Exception {
 		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
 		ParameterWrapper paramWrapper = new ParameterWrapper();
 		if (or)
@@ -382,7 +382,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 	}
 
 	@Override
-	public Immunization constructFHIR(Long fhirId, FImmunizationView entity) {
+	public Immunization constructFHIR(Long fhirId, FImmunizationView entity) throws Exception {
 		Immunization immunization = new Immunization();
 		immunization.setId(new IdType(fhirId));
 
@@ -455,7 +455,7 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		return immunization;
 	}
 
-	public DrugExposure constructDrugExposure(Long omopId, Immunization fhirResource) {
+	public DrugExposure constructDrugExposure(Long omopId, Immunization fhirResource) throws Exception {
 		DrugExposure drugExposure = null;
 		if (omopId != null) {
 			// Update
@@ -529,7 +529,10 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 
 		Concept drugConcept = null;
 		for (Coding vaccineCodeCoding : vaccineCode.getCoding()) {
-			drugConcept = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, vaccineCodeCoding);
+			List<Concept> drugConcepts = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, vaccineCodeCoding);
+			if (drugConcepts != null && !drugConcepts.isEmpty()) {
+				drugConcept = drugConcepts.get(0);
+			}
 			if (drugConcept != null)
 				break;
 		}
@@ -595,7 +598,10 @@ public class OmopImmunization extends BaseOmopResource<Immunization, FImmunizati
 		if (!routeCode.isEmpty()) {
 			Concept routeConcept = null;
 			for (Coding routeCodeCoding : routeCode.getCoding()) {
-				routeConcept = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, routeCodeCoding);
+				List<Concept> routeConcepts = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, routeCodeCoding);
+				if (routeConcepts != null && !routeConcepts.isEmpty()) {
+					routeConcept = routeConcepts.get(0);
+				}
 				if (routeConcept != null) break;
 			}
 			

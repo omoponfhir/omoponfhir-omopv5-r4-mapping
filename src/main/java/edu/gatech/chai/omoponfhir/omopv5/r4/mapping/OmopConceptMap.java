@@ -70,78 +70,108 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 		return null;
 	}
 
-	public Parameters translateConcept(String code, String system, String targetUri, String targetSystem) {
-		System.out.println("code, system, targetURI, and targetSystem are " + code + " " + system + " " + targetUri + " " + targetSystem);
+	public Parameters translateConcept(List<Coding> codings, String targetUri, String targetSystem) throws Exception {
 		Parameters retVal = new Parameters();
 		
-		// Using the system/code and targetSystem, map the system/code.
-		String omopSrcVocab = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system);
-		String omopTargetVocab = fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(targetSystem);
+		if (codings == null || codings.isEmpty()) return retVal;
 
-		if ("None".equals(omopSrcVocab) || "None".equals(omopTargetVocab)) {
-			logger.error("$translate: trying to translate not-known coding system ("+system+"|"+code+" to "+targetSystem);
-			return retVal;
-		}
-		
-		String relationshipId = omopSrcVocab+" % "+omopTargetVocab+" eq";
-		String relationshipId2 = "Has Alias";
+		List<ConceptRelationship> conceptRealationships = new ArrayList<ConceptRelationship>();
+		for (Coding coding : codings) {
+			String system = coding.getSystem();
+			String code = coding.getCode();
+			String display = coding.getDisplay();
 
-		logger.debug("$translate requested for "+relationshipId);
-		
-		// Find concept_id for source coding.
-		Concept omopSrcConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopSrcVocab, code);
-		if (omopSrcConcept == null) {
-			logger.error("$translate: could not find concept for "+system+"|"+code);
-			return retVal;
-		}
-		
-		logger.debug("$translate: attempting translate from concept_id_1:"+omopSrcConcept.getId()+" to "+targetSystem);
-		List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
-		ParameterWrapper paramConceptId1 = new ParameterWrapper(
-				"Long",
-				Arrays.asList("conceptId1"),
-				Arrays.asList("="),
-				Arrays.asList(String.valueOf(omopSrcConcept.getId())),
-				"or"
-				);
-		params.add(paramConceptId1);
-		
-		ParameterWrapper paramRelationshipId = new ParameterWrapper(
-				"String",
-				Arrays.asList("relationshipId"),
-				Arrays.asList("like"),
-				Arrays.asList(relationshipId),
-				"or"
-				);
-		params.add(paramRelationshipId);
-		
-		List<ConceptRelationship> conceptRealationships = getMyOmopService().searchWithParams(0, 0, params, null);
-		if (conceptRealationships.isEmpty()) {
-			logger.info("$translate: mapping information is not found ("+system+"|"+code+" eq "+targetSystem+")");
+			String omopSrcVocab = "None";
+			if (system != null && !system.isBlank()) {
+				omopSrcVocab =fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(system);
+			}
 
-			params.clear();;
-			paramConceptId1 = new ParameterWrapper(
-				"Long",
-				Arrays.asList("conceptId1"),
-				Arrays.asList("="),
-				Arrays.asList(String.valueOf(omopSrcConcept.getId())),
-				"or"
-				);
-			params.add(paramConceptId1);
-			
-			paramRelationshipId = new ParameterWrapper(
-					"String",
-					Arrays.asList("relationshipId"),
-					Arrays.asList("like"),
-					Arrays.asList(relationshipId2),
+			String omopTargetVocab = "None";
+			if (targetSystem != null && !targetSystem.isBlank()) {
+				omopTargetVocab =fhirOmopVocabularyMap.getOmopVocabularyFromFhirSystemName(targetSystem);
+			}
+
+			List<Concept> omopSrcConcepts = new ArrayList<Concept>();
+			// get OMOP concept for the source code.
+			if (code != null && !code.isBlank()) {
+				// Find concept_id for source coding.
+				if (!"None".equals(omopSrcVocab)) {
+					Concept omopSrcConcept = CodeableConceptUtil.getOmopConceptWithOmopVacabIdAndCode(conceptService, omopSrcVocab, code);
+					if (omopSrcConcept != null) {
+						omopSrcConcepts.add(omopSrcConcept);
+					}
+				} else {
+					omopSrcConcepts = CodeableConceptUtil.getOmopConceptsWithOmopCode(conceptService, code);
+				}
+			} else if (display != null && !display.isBlank()) {
+				// We do not have code. But, we have display. Use this to find the equivalent. 
+				if ("None".equals(omopSrcVocab)) {
+					omopSrcConcepts = CodeableConceptUtil.getOmopConceptsWithOmopConceptName(conceptService, display);
+				} else {
+					omopSrcConcepts = CodeableConceptUtil.getOmopConceptsWithOmopVocabIdAndtName(conceptService, omopSrcVocab, display);
+				}
+			}
+
+			String relationshipId = null;
+			if (!"None".equals(omopSrcVocab) && !"None".equals(omopTargetVocab)) {
+				relationshipId = omopSrcVocab+" % "+omopTargetVocab+" eq";
+			}
+
+			String relationshipId2 = "Alias of";
+	
+			for (Concept omopSrcConcept : omopSrcConcepts) {
+				if (relationshipId != null) {
+					List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
+					ParameterWrapper paramConceptId1 = new ParameterWrapper(
+							"Long",
+							Arrays.asList("concept1"),
+							Arrays.asList("="),
+							Arrays.asList(String.valueOf(omopSrcConcept.getId())),
+							"or"
+							);
+					params.add(paramConceptId1);
+					
+					ParameterWrapper paramRelationshipId = new ParameterWrapper(
+							"String",
+							Arrays.asList("relationshipId"),
+							Arrays.asList("like"),
+							Arrays.asList(relationshipId),
+							"or"
+							);
+					params.add(paramRelationshipId);
+					
+					conceptRealationships = getMyOmopService().searchWithParams(0, 0, params, null);
+				}
+
+				// look for another type of equivalent relationship. 
+				// - NVDRS/SUDORS "Alias of"
+				List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
+				ParameterWrapper paramConceptId1 = new ParameterWrapper(
+					"Long",
+					Arrays.asList("concept1"),
+					Arrays.asList("="),
+					Arrays.asList(String.valueOf(omopSrcConcept.getId())),
 					"or"
 					);
-			params.add(paramRelationshipId);
+				params.add(paramConceptId1);
+				
+				ParameterWrapper paramRelationshipId = new ParameterWrapper(
+						"String",
+						Arrays.asList("relationshipId"),
+						Arrays.asList("="),
+						Arrays.asList(relationshipId2),
+						"or"
+						);
 
-			conceptRealationships = getMyOmopService().searchWithParams(0, 0, params, null);
-			if (conceptRealationships.isEmpty()) {
-				return retVal;
+				params.add(paramRelationshipId);
+
+				// Add to the concept relationships.
+				conceptRealationships.addAll(getMyOmopService().searchWithParams(0, 0, params, null));
 			}
+		}
+
+		if (conceptRealationships.isEmpty()) {
+			return retVal;
 		}
 		
 		ParametersParameterComponent parameter = retVal.addParameter();
@@ -161,8 +191,8 @@ public class OmopConceptMap extends BaseOmopResource<ConceptMap, ConceptRelation
 			partParameter = parameter.addPart();
 			partParameter.setName("concept");
 			
-			Long targetConceptId = conceptRealationship.getId().getConceptId2();
-			Concept targetConcept = conceptService.findById(targetConceptId);
+			Concept targetConcept2 = conceptRealationship.getConcept2();
+			Concept targetConcept = conceptService.findById(targetConcept2.getId());
 			
 			logger.debug("$translate: target concept obtained with vocabulary_id="+targetConcept.getVocabularyId());
 			Coding targetCoding = CodeableConceptUtil.getCodingFromOmopConcept(targetConcept, getFhirOmopVocabularyMap());

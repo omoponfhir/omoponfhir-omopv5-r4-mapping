@@ -66,7 +66,17 @@ public class CodeableConceptUtil {
 		return codeableConcept;
 	}
 
-	public static Concept getOmopConceptWithOmopCode(ConceptService conceptService, String code) {		
+	public static Concept getOmopConceptWithOmopCode(ConceptService conceptService, String code) throws Exception {		
+		List<Concept> conceptIds = getOmopConceptsWithOmopCode(conceptService, code);
+		if (conceptIds.isEmpty()) {
+			return null;
+		}
+		
+		// We should have only one entry... so... 
+		return conceptIds.get(0);
+	}
+
+	public static List<Concept> getOmopConceptsWithOmopCode(ConceptService conceptService, String code) throws Exception {		
 		ParameterWrapper param = new ParameterWrapper(
 				"String",
 				Arrays.asList("conceptCode"),
@@ -78,16 +88,49 @@ public class CodeableConceptUtil {
 		List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
 		params.add(param);
 
-		List<Concept> conceptIds = conceptService.searchWithParams(0, 0, params, null);
-		if (conceptIds.isEmpty()) {
-			return null;
-		}
-		
-		// We should have only one entry... so... 
-		return conceptIds.get(0);
+		return conceptService.searchWithParams(0, 0, params, null);
 	}
 
-	public static Concept getOmopConceptWithOmopVacabIdAndCode(ConceptService conceptService, String omopVocabularyId, String code) {
+	public static List<Concept> getOmopConceptsWithOmopConceptName(ConceptService conceptService, String name) throws Exception {		
+		ParameterWrapper param = new ParameterWrapper(
+				"StringIgnoreCase",
+				Arrays.asList("conceptName"),
+				Arrays.asList("="),
+				Arrays.asList(name),
+				"and"
+				);
+		
+		List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
+		params.add(param);
+
+		return conceptService.searchWithParams(0, 0, params, null);
+	}
+
+	public static List<Concept> getOmopConceptsWithOmopVocabIdAndtName(ConceptService conceptService, String omopVocabularyId, String name) throws Exception {		
+		List<ParameterWrapper> params = new ArrayList<ParameterWrapper>();
+
+		ParameterWrapper param1 = new ParameterWrapper(
+				"StringIgnoreCase",
+				Arrays.asList("conceptName"),
+				Arrays.asList("="),
+				Arrays.asList(name),
+				"and"
+				);
+		params.add(param1);
+		
+		ParameterWrapper param2 = new ParameterWrapper(
+				"String",
+				Arrays.asList("vocabularyId"),
+				Arrays.asList("="),
+				Arrays.asList(omopVocabularyId),
+				"and"
+				);
+		params.add(param2);
+
+		return conceptService.searchWithParams(0, 0, params, null);
+	}
+
+	public static Concept getOmopConceptWithOmopVacabIdAndCode(ConceptService conceptService, String omopVocabularyId, String code) throws Exception {
 		if (omopVocabularyId == null) return null;
 		
 		ParameterWrapper param = new ParameterWrapper(
@@ -110,21 +153,38 @@ public class CodeableConceptUtil {
 		return conceptIds.get(0);
 	}
 	
-	public static Concept getOmopConceptWithFhirConcept(ConceptService conceptService, Coding fhirCoding) throws FHIRException {
+	public static List<Concept> getOmopConceptWithFhirConcept(ConceptService conceptService, Coding fhirCoding) throws Exception {
 		String system = fhirCoding.getSystem();
 		String code = fhirCoding.getCode();
+		String display = fhirCoding.getDisplay();
 		
-		String omopVocabularyId = OmopCodeableConceptMapping.omopVocabularyforFhirUri(system);
-		return getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabularyId, code);
+		List<Concept> concepts = new ArrayList<Concept>();
+
+		if (system != null && !system.isEmpty() && code != null && !code.isEmpty()) {
+			String omopVocabularyId = OmopCodeableConceptMapping.omopVocabularyforFhirUri(system);
+			concepts.add(getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabularyId, code));
+		}
+
+		if (code != null && !code.isEmpty()) {
+			concepts.addAll(getOmopConceptsWithOmopCode(conceptService, code));
+		}
+
+		if (display != null && !display.isEmpty()) {
+			concepts.addAll(getOmopConceptsWithOmopConceptName(conceptService, display));
+		}
+
+		return concepts;
 	}
 	
-	public static Concept searchConcept(ConceptService conceptService, CodeableConcept codeableConcept) throws FHIRException {
+	public static Concept searchConcept(ConceptService conceptService, CodeableConcept codeableConcept) throws Exception {
 		List<Coding> codings = codeableConcept.getCoding();
+
 		for (Coding coding : codings) {
 			// get OMOP Vocabulary from mapping.
-			Concept ret = getOmopConceptWithFhirConcept(conceptService, coding);
-			if (ret != null) return ret;
+			List<Concept> ret = getOmopConceptWithFhirConcept(conceptService, coding);
+			if (ret != null && !ret.isEmpty()) return ret.get(0);
 		}
+
 		return null;
 	}
 

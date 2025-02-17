@@ -57,7 +57,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize(true);
+		// getSize(true);
 	}
 	
 	public OmopPractitioner() {
@@ -79,7 +79,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 	public static String FHIRTYPE = "Practitioner";
 	
 	@Override
-	public Practitioner constructFHIR(Long fhirId, Provider omopProvider) {
+	public Practitioner constructFHIR(Long fhirId, Provider omopProvider) throws Exception {
 		Practitioner practitioner = new Practitioner(); //Assuming default active state
 		practitioner.setId(new IdType(fhirId));
 		
@@ -137,7 +137,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 	}
 
 	@Override
-	public Long toDbase(Practitioner practitioner, IdType fhirId) throws FHIRException {
+	public Long toDbase(Practitioner practitioner, IdType fhirId) throws Exception {
 		
 		// If we have match in identifier, then we can update or create since
 		// we have the patient. If we have no match, but fhirId is not null,
@@ -187,7 +187,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 //		return providerService.getSize(Provider.class, map);
 //	}
 	
-	public Location searchAndUpdateLocation (Address address, Location location) {
+	public Location searchAndUpdateLocation (Address address, Location location) throws Exception {
 		if (address == null) return null;
 		
 		List<StringType> addressLines = address.getLine();
@@ -222,7 +222,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 		return null;
 	}
 	
-	public CareSite searchAndUpdateCareSite(Address address) {
+	public CareSite searchAndUpdateCareSite(Address address) throws Exception {
 		Location location = AddressUtil.searchAndUpdate(locationService, address, null);
 		if(location == null) return null;
 		CareSite careSite = careSiteService.searchByLocation(location);
@@ -313,7 +313,7 @@ public class OmopPractitioner extends BaseOmopResource<Practitioner, Provider, P
 	}
 
 	@Override
-	public Provider constructOmop(Long omopId, Practitioner practitioner) {
+	public Provider constructOmop(Long omopId, Practitioner practitioner) throws Exception {
 		Provider omopProvider = null;
 
 		if (omopId != null) {

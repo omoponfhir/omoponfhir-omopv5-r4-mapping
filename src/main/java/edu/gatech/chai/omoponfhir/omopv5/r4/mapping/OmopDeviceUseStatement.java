@@ -66,7 +66,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize(true);
+		// getSize(true);
 	}
 	
 	public OmopDeviceUseStatement() {
@@ -155,7 +155,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 	}
 	
 	@Override
-	public Long toDbase(MyDeviceUseStatement fhirResource, IdType fhirId) throws FHIRException {
+	public Long toDbase(MyDeviceUseStatement fhirResource, IdType fhirId) throws Exception {
 		Long omopId = null;
 		if (fhirId != null) {
 			// Search for this ID.
@@ -174,7 +174,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 	}
 
 	@Override
-	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) {
+	public List<ParameterWrapper> mapParameter(String parameter, Object value, boolean or) throws Exception {
 		List<ParameterWrapper> mapList = new ArrayList<ParameterWrapper>();
 		ParameterWrapper paramWrapper = new ParameterWrapper();
 		if (or)
@@ -221,7 +221,7 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 	}
 
 	@Override
-	public DeviceExposure constructOmop(Long omopId, MyDeviceUseStatement deviceUseStatement) {
+	public DeviceExposure constructOmop(Long omopId, MyDeviceUseStatement deviceUseStatement) throws Exception {
 		DeviceExposure deviceExposure = null;
 		Device device = null;
 		
@@ -332,8 +332,9 @@ public class OmopDeviceUseStatement extends BaseOmopResource<MyDeviceUseStatemen
 			if (deviceType != null && !deviceType.isEmpty()) {
 				Coding deviceTypeCoding = deviceType.getCodingFirstRep();
 				try {
-					Concept concept = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, deviceTypeCoding);
-					if (concept != null) {
+					List<Concept> concepts = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, deviceTypeCoding);
+					if (concepts != null && !concepts.isEmpty()) {
+						Concept concept = concepts.get(0);
 						deviceExposure.setDeviceConcept(concept);
 						if (concept.getId() != 0L) {
 							deviceExposure.setDeviceSourceConcept(concept);

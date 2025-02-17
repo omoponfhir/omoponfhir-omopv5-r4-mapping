@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Procedure.ProcedurePerformerComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Type;
+import org.checkerframework.checker.units.qual.s;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
@@ -67,7 +68,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 		initialize(context);
 		
 		// Get count and put it in the counts.
-		getSize(true);
+		// getSize(true);
 	}
 
 	public OmopProcedure() {
@@ -90,7 +91,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 	public static String FHIRTYPE = "Procedure";
 	
 	@Override
-	public Long toDbase(Procedure fhirResource, IdType fhirId) throws FHIRException {
+	public Long toDbase(Procedure fhirResource, IdType fhirId) throws Exception {
 		Long omopId = null;
 		if (fhirId != null) {
 			// Update
@@ -110,7 +111,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 	}
 
 	@Override
-	public Procedure constructResource(Long fhirId, ProcedureOccurrence entity, List<String> includes) {
+	public Procedure constructResource(Long fhirId, ProcedureOccurrence entity, List<String> includes) throws Exception {
 		Procedure procedure = constructFHIR(fhirId,entity); 
 		Long omopId = entity.getId();
 		
@@ -150,7 +151,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 	}
 
 	@Override
-	public Procedure constructFHIR(Long fhirId, ProcedureOccurrence entity) {
+	public Procedure constructFHIR(Long fhirId, ProcedureOccurrence entity) throws Exception {
 		Procedure procedure = new Procedure(); //Assuming default active state
 		procedure.setId(new IdType(fhirId));
 
@@ -365,7 +366,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 	}
 
 	@Override
-	public ProcedureOccurrence constructOmop(Long omopId, Procedure fhirResource) {
+	public ProcedureOccurrence constructOmop(Long omopId, Procedure fhirResource) throws Exception {
 		ProcedureOccurrence procedureOccurrence = null;
 		if (omopId == null) {
 			// Create
@@ -374,11 +375,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 			procedureOccurrence = getMyOmopService().findById(omopId);
 			
 			if (procedureOccurrence == null) {
-				try {
-					throw new FHIRException(fhirResource.getId() + " does not exist");
-				} catch (FHIRException e) {
-					e.printStackTrace();
-				}
+				throw new FHIRException(fhirResource.getId() + " does not exist");
 			}
 		}
 
@@ -407,8 +404,11 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 			List<Coding> codings = codeCodeableConcept.getCoding();
 			for (Coding coding: codings) {
 				try {
-					procedureConcept = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, coding);
-					if (procedureConcept != null) break;
+					List<Concept> procedureConcepts = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, coding);
+					if (procedureConcepts != null && !procedureConcepts.isEmpty()) {
+						procedureConcept = procedureConcepts.get(0);
+						break;
+					}
 				} catch (FHIRException e) {
 					e.printStackTrace();
 				}
@@ -476,7 +476,10 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 					for (Coding coding: codings) {
 						if (!coding.isEmpty()) {
 							try {
-								specialtyConcept = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, coding);
+								List<Concept> specialtyConcepts = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, coding);
+								if (specialtyConcepts != null && !specialtyConcepts.isEmpty()) {
+									specialtyConcept = specialtyConcepts.get(0);
+								}
 							} catch (FHIRException e) {
 								e.printStackTrace();
 							}

@@ -21,8 +21,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -35,12 +33,9 @@ import edu.gatech.chai.omopv5.dba.service.ConceptService;
 
 import ca.uhn.fhir.rest.api.SortSpec;
 import edu.gatech.chai.omopv5.dba.service.ConceptRelationshipService;
-import edu.gatech.chai.omopv5.dba.service.ConceptService;
 import edu.gatech.chai.omopv5.dba.service.ParameterWrapper;
 import edu.gatech.chai.omopv5.dba.service.RelationshipService;
 import edu.gatech.chai.omopv5.model.entity.ConceptRelationship;
-import edu.gatech.chai.omopv5.model.entity.ConceptRelationshipPK;
-import edu.gatech.chai.omopv5.model.entity.Vocabulary;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +56,7 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
     public OmopValueSet(WebApplicationContext context) {
         super(context, ConceptRelationship.class, ConceptRelationshipService.class, OmopValueSet.FHIRTYPE);
         initialize(context);
-        getSize();
+        // getSize();
     }
 
     public OmopValueSet() {
@@ -100,7 +95,7 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 
         // TODO: ConceptRelationshipService needs to implement a PK 
         // valueSet.setId(new IdType(fhirId));
-        Long concept1 = conceptRelationship.getConceptId1();
+        Concept concept1 = conceptRelationship.getConcept1();
 
 
         valueSet.setId(new IdType(20000000000L));
@@ -138,7 +133,7 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
 
     
     @Override
-    public Long toDbase(ValueSet valueSet, IdType fhirId) throws FHIRException { 
+    public Long toDbase(ValueSet valueSet, IdType fhirId) throws Exception { 
 		Long omopId = null, fhirIdLong = null;
 
 		if (fhirId != null) {
@@ -203,36 +198,35 @@ public class OmopValueSet extends BaseOmopResource<ValueSet, ConceptRelationship
     }
 
     @Override
-	public Long getSize() {
+	public Long getSize() throws Exception {
         return super.getSize();
     }
 
     @Override
-	public Long getSize(List<ParameterWrapper> mapList) {
+	public Long getSize(List<ParameterWrapper> mapList) throws Exception {
         return super.getSize(mapList);
     }
     
     @Override
     public ConceptRelationship constructOmop(Long omopId, ValueSet fhirResource) {
-        ConceptRelationshipPK pk = new ConceptRelationshipPK(2L, 1L, "In ValueSet");
         ConceptRelationship conceptRelationship = new ConceptRelationship();
         // conceptRelationship.setConceptId1(2L);
         // conceptRelationship.setConceptId2(1L);
         // conceptRelationship.setRelationshipId("In ValueSet");
-        conceptRelationship.setId(pk);
+        conceptRelationship.setConcept1(new Concept(omopId));
         return conceptRelationship;
     }
 
     @Override
     public void searchWithoutParams(int fromIndex, int toIndex, List<IBaseResource> listResources,
-			List<String> includes, String sort) {
+			List<String> includes, String sort) throws Exception {
         super.searchWithoutParams(fromIndex, toIndex, listResources, includes, sort);
     }
 
 
     @Override
 	public void searchWithParams(int fromIndex, int toIndex, List<ParameterWrapper> mapList, List<IBaseResource> listResources, 
-        List<String> includes, String sort) {
+        List<String> includes, String sort) throws Exception {
             super.searchWithParams(fromIndex, toIndex, mapList, listResources, includes, sort);
     }
 
