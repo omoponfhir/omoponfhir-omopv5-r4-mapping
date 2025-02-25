@@ -126,7 +126,7 @@ public class FhirOmopVocabularyMapImpl extends BaseFhirOmopMap implements FhirOm
 
 	@Override
 	public String getFhirSystemNameFromOmopVocabulary(String omopVocabulary) {
-		String retv = "None";
+		String retv = omopVocabulary;
 		String sql = "SELECT * FROM FhirOmopVocabularyMap where omop_vocabulary_id=?";
 
 		try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
