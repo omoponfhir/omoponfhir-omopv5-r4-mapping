@@ -43,6 +43,10 @@ public class CodeableConceptUtil {
 	
 	public static Coding getCodingFromOmopConcept(Concept concept, FhirOmopVocabularyMapImpl fhirOmopVocabularyMap) throws FHIRException {
 		String fhirUri = fhirOmopVocabularyMap.getFhirSystemNameFromOmopVocabulary(concept.getVocabularyId());
+
+		if ("None".equals(fhirUri)) {
+			fhirUri = concept.getVocabularyId();
+		}
 		
 		Coding coding = new Coding();
 		coding.setSystem(fhirUri);
