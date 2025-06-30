@@ -600,7 +600,7 @@ public class OmopMedicationRequest extends BaseOmopResource<MedicationRequest, D
 			omopConcept = CodeableConceptUtil.searchConcept(conceptService, medicationCodeableConcept);
 			if (omopConcept == null) {
 				if (medicationCodeableConcept.getText() != null && !medicationCodeableConcept.getText().isEmpty()) {
-					drugExposure.setDrugSourceValue(medicationCodeableConcept.getText());
+					drugExposure.setDrugSourceValue(medicationCodeableConcept.getText().substring(0, 50));
 				} else {
 					drugExposure.setDrugSourceValue(CodeableConceptUtil.convert2String(medicationCodeableConcept.getCodingFirstRep()));
 				}

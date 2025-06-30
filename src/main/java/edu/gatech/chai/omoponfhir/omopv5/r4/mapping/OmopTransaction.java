@@ -32,7 +32,6 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationStatement;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -59,7 +58,6 @@ public class OmopTransaction {
 	private FPersonService fPersonService;
 	private ObservationService observationService;
 	private MeasurementService measurementService;
-	private NoteService noteService;
 	private WebApplicationContext myContext;
 
 	public OmopTransaction(WebApplicationContext context) {
@@ -77,7 +75,6 @@ public class OmopTransaction {
 		fPersonService = context.getBean(FPersonService.class);
 		observationService = context.getBean(ObservationService.class);
 		measurementService = context.getBean(MeasurementService.class);
-		noteService = context.getBean(NoteService.class);
 	}
 
 	public static OmopTransaction getInstance() {
@@ -171,49 +168,14 @@ public class OmopTransaction {
 			}
 		}
 
-		// do medication statement
-		for (Resource resource : postList) {			
-			if (resource instanceof MedicationStatement) {
-				logger.debug("Trying to add medication statement: " + resource.getId());
-				MedicationStatement medicationStatement = (MedicationStatement) resource;
-				Reference subject = medicationStatement.getSubject();
-				IdType refIdType = linkToPatient(subject, patientMap);
-				if (refIdType == null) {
-					continue;
-				}
-				medicationStatement.setSubject(new Reference(refIdType));
-
-				Long fhirId = OmopMedicationStatement.getInstance().toDbase(medicationStatement, null);
-				if (fhirId == null || fhirId == 0L) {
-					addResponseEntry(responseEntries, "400 Bad Request", null);
-				} else {
-					addResponseEntry(responseEntries, "201 Created", "MedicationStatement/" + fhirId);
-				}
-			}
-		}
-
-		// Process Condition
+		// Now process the rest.
 		for (Resource resource : postList) {
-			if (resource instanceof Condition) {
-				Condition condition = (Condition) resource;
-				Reference subject = condition.getSubject();
-				IdType refIdType = linkToPatient(subject, patientMap);
-				if (refIdType == null)
-					continue;
-				condition.setSubject(new Reference(refIdType));
-
-				Long fhirId = OmopCondition.getInstance().toDbase(condition, null);
-				if (fhirId == null || fhirId == 0L) {
-					addResponseEntry(responseEntries, "400 Bad Request", null);
-				} else {
-					addResponseEntry(responseEntries, "201 Created", "Condition/" + fhirId);
-				}
+			if (resource.getResourceType() == ResourceType.Patient) {
+				// already done.
+				continue;
 			}
-		}
-
-		// process observation.
-		for (Resource resource : postList) {
-			if (resource instanceof Observation) {
+		
+			if (resource.getResourceType() == ResourceType.Observation) {
 				Observation observation = (Observation) resource;
 				Reference subject = observation.getSubject();
 				IdType refIdType = linkToPatient(subject, patientMap);
@@ -226,25 +188,8 @@ public class OmopTransaction {
 					addResponseEntry(responseEntries, "400 Bad Request", null);
 				else
 					addResponseEntry(responseEntries, "201 Created", "Observation/" + fhirId);
-			} 
-		}
 
-		for (Resource resource : postList) {
-			if (resource instanceof DocumentReference) {
-				DocumentReference documentReference = (DocumentReference) resource;
-				Reference subject = documentReference.getSubject();
-				IdType refIdType = linkToPatient(subject, patientMap);
-				if (refIdType == null) {
-					continue;
-				}
-				documentReference.setSubject(new Reference(refIdType));
-
-				Long fhirId = OmopDocumentReference.getInstance().toDbase(documentReference, null);
-				if (fhirId == null)
-					addResponseEntry(responseEntries, "400 Bad Request", null);
-				else
-					addResponseEntry(responseEntries, "201 Created", "DocumentReference/" + fhirId);
-			} 
+			}
 		}
 
 		for (Resource resource : putList) {
@@ -329,7 +274,6 @@ public class OmopTransaction {
 				}
 
 				break;
-			case DocumentReference:
 			default:
 				break;
 			}

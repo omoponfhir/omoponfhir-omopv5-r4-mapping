@@ -340,7 +340,13 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 	}
 
 	private Long postResource(Resource resource, IdType fhirId, Bundle theBundle) throws Exception{
-		String resourceType = fhirId.getResourceType();
+		String resourceType = null;
+		if (fhirId != null && !fhirId.isEmpty()) {
+			resourceType = fhirId.getResourceType();
+		} else {
+			resourceType = resource.fhirType();
+		}
+		
 		Long id = null;
 		// Make sure to visit all the reference fields for each resource
 		if (OmopOrganization.FHIRTYPE.equals(resourceType)) {
@@ -1079,91 +1085,91 @@ public class OmopBundle extends BaseOmopResource<Bundle, Concept, ConceptService
 		// In Bundle transaction/batch, we process the entry requests in the following order.
 		// DELETE, POST, PUT, and GET
 		processDeletes(deleteList, theBundle);
-		processPosts(deleteList, theBundle);
-		processPuts(deleteList, theBundle);
-		processGets(deleteList, theBundle);
+		processPosts(postList, theBundle);
+		processPuts(putList, theBundle);
+		processGets(getList, theBundle);
 
 		// Do POST now. 
-		for (BundleEntryComponent entry : postList) {
-			if (entry.hasResource()) {
-				Resource postResource = entry.getResource();
-				Long idc = postResource(postResource, null, theBundle);
-				if (idc != null) {
-					toBeDeleted.add(postResource.fhirType() + "/" + idc);
-					entry.getResponse().setStatus(HttpStatus.CREATED.toString());
-					entry.getResponse().setLocation(postResource.fhirType() + "/" + idc);
-				} else {
-					errorOnTransactionBatch(theBundle, entry, HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Resource (" + postResource.getIdElement().asStringValue() + ") post failed");
-				}
-			} else {
-				errorOnTransactionBatch(theBundle, entry, HttpStatus.BAD_REQUEST.toString(), "Bundle has no resource, which is needed for POST");
-			}
-		}
+		// for (BundleEntryComponent entry : postList) {
+		// 	if (entry.hasResource()) {
+		// 		Resource postResource = entry.getResource();
+		// 		Long idc = postResource(postResource, null, theBundle);
+		// 		if (idc != null) {
+		// 			toBeDeleted.add(postResource.fhirType() + "/" + idc);
+		// 			entry.getResponse().setStatus(HttpStatus.CREATED.toString());
+		// 			entry.getResponse().setLocation(postResource.fhirType() + "/" + idc);
+		// 		} else {
+		// 			errorOnTransactionBatch(theBundle, entry, HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Resource (" + postResource.getIdElement().asStringValue() + ") post failed");
+		// 		}
+		// 	} else {
+		// 		errorOnTransactionBatch(theBundle, entry, HttpStatus.BAD_REQUEST.toString(), "Bundle has no resource, which is needed for POST");
+		// 	}
+		// }
 
-		// Do PUT now. 
-		for (BundleEntryComponent entry : putList) {
-			if (entry.hasResource()) {
-				Resource putResource = entry.getResource();
-				IdType putResourceFhirId = putResource.getIdElement();
-				if (putResourceFhirId == null || putResourceFhirId.isEmpty()) {
-					if (entry.hasRequest()) {
-						String url = entry.getRequest().getUrl();
-						if (url != null && !url.isBlank()) {
-							putResourceFhirId = new IdType(url);
-						}
-					}
-				}
+		// // Do PUT now. 
+		// for (BundleEntryComponent entry : putList) {
+		// 	if (entry.hasResource()) {
+		// 		Resource putResource = entry.getResource();
+		// 		IdType putResourceFhirId = putResource.getIdElement();
+		// 		if (putResourceFhirId == null || putResourceFhirId.isEmpty()) {
+		// 			if (entry.hasRequest()) {
+		// 				String url = entry.getRequest().getUrl();
+		// 				if (url != null && !url.isBlank()) {
+		// 					putResourceFhirId = new IdType(url);
+		// 				}
+		// 			}
+		// 		}
 
-				if (putResourceFhirId == null || putResourceFhirId.isEmpty()) {
-					errorOnTransactionBatch(theBundle, entry, HttpStatus.BAD_REQUEST.toString(), "Resource ID is needed for PUT");
-				} else {
-					Resource existingResource = getResource(putResourceFhirId);
-					if (existingResource == null || existingResource.isEmpty()) {
-						errorOnTransactionBatch(theBundle, entry, HttpStatus.NOT_FOUND.toString(), "Resource for update does not exist");
-					} else {
-						Long idc = postResource(putResource, putResourceFhirId, theBundle);
-						if (idc != null && idc != 0L) {
-							toPutBack.add(existingResource);
-							entry.getResponse().setStatus(HttpStatus.OK.toString());
-						} else {
-							errorOnTransactionBatch(theBundle, entry, HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Resource (" + putResource.getIdElement().asStringValue() + ") put failed");
-						}
-					}
-				}
-			} else {
-				errorOnTransactionBatch(theBundle, entry, HttpStatus.BAD_REQUEST.toString(), "Bundle has no resource, which is needed for PUT");
-			}
-		}
+		// 		if (putResourceFhirId == null || putResourceFhirId.isEmpty()) {
+		// 			errorOnTransactionBatch(theBundle, entry, HttpStatus.BAD_REQUEST.toString(), "Resource ID is needed for PUT");
+		// 		} else {
+		// 			Resource existingResource = getResource(putResourceFhirId);
+		// 			if (existingResource == null || existingResource.isEmpty()) {
+		// 				errorOnTransactionBatch(theBundle, entry, HttpStatus.NOT_FOUND.toString(), "Resource for update does not exist");
+		// 			} else {
+		// 				Long idc = postResource(putResource, putResourceFhirId, theBundle);
+		// 				if (idc != null && idc != 0L) {
+		// 					toPutBack.add(existingResource);
+		// 					entry.getResponse().setStatus(HttpStatus.OK.toString());
+		// 				} else {
+		// 					errorOnTransactionBatch(theBundle, entry, HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Resource (" + putResource.getIdElement().asStringValue() + ") put failed");
+		// 				}
+		// 			}
+		// 		}
+		// 	} else {
+		// 		errorOnTransactionBatch(theBundle, entry, HttpStatus.BAD_REQUEST.toString(), "Bundle has no resource, which is needed for PUT");
+		// 	}
+		// }
 
-		// Do GET now.
-		for (BundleEntryComponent entry : getList) {
-			IdType fhirIdType = null;
-			if (entry.hasRequest()) {
-				String urlString = entry.getRequest().getUrl();
-				if (urlString != null && !urlString.isBlank()) {
-					fhirIdType = new IdType(urlString);
-				}
-			}
+		// // Do GET now.
+		// for (BundleEntryComponent entry : getList) {
+		// 	IdType fhirIdType = null;
+		// 	if (entry.hasRequest()) {
+		// 		String urlString = entry.getRequest().getUrl();
+		// 		if (urlString != null && !urlString.isBlank()) {
+		// 			fhirIdType = new IdType(urlString);
+		// 		}
+		// 	}
 
-			if (fhirIdType == null) {
-				// get it from resource.
-				if (entry.hasResource()) {
-					fhirIdType = entry.getResource().getIdElement();
-				}
-			}
+		// 	if (fhirIdType == null) {
+		// 		// get it from resource.
+		// 		if (entry.hasResource()) {
+		// 			fhirIdType = entry.getResource().getIdElement();
+		// 		}
+		// 	}
 
-			if (fhirIdType == null || fhirIdType.isEmpty()) {
-				errorOnTransactionBatch(theBundle, entry, HttpStatus.BAD_REQUEST.toString(), "Request has no FHIR ID to GET");
-			} else {
-				Resource resource = getResource(fhirIdType);
-				if (resource != null && !resource.isEmpty()) {
-					entry.getResponse().setStatus(HttpStatus.OK.toString());
-					entry.setResource(resource);
-				} else {
-					errorOnTransactionBatch(theBundle, entry, HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Failed to GET Resource (" + fhirIdType.asStringValue() + ")");
-				}
-			}
-		}
+		// 	if (fhirIdType == null || fhirIdType.isEmpty()) {
+		// 		errorOnTransactionBatch(theBundle, entry, HttpStatus.BAD_REQUEST.toString(), "Request has no FHIR ID to GET");
+		// 	} else {
+		// 		Resource resource = getResource(fhirIdType);
+		// 		if (resource != null && !resource.isEmpty()) {
+		// 			entry.getResponse().setStatus(HttpStatus.OK.toString());
+		// 			entry.setResource(resource);
+		// 		} else {
+		// 			errorOnTransactionBatch(theBundle, entry, HttpStatus.INTERNAL_SERVER_ERROR.toString(), "Failed to GET Resource (" + fhirIdType.asStringValue() + ")");
+		// 		}
+		// 	}
+		// }
 
 
 		return retVal;

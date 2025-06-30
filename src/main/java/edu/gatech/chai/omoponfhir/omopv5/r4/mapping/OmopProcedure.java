@@ -402,17 +402,7 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 		Concept procedureConcept = null;
 		if (!codeCodeableConcept.isEmpty()) {
 			List<Coding> codings = codeCodeableConcept.getCoding();
-			for (Coding coding: codings) {
-				try {
-					List<Concept> procedureConcepts = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, coding);
-					if (procedureConcepts != null && !procedureConcepts.isEmpty()) {
-						procedureConcept = procedureConcepts.get(0);
-						break;
-					}
-				} catch (FHIRException e) {
-					e.printStackTrace();
-				}
-			}
+			procedureConcept = CodeableConceptUtil.OmopConceptToUse(conceptService, codings);
 		}
 		
 		if (procedureConcept != null) {
@@ -454,8 +444,6 @@ public class OmopProcedure extends BaseOmopResource<Procedure, ProcedureOccurren
 			} else {
 				throw new FHIRException("Unable to find the visit occurrence from OMOP database");
 			}
-		} else {
-			throw new FHIRException("Context must be Encounter");
 		}
 
 		// Provider mapping

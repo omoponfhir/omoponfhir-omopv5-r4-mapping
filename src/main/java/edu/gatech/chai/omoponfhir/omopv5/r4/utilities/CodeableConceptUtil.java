@@ -166,15 +166,15 @@ public class CodeableConceptUtil {
 
 		if (system != null && !system.isEmpty() && code != null && !code.isEmpty()) {
 			String omopVocabularyId = OmopCodeableConceptMapping.omopVocabularyforFhirUri(system);
-			concepts.add(getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabularyId, code));
-		}
-
-		if (code != null && !code.isEmpty()) {
-			concepts.addAll(getOmopConceptsWithOmopCode(conceptService, code));
-		}
-
-		if (display != null && !display.isEmpty()) {
-			concepts.addAll(getOmopConceptsWithOmopConceptName(conceptService, display));
+			Concept retConcept = getOmopConceptWithOmopVacabIdAndCode(conceptService, omopVocabularyId, code);
+			if (retConcept != null) {
+				concepts.add(retConcept);
+			}
+		} else if (display != null && !display.isEmpty()) {
+			List<Concept> retConcepts = getOmopConceptsWithOmopConceptName(conceptService, display);
+			if (retConcepts != null && !retConcepts.isEmpty()) {
+				concepts.addAll(getOmopConceptsWithOmopConceptName(conceptService, display));
+			}
 		}
 
 		return concepts;
@@ -259,6 +259,61 @@ public class CodeableConceptUtil {
 		if (isSystemMatch && isCodeMatch) return 0;
 		if (isCodeMatch) return 1;
 		return -1;
+	}
+
+	public static Concept OmopConceptToUse(ConceptService conceptService, List<Coding> codings) {
+		if (codings == null) {
+			return null;
+		}
+
+		Concept concept2Use = null;
+		
+		for (Coding coding: codings) {
+			List<Concept> concepts = null;
+			try {
+				concepts = CodeableConceptUtil.getOmopConceptWithFhirConcept(conceptService, coding);
+			} catch (Exception e) {
+				// it's ok that we got an exception. Just return null;
+				e.printStackTrace();
+			}
+
+			if (concepts != null && !concepts.isEmpty()) {
+				for (Concept concept : concepts) {
+					concept2Use = concept;
+
+					if (OmopCodeableConceptMapping.LOINC.getOmopVocabulary().equals(concept.getVocabularyId())) {
+						// we got what we want.
+						return concept;
+					}
+
+					if (OmopCodeableConceptMapping.ICD10.getOmopVocabulary().equals(concept.getVocabularyId())) {
+						return concept;
+					}
+
+					if (OmopCodeableConceptMapping.ICD10CM.getOmopVocabulary().equals(concept.getVocabularyId())) {
+						return concept;
+					}
+
+					if (OmopCodeableConceptMapping.ICD9CM.getOmopVocabulary().equals(concept.getVocabularyId())) {
+						return concept;
+					}
+
+					if (OmopCodeableConceptMapping.ICD9PROC.getOmopVocabulary().equals(concept.getVocabularyId())) {
+						return concept;
+					}
+
+					if (OmopCodeableConceptMapping.SCT.getOmopVocabulary().equals(concept.getVocabularyId())) {
+						return concept;
+					}
+
+					if (OmopCodeableConceptMapping.CPT.getOmopVocabulary().equals(concept.getVocabularyId())) {
+						return concept;
+					}
+				}
+			}
+		}
+
+		return concept2Use;
 	}
 
 }
